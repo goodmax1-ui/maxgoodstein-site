@@ -6,45 +6,41 @@
   <title>Dashboard — maxgoodstein.com</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #f5f5f5;
-      --surface: #ffffff;
-      --border: #e2e2e2;
-      --text: #1a1a1a;
-      --text-secondary: #666;
-      --accent: #2d6a4f;
-      --accent-hover: #1b4332;
-      --danger: #d32f2f;
-      --success: #2d6a4f;
-      --radius: 10px;
+      --dash-bg: #f0f0f0;
+      --dash-surface: #ffffff;
+      --dash-border: #e2e2e2;
+      --dash-text: #1a1a1a;
+      --dash-text-sec: #666;
+      --dash-accent: #2d6a4f;
+      --dash-accent-hover: #1b4332;
+      --dash-danger: #d32f2f;
+      --dash-radius: 10px;
     }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--dash-bg);
+      color: var(--dash-text);
       height: 100vh;
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Top bar */
+    /* ── Top bar ── */
     .topbar {
-      height: 56px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      height: 52px;
+      background: #1a1a1a;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 1.5rem;
+      padding: 0 1.25rem;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 100;
     }
 
@@ -55,313 +51,568 @@
     }
 
     .topbar-left h1 {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
     }
 
     .topbar-left .dot {
-      width: 8px;
-      height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
-      background: #ccc;
+      background: #555;
+      transition: background 0.3s;
     }
-
     .topbar-left .dot.unsaved { background: #f59e0b; }
-    .topbar-left .dot.saved { background: var(--success); }
+    .topbar-left .dot.saved { background: #4ade80; }
 
     .topbar-left .status-text {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
+      font-size: 0.75rem;
+      color: #888;
     }
 
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
+    .device-toggle {
+      display: flex;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .device-toggle button {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 0.35rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .device-toggle button.active {
+      background: #555;
+      color: #fff;
+    }
+    .device-toggle button:hover:not(.active) { color: #ccc; }
+
     .btn {
-      padding: 0.5rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 500;
+      padding: 0.45rem 1.1rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
       border: none;
       cursor: pointer;
       font-family: inherit;
       transition: all 0.15s;
     }
-
-    .btn-secondary {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .btn-push {
+      background: #4ade80;
+      color: #052e16;
     }
+    .btn-push:hover { background: #22c55e; }
+    .btn-push:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-secondary:hover { background: #eee; }
-
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-danger {
-      background: none;
-      color: var(--danger);
-      font-size: 0.85rem;
-      padding: 0.25rem 0.5rem;
-    }
-
-    .btn-danger:hover { background: #fef2f2; }
-
-    /* Layout */
+    /* ── Layout ── */
     .layout {
       display: flex;
-      height: calc(100vh - 56px);
-      margin-top: 56px;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
     }
 
-    /* Editor panel */
+    /* ── Editor panel ── */
     .editor {
-      width: 420px;
-      min-width: 420px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+      width: 380px;
+      min-width: 380px;
+      background: var(--dash-surface);
+      border-right: 1px solid var(--dash-border);
       overflow-y: auto;
-      padding: 1.5rem;
+      padding: 0;
     }
 
+    .editor::-webkit-scrollbar { width: 4px; }
+    .editor::-webkit-scrollbar-track { background: transparent; }
+    .editor::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+    /* ── Sections ── */
     .section {
-      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--dash-border);
     }
 
-    .section-title {
-      font-size: 0.75rem;
-      font-weight: 600;
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .section-header:hover { background: #f9f9f9; }
+
+    .section-header h2 {
+      font-size: 0.7rem;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-secondary);
-      margin-bottom: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--dash-text-sec);
     }
 
+    .section-header .chevron {
+      font-size: 0.7rem;
+      color: #bbb;
+      transition: transform 0.2s;
+    }
+    .section.collapsed .chevron { transform: rotate(-90deg); }
+    .section.collapsed .section-body { display: none; }
+
+    .section-body {
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    /* ── Fields ── */
     .field {
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
 
     .field label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
-      margin-bottom: 0.35rem;
-      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--dash-text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .field input[type="text"],
-    .field textarea {
+    .field textarea,
+    .field select {
       width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.9rem;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--dash-border);
+      border-radius: 7px;
+      font-size: 0.85rem;
       font-family: inherit;
-      background: var(--bg);
-      color: var(--text);
+      background: #f8f8f8;
+      color: var(--dash-text);
       transition: border-color 0.15s;
-      resize: vertical;
     }
-
     .field input:focus,
-    .field textarea:focus {
+    .field textarea:focus,
+    .field select:focus {
       outline: none;
-      border-color: var(--accent);
+      border-color: var(--dash-accent);
+      background: #fff;
     }
+    .field textarea { min-height: 70px; resize: vertical; }
+    .field select { cursor: pointer; }
 
-    .field textarea { min-height: 80px; }
-
-    /* Avatar section */
-    .avatar-section {
+    /* ── Color input ── */
+    .color-field {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
-    .avatar-preview {
-      width: 64px;
-      height: 64px;
+    .color-swatch {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 2px solid var(--dash-border);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .color-swatch input[type="color"] {
+      position: absolute;
+      inset: -4px;
+      width: calc(100% + 8px);
+      height: calc(100% + 8px);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+    }
+
+    .color-hex {
+      flex: 1;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--dash-border);
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #f8f8f8;
+      color: var(--dash-text);
+    }
+    .color-hex:focus { outline: none; border-color: var(--dash-accent); background: #fff; }
+
+    /* ── Theme presets ── */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .preset-card {
+      border: 2px solid var(--dash-border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      background: var(--dash-surface);
+    }
+    .preset-card:hover { border-color: #bbb; }
+    .preset-card.active { border-color: var(--dash-accent); background: #f0faf4; }
+
+    .preset-colors {
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      margin-bottom: 0.35rem;
+    }
+    .preset-dot {
+      width: 14px; height: 14px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #40916c);
+    }
+
+    .preset-card span {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--dash-text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Font preview select ── */
+    .font-option {
+      padding: 0.3rem 0;
+    }
+
+    /* ── Link style selector ── */
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .style-card {
+      border: 2px solid var(--dash-border);
+      border-radius: 8px;
+      padding: 0.6rem 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .style-card:hover { border-color: #bbb; }
+    .style-card.active { border-color: var(--dash-accent); background: #f0faf4; }
+
+    .style-preview {
+      height: 28px;
+      margin-bottom: 0.3rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+    }
+
+    .style-preview .mock-btn {
+      font-size: 0.55rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    .style-preview .mock-outline { border: 1.5px solid #888; color: #888; }
+    .style-preview .mock-filled { background: #888; color: white; border: none; }
+    .style-preview .mock-pill { border: 1.5px solid #888; color: #888; border-radius: 20px; }
+    .style-preview .mock-minimal { border: none; border-bottom: 1px solid #888; color: #888; border-radius: 0; }
+
+    .style-card span {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--dash-text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Avatar shape selector ── */
+    .shape-grid {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .shape-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+    }
+
+    .shape-preview {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--dash-accent), #40916c);
+      transition: all 0.15s;
+    }
+    .shape-preview.circle { border-radius: 50%; }
+    .shape-preview.rounded { border-radius: 20%; }
+    .shape-preview.square { border-radius: 0; }
+
+    .shape-option.active .shape-preview {
+      box-shadow: 0 0 0 2px var(--dash-surface), 0 0 0 4px var(--dash-accent);
+    }
+
+    .shape-option span {
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--dash-text-sec);
+      text-transform: uppercase;
+    }
+
+    /* ── Avatar section ── */
+    .avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .avatar-preview {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--dash-accent), #40916c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
       font-weight: 600;
       color: white;
       overflow: hidden;
       flex-shrink: 0;
     }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
 
-    .avatar-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .avatar-controls {
+    .avatar-btns {
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
-
-    .avatar-controls .btn { font-size: 0.8rem; padding: 0.4rem 0.75rem; }
+    .avatar-btns .btn-sm {
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid var(--dash-border);
+      background: var(--dash-surface);
+      color: var(--dash-text);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .avatar-btns .btn-sm:hover { background: #f5f5f5; }
+    .avatar-btns .btn-sm.danger { color: var(--dash-danger); border-color: transparent; }
+    .avatar-btns .btn-sm.danger:hover { background: #fef2f2; }
 
     .file-input { display: none; }
 
-    /* Link card */
+    /* ── Link cards ── */
     .link-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
-      margin-bottom: 0.75rem;
+      background: #f8f8f8;
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      transition: box-shadow 0.15s;
     }
+    .link-card.dragging { opacity: 0.5; }
+    .link-card.drag-over { box-shadow: 0 -2px 0 0 var(--dash-accent); }
 
-    .link-card-header {
+    .link-card-top {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
     }
 
-    .link-card-header span {
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--text-secondary);
+    .link-card-top-left {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
+
+    .drag-handle {
+      cursor: grab;
+      color: #ccc;
+      font-size: 0.9rem;
+      padding: 0.15rem;
+      line-height: 1;
+    }
+    .drag-handle:active { cursor: grabbing; }
+
+    .link-card-top span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--dash-text-sec);
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.1rem 0.25rem;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .btn-remove:hover { color: var(--dash-danger); background: #fef2f2; }
 
     .link-fields {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
-
-    .link-fields input {
-      width: 100%;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-family: inherit;
-      background: var(--surface);
-    }
-
-    .link-fields input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
+    .link-fields input,
     .link-fields select {
       width: 100%;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--border);
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--dash-border);
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-family: inherit;
-      background: var(--surface);
-      cursor: pointer;
+      background: var(--dash-surface);
+    }
+    .link-fields input:focus,
+    .link-fields select:focus {
+      outline: none;
+      border-color: var(--dash-accent);
     }
 
     .add-link-btn {
       width: 100%;
-      padding: 0.6rem;
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
+      padding: 0.5rem;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
       background: none;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
+      color: #bbb;
+      font-size: 0.8rem;
+      font-weight: 600;
       font-family: inherit;
       cursor: pointer;
       transition: all 0.15s;
     }
+    .add-link-btn:hover { border-color: var(--dash-accent); color: var(--dash-accent); }
 
-    .add-link-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* Preview panel */
+    /* ── Preview panel ── */
     .preview {
       flex: 1;
-      background: #e8e8e8;
+      background: var(--dash-bg);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 2rem;
+      position: relative;
+    }
+
+    .preview-container {
+      transition: all 0.3s ease;
+    }
+
+    .preview-container.desktop {
+      width: 100%;
+      max-width: 520px;
+      height: calc(100vh - 116px);
+    }
+
+    .preview-container.mobile {
+      width: 375px;
+      height: 700px;
+      border-radius: 36px;
+      box-shadow: 0 0 0 10px #1a1a1a, 0 0 0 12px #333, 0 20px 60px rgba(0,0,0,0.2);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-container.mobile::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 20px;
+      background: #1a1a1a;
+      border-radius: 10px;
+      z-index: 10;
     }
 
     .preview-frame {
       width: 100%;
-      max-width: 500px;
-      height: calc(100vh - 120px);
+      height: 100%;
       border: none;
       border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       background: white;
     }
 
-    /* Toast */
+    .preview-container.mobile .preview-frame {
+      border-radius: 36px;
+    }
+
+    /* ── Toast ── */
     .toast {
       position: fixed;
       bottom: 1.5rem;
-      right: 1.5rem;
-      padding: 0.85rem 1.25rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 0.75rem 1.5rem;
       border-radius: 10px;
       font-size: 0.85rem;
       font-weight: 500;
       color: white;
       z-index: 200;
-      transform: translateY(100px);
       opacity: 0;
       transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: #059669; }
+    .toast.error { background: var(--dash-danger); }
 
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { background: var(--success); }
-    .toast.error { background: var(--danger); }
-
-    /* Pushing overlay */
+    /* ── Pushing overlay ── */
     .pushing-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.4);
       z-index: 150;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(4px);
     }
-
     .pushing-overlay.show { display: flex; }
 
     .pushing-box {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
+      padding: 2.5rem 3rem;
+      border-radius: 16px;
       text-align: center;
       font-size: 0.95rem;
       font-weight: 500;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     }
 
     .spinner {
-      width: 28px;
-      height: 28px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
+      width: 28px; height: 28px;
+      border: 3px solid #e5e5e5;
+      border-top-color: var(--dash-accent);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       margin: 0 auto 1rem;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -372,63 +623,141 @@
     <div class="topbar-left">
       <h1>maxgoodstein.com</h1>
       <div class="dot saved" id="statusDot"></div>
-      <span class="status-text" id="statusText">All saved</span>
+      <span class="status-text" id="statusText">Saved</span>
     </div>
     <div class="topbar-right">
-      <button class="btn btn-primary" id="pushBtn" onclick="pushLive()">Push Live</button>
+      <div class="device-toggle">
+        <button class="active" id="btnDesktop" onclick="setDevice('desktop')" title="Desktop preview">&#9634;</button>
+        <button id="btnMobile" onclick="setDevice('mobile')" title="Mobile preview">&#9642;</button>
+      </div>
+      <button class="btn btn-push" id="pushBtn" onclick="pushLive()">Push Live</button>
     </div>
   </div>
 
   <!-- Layout -->
   <div class="layout">
-
     <!-- Editor -->
     <div class="editor">
 
-      <!-- Avatar -->
-      <div class="section">
-        <div class="section-title">Avatar</div>
-        <div class="avatar-section">
-          <div class="avatar-preview" id="avatarPreview">MG</div>
-          <div class="avatar-controls">
-            <button class="btn btn-secondary" onclick="document.getElementById('avatarFile').click()">Upload Photo</button>
-            <button class="btn btn-danger" id="removeAvatarBtn" onclick="removeAvatar()" style="display:none">Remove Photo</button>
-            <input type="file" id="avatarFile" class="file-input" accept="image/*" onchange="uploadAvatar(this)">
+      <!-- Theme section -->
+      <div class="section" id="sectionTheme">
+        <div class="section-header" onclick="toggleSection('sectionTheme')">
+          <h2>Theme</h2>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+          <div class="preset-grid" id="presetGrid"></div>
+          <div class="field">
+            <label>Accent Color</label>
+            <div class="color-field">
+              <div class="color-swatch" id="accentSwatch">
+                <input type="color" id="accentPicker" oninput="onAccentColor(this.value)">
+              </div>
+              <input type="text" class="color-hex" id="accentHex" maxlength="7" oninput="onAccentHex(this.value)">
+            </div>
+          </div>
+          <div class="field">
+            <label>Dark Mode</label>
+            <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;font-weight:400;font-size:0.85rem;cursor:pointer;margin-top:0.25rem;">
+              <input type="checkbox" id="darkModeToggle" onchange="onDarkMode(this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Dark background
+            </label>
           </div>
         </div>
       </div>
 
-      <!-- Text -->
-      <div class="section">
-        <div class="section-title">Content</div>
-        <div class="field">
-          <label>Name</label>
-          <input type="text" id="fieldName" oninput="onEdit()">
+      <!-- Typography section -->
+      <div class="section" id="sectionTypography">
+        <div class="section-header" onclick="toggleSection('sectionTypography')">
+          <h2>Typography</h2>
+          <span class="chevron">&#9660;</span>
         </div>
-        <div class="field">
-          <label>Tagline</label>
-          <input type="text" id="fieldTagline" oninput="onEdit()">
-        </div>
-        <div class="field">
-          <label>Bio</label>
-          <textarea id="fieldBio" oninput="onEdit()"></textarea>
+        <div class="section-body">
+          <div class="field">
+            <label>Font Family</label>
+            <select id="fontSelect" onchange="onFontChange(this.value)">
+              <option value="Inter" style="font-family:'Inter'">Inter — Clean & Modern</option>
+              <option value="DM Sans" style="font-family:'DM Sans'">DM Sans — Friendly & Rounded</option>
+              <option value="Space Grotesk" style="font-family:'Space Grotesk'">Space Grotesk — Techy & Bold</option>
+              <option value="Playfair Display" style="font-family:'Playfair Display'">Playfair Display — Elegant Serif</option>
+              <option value="Libre Baskerville" style="font-family:'Libre Baskerville'">Libre Baskerville — Classic Serif</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- Links -->
-      <div class="section">
-        <div class="section-title">Links</div>
-        <div id="linksContainer"></div>
-        <button class="add-link-btn" onclick="addLink()">+ Add Link</button>
+      <!-- Link Style section -->
+      <div class="section" id="sectionLinkStyle">
+        <div class="section-header" onclick="toggleSection('sectionLinkStyle')">
+          <h2>Link Style</h2>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+          <div class="style-grid" id="styleGrid"></div>
+        </div>
+      </div>
+
+      <!-- Avatar section -->
+      <div class="section" id="sectionAvatar">
+        <div class="section-header" onclick="toggleSection('sectionAvatar')">
+          <h2>Avatar</h2>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+          <div class="avatar-row">
+            <div class="avatar-preview" id="avatarPreview">MG</div>
+            <div class="avatar-btns">
+              <button class="btn-sm" onclick="document.getElementById('avatarFile').click()">Upload</button>
+              <button class="btn-sm danger" id="removeAvatarBtn" onclick="removeAvatar()" style="display:none">Remove</button>
+              <input type="file" id="avatarFile" class="file-input" accept="image/*" onchange="uploadAvatar(this)">
+            </div>
+          </div>
+          <div class="shape-grid" id="shapeGrid"></div>
+        </div>
+      </div>
+
+      <!-- Content section -->
+      <div class="section" id="sectionContent">
+        <div class="section-header" onclick="toggleSection('sectionContent')">
+          <h2>Content</h2>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" id="fieldName" oninput="onEdit()">
+          </div>
+          <div class="field">
+            <label>Tagline</label>
+            <input type="text" id="fieldTagline" oninput="onEdit()">
+          </div>
+          <div class="field">
+            <label>Bio</label>
+            <textarea id="fieldBio" oninput="onEdit()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links section -->
+      <div class="section" id="sectionLinks">
+        <div class="section-header" onclick="toggleSection('sectionLinks')">
+          <h2>Links</h2>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+          <div id="linksContainer"></div>
+          <button class="add-link-btn" onclick="addLink()">+ Add Link</button>
+        </div>
       </div>
 
     </div>
 
     <!-- Preview -->
     <div class="preview">
-      <iframe class="preview-frame" id="previewFrame" src="/preview"></iframe>
+      <div class="preview-container desktop" id="previewContainer">
+        <iframe class="preview-frame" id="previewFrame" src="/preview"></iframe>
+      </div>
     </div>
-
   </div>
 
   <!-- Toast -->
@@ -442,203 +771,415 @@
     </div>
   </div>
 
-  <script>
-    let content = {};
-    let saveTimeout = null;
-    let hasUnsaved = false;
+<script>
+let content = {};
+let saveTimeout = null;
+let hasUnsaved = false;
+let dragSrcIndex = null;
 
-    const iconOptions = [
-      { value: "linkedin", label: "LinkedIn" },
-      { value: "github", label: "GitHub" },
-      { value: "email", label: "Email" },
-      { value: "twitter", label: "Twitter / X" },
-      { value: "instagram", label: "Instagram" },
-      { value: "website", label: "Website" },
-    ];
+// ── Presets ──
+const PRESETS = {
+  forest:    { label: "Forest",     colors: ["#2d6a4f","#40916c","#fafafa"], accentColor: "#2d6a4f", accentColorLight: "#40916c", bgColor: "#fafafa", textColor: "#1a1a1a", textSecondary: "#555555", borderColor: "#e0e0e0", cardBg: "#ffffff", darkMode: false },
+  ocean:     { label: "Ocean",      colors: ["#1d4ed8","#3b82f6","#f0f5ff"], accentColor: "#1d4ed8", accentColorLight: "#3b82f6", bgColor: "#f0f5ff", textColor: "#1e293b", textSecondary: "#64748b", borderColor: "#dbeafe", cardBg: "#ffffff", darkMode: false },
+  sunset:    { label: "Sunset",     colors: ["#dc2626","#f97316","#fffbeb"], accentColor: "#dc2626", accentColorLight: "#f97316", bgColor: "#fffbeb", textColor: "#1c1917", textSecondary: "#78716c", borderColor: "#fde68a", cardBg: "#ffffff", darkMode: false },
+  midnight:  { label: "Midnight",   colors: ["#818cf8","#6366f1","#0f172a"], accentColor: "#818cf8", accentColorLight: "#6366f1", bgColor: "#0f172a", textColor: "#e2e8f0", textSecondary: "#94a3b8", borderColor: "#1e293b", cardBg: "#1e293b", darkMode: true },
+  lavender:  { label: "Lavender",   colors: ["#7c3aed","#a78bfa","#faf5ff"], accentColor: "#7c3aed", accentColorLight: "#a78bfa", bgColor: "#faf5ff", textColor: "#1e1b4b", textSecondary: "#6b7280", borderColor: "#e9d5ff", cardBg: "#ffffff", darkMode: false },
+  mono:      { label: "Mono",       colors: ["#171717","#525252","#fafafa"], accentColor: "#171717", accentColorLight: "#525252", bgColor: "#fafafa", textColor: "#171717", textSecondary: "#737373", borderColor: "#e5e5e5", cardBg: "#ffffff", darkMode: false },
+};
 
-    // Load content on startup
-    async function loadContent() {
-      const res = await fetch("/api/content");
-      content = await res.json();
-      renderEditor();
-    }
+const LINK_STYLES = [
+  { id: "outline", label: "Outline", mockClass: "mock-outline" },
+  { id: "filled",  label: "Filled",  mockClass: "mock-filled"  },
+  { id: "pill",    label: "Pill",    mockClass: "mock-pill"    },
+  { id: "minimal", label: "Minimal", mockClass: "mock-minimal" },
+];
 
-    function renderEditor() {
-      document.getElementById("fieldName").value = content.name || "";
-      document.getElementById("fieldTagline").value = content.tagline || "";
-      document.getElementById("fieldBio").value = content.bio || "";
-      renderAvatar();
-      renderLinks();
-    }
+const AVATAR_SHAPES = [
+  { id: "circle",  label: "Circle"  },
+  { id: "rounded", label: "Rounded" },
+  { id: "square",  label: "Square"  },
+];
 
-    function renderAvatar() {
-      const el = document.getElementById("avatarPreview");
-      const removeBtn = document.getElementById("removeAvatarBtn");
-      if (content.avatarType === "image" && content.avatarImage) {
-        el.innerHTML = `<img src="/${content.avatarImage}" alt="avatar">`;
-        removeBtn.style.display = "block";
-      } else {
-        el.textContent = content.avatarInitials || "MG";
-        removeBtn.style.display = "none";
-      }
-    }
+const ICON_OPTIONS = [
+  { value: "linkedin",  label: "LinkedIn" },
+  { value: "github",    label: "GitHub" },
+  { value: "email",     label: "Email" },
+  { value: "twitter",   label: "Twitter / X" },
+  { value: "instagram", label: "Instagram" },
+  { value: "youtube",   label: "YouTube" },
+  { value: "tiktok",    label: "TikTok" },
+  { value: "website",   label: "Website" },
+];
 
-    function renderLinks() {
-      const container = document.getElementById("linksContainer");
-      container.innerHTML = "";
-      (content.links || []).forEach((link, i) => {
-        const card = document.createElement("div");
-        card.className = "link-card";
-        card.innerHTML = `
-          <div class="link-card-header">
-            <span>Link ${i + 1}</span>
-            <button class="btn btn-danger" onclick="removeLink(${i})">Remove</button>
-          </div>
-          <div class="link-fields">
-            <input type="text" placeholder="Label" value="${escHtml(link.label)}" oninput="updateLink(${i}, 'label', this.value)">
-            <input type="text" placeholder="URL" value="${escHtml(link.url)}" oninput="updateLink(${i}, 'url', this.value)">
-            <select onchange="updateLink(${i}, 'icon', this.value)">
-              ${iconOptions.map(o => `<option value="${o.value}" ${link.icon === o.value ? "selected" : ""}>${o.label}</option>`).join("")}
-            </select>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+// ── Init ──
+async function loadContent() {
+  const res = await fetch("/api/content");
+  content = await res.json();
+  if (!content.theme) content.theme = {};
+  renderAll();
+}
 
-    function escHtml(s) {
-      return (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+function renderAll() {
+  renderPresets();
+  renderAccentColor();
+  renderDarkMode();
+  renderFont();
+  renderLinkStyles();
+  renderAvatarShapes();
+  renderAvatar();
+  renderContentFields();
+  renderLinks();
+}
 
-    // Edit handlers
-    function onEdit() {
-      content.name = document.getElementById("fieldName").value;
-      content.tagline = document.getElementById("fieldTagline").value;
-      content.bio = document.getElementById("fieldBio").value;
-      scheduleSave();
-    }
+// ── Sections ──
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle("collapsed");
+}
 
-    function updateLink(i, field, value) {
-      content.links[i][field] = value;
-      scheduleSave();
-    }
+// ── Theme presets ──
+function renderPresets() {
+  const grid = document.getElementById("presetGrid");
+  grid.innerHTML = "";
+  for (const [key, p] of Object.entries(PRESETS)) {
+    const active = content.theme.preset === key;
+    const card = document.createElement("div");
+    card.className = "preset-card" + (active ? " active" : "");
+    card.onclick = () => applyPreset(key);
+    card.innerHTML = `
+      <div class="preset-colors">
+        ${p.colors.map(c => `<div class="preset-dot" style="background:${c}"></div>`).join("")}
+      </div>
+      <span>${p.label}</span>
+    `;
+    grid.appendChild(card);
+  }
+}
 
-    function addLink() {
-      content.links = content.links || [];
-      content.links.push({ label: "New Link", url: "https://", icon: "website" });
-      renderLinks();
-      scheduleSave();
-    }
+function applyPreset(key) {
+  const p = PRESETS[key];
+  content.theme = {
+    ...content.theme,
+    preset: key,
+    accentColor: p.accentColor,
+    accentColorLight: p.accentColorLight,
+    bgColor: p.bgColor,
+    textColor: p.textColor,
+    textSecondary: p.textSecondary,
+    borderColor: p.borderColor,
+    cardBg: p.cardBg,
+    darkMode: p.darkMode,
+  };
+  renderPresets();
+  renderAccentColor();
+  renderDarkMode();
+  scheduleSave();
+}
 
-    function removeLink(i) {
-      content.links.splice(i, 1);
-      renderLinks();
-      scheduleSave();
-    }
+// ── Accent color ──
+function renderAccentColor() {
+  const c = content.theme.accentColor || "#2d6a4f";
+  document.getElementById("accentSwatch").style.background = c;
+  document.getElementById("accentPicker").value = c;
+  document.getElementById("accentHex").value = c;
+}
 
-    function removeAvatar() {
-      content.avatarType = "initials";
-      content.avatarImage = "";
-      renderAvatar();
-      scheduleSave();
-    }
+function onAccentColor(val) {
+  content.theme.accentColor = val;
+  content.theme.preset = "custom";
+  document.getElementById("accentSwatch").style.background = val;
+  document.getElementById("accentHex").value = val;
+  renderPresets();
+  scheduleSave();
+}
 
-    async function uploadAvatar(input) {
-      const file = input.files[0];
-      if (!file) return;
+function onAccentHex(val) {
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    content.theme.accentColor = val;
+    content.theme.preset = "custom";
+    document.getElementById("accentSwatch").style.background = val;
+    document.getElementById("accentPicker").value = val;
+    renderPresets();
+    scheduleSave();
+  }
+}
 
-      const form = new FormData();
-      form.append("file", file);
+// ── Dark mode ──
+function renderDarkMode() {
+  document.getElementById("darkModeToggle").checked = content.theme.darkMode || false;
+}
 
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const data = await res.json();
-      if (data.ok) {
-        content.avatarType = "image";
-        content.avatarImage = data.path;
-        renderAvatar();
-        scheduleSave();
-      } else {
-        showToast("Upload failed: " + data.message, "error");
-      }
-      input.value = "";
-    }
+function onDarkMode(val) {
+  content.theme.darkMode = val;
+  if (val) {
+    content.theme.bgColor = "#0f172a";
+    content.theme.textColor = "#e2e8f0";
+    content.theme.textSecondary = "#94a3b8";
+    content.theme.borderColor = "#1e293b";
+    content.theme.cardBg = "#1e293b";
+  } else {
+    content.theme.bgColor = "#fafafa";
+    content.theme.textColor = "#1a1a1a";
+    content.theme.textSecondary = "#555555";
+    content.theme.borderColor = "#e0e0e0";
+    content.theme.cardBg = "#ffffff";
+  }
+  content.theme.preset = "custom";
+  renderPresets();
+  scheduleSave();
+}
 
-    // Auto-save with debounce
-    function scheduleSave() {
-      setUnsaved(true);
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(saveContent, 600);
-    }
+// ── Font ──
+function renderFont() {
+  document.getElementById("fontSelect").value = content.theme.font || "Inter";
+}
 
-    async function saveContent() {
-      try {
-        await fetch("/api/content", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(content),
-        });
-        refreshPreview();
-        setUnsaved(false);
-      } catch (e) {
-        showToast("Save failed", "error");
-      }
-    }
+function onFontChange(val) {
+  content.theme.font = val;
+  scheduleSave();
+}
 
-    function refreshPreview() {
-      const frame = document.getElementById("previewFrame");
-      frame.src = "/preview?" + Date.now();
-    }
+// ── Link styles ──
+function renderLinkStyles() {
+  const grid = document.getElementById("styleGrid");
+  grid.innerHTML = "";
+  const current = content.theme.linkStyle || "outline";
+  LINK_STYLES.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "style-card" + (current === s.id ? " active" : "");
+    card.onclick = () => { content.theme.linkStyle = s.id; renderLinkStyles(); scheduleSave(); };
+    card.innerHTML = `
+      <div class="style-preview"><div class="mock-btn ${s.mockClass}">Link</div></div>
+      <span>${s.label}</span>
+    `;
+    grid.appendChild(card);
+  });
+}
 
-    function setUnsaved(val) {
-      hasUnsaved = val;
-      const dot = document.getElementById("statusDot");
-      const text = document.getElementById("statusText");
-      if (val) {
-        dot.className = "dot unsaved";
-        text.textContent = "Unsaved changes";
-      } else {
-        dot.className = "dot saved";
-        text.textContent = "All saved";
-      }
-    }
+// ── Avatar shapes ──
+function renderAvatarShapes() {
+  const grid = document.getElementById("shapeGrid");
+  grid.innerHTML = "";
+  const current = content.avatarShape || "circle";
+  AVATAR_SHAPES.forEach(s => {
+    const opt = document.createElement("div");
+    opt.className = "shape-option" + (current === s.id ? " active" : "");
+    opt.onclick = () => { content.avatarShape = s.id; renderAvatarShapes(); scheduleSave(); };
+    opt.innerHTML = `
+      <div class="shape-preview ${s.id}"></div>
+      <span>${s.label}</span>
+    `;
+    grid.appendChild(opt);
+  });
+}
 
-    // Push live
-    async function pushLive() {
-      // Save first if needed
-      if (hasUnsaved) await saveContent();
+// ── Avatar ──
+function renderAvatar() {
+  const el = document.getElementById("avatarPreview");
+  const removeBtn = document.getElementById("removeAvatarBtn");
+  if (content.avatarType === "image" && content.avatarImage) {
+    el.innerHTML = `<img src="/${content.avatarImage}" alt="avatar">`;
+    removeBtn.style.display = "inline-block";
+  } else {
+    el.textContent = content.avatarInitials || "MG";
+    removeBtn.style.display = "none";
+  }
+}
 
-      const overlay = document.getElementById("pushingOverlay");
-      const btn = document.getElementById("pushBtn");
-      overlay.classList.add("show");
-      btn.disabled = true;
+function removeAvatar() {
+  content.avatarType = "initials";
+  content.avatarImage = "";
+  renderAvatar();
+  scheduleSave();
+}
 
-      try {
-        const res = await fetch("/api/push", { method: "POST" });
-        const data = await res.json();
-        overlay.classList.remove("show");
-        btn.disabled = false;
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/upload", { method: "POST", body: form });
+  const data = await res.json();
+  if (data.ok) {
+    content.avatarType = "image";
+    content.avatarImage = data.path;
+    renderAvatar();
+    scheduleSave();
+  } else {
+    showToast("Upload failed: " + data.message, "error");
+  }
+  input.value = "";
+}
 
-        if (data.ok) {
-          showToast(data.message, "success");
-        } else {
-          showToast(data.message, "error");
-        }
-      } catch (e) {
-        overlay.classList.remove("show");
-        btn.disabled = false;
-        showToast("Push failed: " + e.message, "error");
-      }
-    }
+// ── Content fields ──
+function renderContentFields() {
+  document.getElementById("fieldName").value = content.name || "";
+  document.getElementById("fieldTagline").value = content.tagline || "";
+  document.getElementById("fieldBio").value = content.bio || "";
+}
 
-    function showToast(message, type) {
-      const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.className = `toast ${type} show`;
-      setTimeout(() => { toast.classList.remove("show"); }, 3500);
-    }
+function onEdit() {
+  content.name = document.getElementById("fieldName").value;
+  content.tagline = document.getElementById("fieldTagline").value;
+  content.bio = document.getElementById("fieldBio").value;
+  scheduleSave();
+}
 
-    // Init
-    loadContent();
-  </script>
+// ── Links ──
+function renderLinks() {
+  const container = document.getElementById("linksContainer");
+  container.innerHTML = "";
+  (content.links || []).forEach((link, i) => {
+    const card = document.createElement("div");
+    card.className = "link-card";
+    card.draggable = true;
+    card.dataset.index = i;
+    card.ondragstart = (e) => onDragStart(e, i);
+    card.ondragover = (e) => onDragOver(e, i);
+    card.ondragleave = (e) => card.classList.remove("drag-over");
+    card.ondrop = (e) => onDrop(e, i);
+    card.ondragend = () => { document.querySelectorAll(".link-card").forEach(c => c.classList.remove("dragging","drag-over")); };
+    card.innerHTML = `
+      <div class="link-card-top">
+        <div class="link-card-top-left">
+          <span class="drag-handle">&#8942;&#8942;</span>
+          <span>${link.label || "Link " + (i+1)}</span>
+        </div>
+        <button class="btn-remove" onclick="removeLink(${i})" title="Remove">&times;</button>
+      </div>
+      <div class="link-fields">
+        <input type="text" placeholder="Label" value="${escHtml(link.label)}" oninput="updateLink(${i},'label',this.value)">
+        <input type="text" placeholder="URL" value="${escHtml(link.url)}" oninput="updateLink(${i},'url',this.value)">
+        <select onchange="updateLink(${i},'icon',this.value)">
+          ${ICON_OPTIONS.map(o => `<option value="${o.value}" ${link.icon===o.value?"selected":""}>${o.label}</option>`).join("")}
+        </select>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function updateLink(i, field, value) {
+  content.links[i][field] = value;
+  if (field === "label") {
+    const cards = document.querySelectorAll(".link-card");
+    if (cards[i]) cards[i].querySelector(".link-card-top-left span:last-child").textContent = value || "Link " + (i+1);
+  }
+  scheduleSave();
+}
+
+function addLink() {
+  content.links = content.links || [];
+  content.links.push({ label: "New Link", url: "https://", icon: "website" });
+  renderLinks();
+  scheduleSave();
+}
+
+function removeLink(i) {
+  content.links.splice(i, 1);
+  renderLinks();
+  scheduleSave();
+}
+
+// ── Drag & drop ──
+function onDragStart(e, i) {
+  dragSrcIndex = i;
+  e.target.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+}
+
+function onDragOver(e, i) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+  const card = e.target.closest(".link-card");
+  if (card && parseInt(card.dataset.index) !== dragSrcIndex) {
+    document.querySelectorAll(".link-card").forEach(c => c.classList.remove("drag-over"));
+    card.classList.add("drag-over");
+  }
+}
+
+function onDrop(e, targetIndex) {
+  e.preventDefault();
+  if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+  const [moved] = content.links.splice(dragSrcIndex, 1);
+  content.links.splice(targetIndex, 0, moved);
+  dragSrcIndex = null;
+  renderLinks();
+  scheduleSave();
+}
+
+// ── Device toggle ──
+function setDevice(mode) {
+  const container = document.getElementById("previewContainer");
+  container.className = "preview-container " + mode;
+  document.getElementById("btnDesktop").classList.toggle("active", mode === "desktop");
+  document.getElementById("btnMobile").classList.toggle("active", mode === "mobile");
+}
+
+// ── Save / Push ──
+function scheduleSave() {
+  setUnsaved(true);
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveContent, 500);
+}
+
+async function saveContent() {
+  try {
+    await fetch("/api/content", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(content),
+    });
+    refreshPreview();
+    setUnsaved(false);
+  } catch (e) {
+    showToast("Save failed", "error");
+  }
+}
+
+function refreshPreview() {
+  document.getElementById("previewFrame").src = "/preview?" + Date.now();
+}
+
+function setUnsaved(val) {
+  hasUnsaved = val;
+  const dot = document.getElementById("statusDot");
+  const text = document.getElementById("statusText");
+  if (val) { dot.className = "dot unsaved"; text.textContent = "Unsaved"; }
+  else { dot.className = "dot saved"; text.textContent = "Saved"; }
+}
+
+async function pushLive() {
+  if (hasUnsaved) await saveContent();
+  const overlay = document.getElementById("pushingOverlay");
+  const btn = document.getElementById("pushBtn");
+  overlay.classList.add("show");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/push", { method: "POST" });
+    const data = await res.json();
+    overlay.classList.remove("show");
+    btn.disabled = false;
+    showToast(data.message, data.ok ? "success" : "error");
+  } catch (e) {
+    overlay.classList.remove("show");
+    btn.disabled = false;
+    showToast("Push failed: " + e.message, "error");
+  }
+}
+
+function showToast(message, type) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => toast.classList.remove("show"), 3500);
+}
+
+// ── Go ──
+loadContent();
+</script>
 </body>
 </html>

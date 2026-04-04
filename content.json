@@ -5,6 +5,7 @@
   "avatarType": "initials",
   "avatarInitials": "MG",
   "avatarImage": "",
+  "avatarShape": "circle",
   "links": [
     {
       "label": "LinkedIn",
@@ -21,5 +22,18 @@
       "url": "mailto:max@maxgoodstein.com",
       "icon": "email"
     }
-  ]
+  ],
+  "theme": {
+    "preset": "custom",
+    "accentColor": "#2d6a4f",
+    "accentColorLight": "#40916c",
+    "bgColor": "#fafafa",
+    "textColor": "#1a1a1a",
+    "textSecondary": "#555555",
+    "borderColor": "#e0e0e0",
+    "cardBg": "#ffffff",
+    "darkMode": false,
+    "font": "Inter",
+    "linkStyle": "outline"
+  }
 }
