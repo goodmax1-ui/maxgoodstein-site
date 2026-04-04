@@ -1,0 +1,25 @@
+{
+  "name": "Max Goodstein",
+  "tagline": "Landscape Architect, RLA",
+  "bio": "hello",
+  "avatarType": "initials",
+  "avatarInitials": "MG",
+  "avatarImage": "",
+  "links": [
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/goodmax1/",
+      "icon": "linkedin"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/maxgoodstein",
+      "icon": "github"
+    },
+    {
+      "label": "Email",
+      "url": "mailto:max@maxgoodstein.com",
+      "icon": "email"
+    }
+  ]
+}

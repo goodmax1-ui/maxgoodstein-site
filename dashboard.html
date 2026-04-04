@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — maxgoodstein.com</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --border: #e2e2e2;
+      --text: #1a1a1a;
+      --text-secondary: #666;
+      --accent: #2d6a4f;
+      --accent-hover: #1b4332;
+      --danger: #d32f2f;
+      --success: #2d6a4f;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top bar */
+    .topbar {
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .topbar-left h1 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .topbar-left .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    .topbar-left .dot.unsaved { background: #f59e0b; }
+    .topbar-left .dot.saved { background: var(--success); }
+
+    .topbar-left .status-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: #eee; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-danger {
+      background: none;
+      color: var(--danger);
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .btn-danger:hover { background: #fef2f2; }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      height: calc(100vh - 56px);
+      margin-top: 56px;
+    }
+
+    /* Editor panel */
+    .editor {
+      width: 420px;
+      min-width: 420px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .section {
+      margin-bottom: 1.75rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      color: var(--text-secondary);
+    }
+
+    .field input[type="text"],
+    .field textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .field textarea { min-height: 80px; }
+
+    /* Avatar section */
+    .avatar-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .avatar-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #40916c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: white;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .avatar-controls .btn { font-size: 0.8rem; padding: 0.4rem 0.75rem; }
+
+    .file-input { display: none; }
+
+    /* Link card */
+    .link-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .link-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .link-card-header span {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .link-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .link-fields input {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: var(--surface);
+    }
+
+    .link-fields input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .link-fields select {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .add-link-btn {
+      width: 100%;
+      padding: 0.6rem;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: none;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .add-link-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Preview panel */
+    .preview {
+      flex: 1;
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .preview-frame {
+      width: 100%;
+      max-width: 500px;
+      height: calc(100vh - 120px);
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: white;
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    /* Pushing overlay */
+    .pushing-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 150;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pushing-overlay.show { display: flex; }
+
+    .pushing-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>maxgoodstein.com</h1>
+      <div class="dot saved" id="statusDot"></div>
+      <span class="status-text" id="statusText">All saved</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-primary" id="pushBtn" onclick="pushLive()">Push Live</button>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Editor -->
+    <div class="editor">
+
+      <!-- Avatar -->
+      <div class="section">
+        <div class="section-title">Avatar</div>
+        <div class="avatar-section">
+          <div class="avatar-preview" id="avatarPreview">MG</div>
+          <div class="avatar-controls">
+            <button class="btn btn-secondary" onclick="document.getElementById('avatarFile').click()">Upload Photo</button>
+            <button class="btn btn-danger" id="removeAvatarBtn" onclick="removeAvatar()" style="display:none">Remove Photo</button>
+            <input type="file" id="avatarFile" class="file-input" accept="image/*" onchange="uploadAvatar(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Text -->
+      <div class="section">
+        <div class="section-title">Content</div>
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="fieldName" oninput="onEdit()">
+        </div>
+        <div class="field">
+          <label>Tagline</label>
+          <input type="text" id="fieldTagline" oninput="onEdit()">
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="fieldBio" oninput="onEdit()"></textarea>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="section">
+        <div class="section-title">Links</div>
+        <div id="linksContainer"></div>
+        <button class="add-link-btn" onclick="addLink()">+ Add Link</button>
+      </div>
+
+    </div>
+
+    <!-- Preview -->
+    <div class="preview">
+      <iframe class="preview-frame" id="previewFrame" src="/preview"></iframe>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Pushing overlay -->
+  <div class="pushing-overlay" id="pushingOverlay">
+    <div class="pushing-box">
+      <div class="spinner"></div>
+      Pushing to maxgoodstein.com...
+    </div>
+  </div>
+
+  <script>
+    let content = {};
+    let saveTimeout = null;
+    let hasUnsaved = false;
+
+    const iconOptions = [
+      { value: "linkedin", label: "LinkedIn" },
+      { value: "github", label: "GitHub" },
+      { value: "email", label: "Email" },
+      { value: "twitter", label: "Twitter / X" },
+      { value: "instagram", label: "Instagram" },
+      { value: "website", label: "Website" },
+    ];
+
+    // Load content on startup
+    async function loadContent() {
+      const res = await fetch("/api/content");
+      content = await res.json();
+      renderEditor();
+    }
+
+    function renderEditor() {
+      document.getElementById("fieldName").value = content.name || "";
+      document.getElementById("fieldTagline").value = content.tagline || "";
+      document.getElementById("fieldBio").value = content.bio || "";
+      renderAvatar();
+      renderLinks();
+    }
+
+    function renderAvatar() {
+      const el = document.getElementById("avatarPreview");
+      const removeBtn = document.getElementById("removeAvatarBtn");
+      if (content.avatarType === "image" && content.avatarImage) {
+        el.innerHTML = `<img src="/${content.avatarImage}" alt="avatar">`;
+        removeBtn.style.display = "block";
+      } else {
+        el.textContent = content.avatarInitials || "MG";
+        removeBtn.style.display = "none";
+      }
+    }
+
+    function renderLinks() {
+      const container = document.getElementById("linksContainer");
+      container.innerHTML = "";
+      (content.links || []).forEach((link, i) => {
+        const card = document.createElement("div");
+        card.className = "link-card";
+        card.innerHTML = `
+          <div class="link-card-header">
+            <span>Link ${i + 1}</span>
+            <button class="btn btn-danger" onclick="removeLink(${i})">Remove</button>
+          </div>
+          <div class="link-fields">
+            <input type="text" placeholder="Label" value="${escHtml(link.label)}" oninput="updateLink(${i}, 'label', this.value)">
+            <input type="text" placeholder="URL" value="${escHtml(link.url)}" oninput="updateLink(${i}, 'url', this.value)">
+            <select onchange="updateLink(${i}, 'icon', this.value)">
+              ${iconOptions.map(o => `<option value="${o.value}" ${link.icon === o.value ? "selected" : ""}>${o.label}</option>`).join("")}
+            </select>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function escHtml(s) {
+      return (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Edit handlers
+    function onEdit() {
+      content.name = document.getElementById("fieldName").value;
+      content.tagline = document.getElementById("fieldTagline").value;
+      content.bio = document.getElementById("fieldBio").value;
+      scheduleSave();
+    }
+
+    function updateLink(i, field, value) {
+      content.links[i][field] = value;
+      scheduleSave();
+    }
+
+    function addLink() {
+      content.links = content.links || [];
+      content.links.push({ label: "New Link", url: "https://", icon: "website" });
+      renderLinks();
+      scheduleSave();
+    }
+
+    function removeLink(i) {
+      content.links.splice(i, 1);
+      renderLinks();
+      scheduleSave();
+    }
+
+    function removeAvatar() {
+      content.avatarType = "initials";
+      content.avatarImage = "";
+      renderAvatar();
+      scheduleSave();
+    }
+
+    async function uploadAvatar(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const form = new FormData();
+      form.append("file", file);
+
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.ok) {
+        content.avatarType = "image";
+        content.avatarImage = data.path;
+        renderAvatar();
+        scheduleSave();
+      } else {
+        showToast("Upload failed: " + data.message, "error");
+      }
+      input.value = "";
+    }
+
+    // Auto-save with debounce
+    function scheduleSave() {
+      setUnsaved(true);
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveContent, 600);
+    }
+
+    async function saveContent() {
+      try {
+        await fetch("/api/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(content),
+        });
+        refreshPreview();
+        setUnsaved(false);
+      } catch (e) {
+        showToast("Save failed", "error");
+      }
+    }
+
+    function refreshPreview() {
+      const frame = document.getElementById("previewFrame");
+      frame.src = "/preview?" + Date.now();
+    }
+
+    function setUnsaved(val) {
+      hasUnsaved = val;
+      const dot = document.getElementById("statusDot");
+      const text = document.getElementById("statusText");
+      if (val) {
+        dot.className = "dot unsaved";
+        text.textContent = "Unsaved changes";
+      } else {
+        dot.className = "dot saved";
+        text.textContent = "All saved";
+      }
+    }
+
+    // Push live
+    async function pushLive() {
+      // Save first if needed
+      if (hasUnsaved) await saveContent();
+
+      const overlay = document.getElementById("pushingOverlay");
+      const btn = document.getElementById("pushBtn");
+      overlay.classList.add("show");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch("/api/push", { method: "POST" });
+        const data = await res.json();
+        overlay.classList.remove("show");
+        btn.disabled = false;
+
+        if (data.ok) {
+          showToast(data.message, "success");
+        } else {
+          showToast(data.message, "error");
+        }
+      } catch (e) {
+        overlay.classList.remove("show");
+        btn.disabled = false;
+        showToast("Push failed: " + e.message, "error");
+      }
+    }
+
+    function showToast(message, type) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => { toast.classList.remove("show"); }, 3500);
+    }
+
+    // Init
+    loadContent();
+  </script>
+</body>
+</html>
