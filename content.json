@@ -1,7 +1,7 @@
 {
   "name": "Max Goodstein",
   "tagline": "Landscape Architect, RLA",
-  "bio": "hello",
+  "bio": "Hello!",
   "avatarType": "initials",
   "avatarInitials": "MG",
   "avatarImage": "",
@@ -13,7 +13,7 @@
     },
     {
       "label": "GitHub",
-      "url": "https://github.com/maxgoodstein",
+      "url": "https://github.com/goodmax1-ui",
       "icon": "github"
     },
     {
