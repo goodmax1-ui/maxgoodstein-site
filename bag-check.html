@@ -1264,28 +1264,39 @@ function buildEndOfTourUrl() {
   const dd = String(d.getDate()).padStart(2, "0");
   const dateStr = `${mm}/${dd}/${d.getFullYear()}`;
 
-  const params = new URLSearchParams();
-  if (nameInput.value.trim()) params.set("Employee Name", nameInput.value.trim());
-  params.set("Date", dateStr);
-  if (venueSelect.value) params.set("Venue", venueSelect.value);
-  params.set("Supplies Needed", suppliesText);
-  // Hedge for column-name variants — Smartsheet ignores unknown params
-  params.set("Supplies Needed?", suppliesText);
-  // Dropdown / text defaults (override manually in the form if a shift differs)
-  params.set("Ambulance On Site", "None");
-  params.set("Physician On Site", "No");
-  params.set("Radio Accountability", "Start: 1  |  End: 1");
-  // Tech Bag Medication Pouch — hedge column-name variants
-  params.set("Tech Bag Medication Pouch", "All Zip Ties Intact");
-  params.set("Tech Bag Med Pouch", "All Zip Ties Intact");
-  params.set("Medication Pouch", "All Zip Ties Intact");
-  params.set("Tech Bag", "All Zip Ties Intact");
-  // After Party — hedge spacing variants
-  params.set("After Party/ Talent Delay", "No");
-  params.set("After Party/Talent Delay", "No");
-  params.set("After Party / Talent Delay", "No");
+  const fields = [];
+  const add = (k, v) => fields.push([k, v]);
 
-  return EOT_FORM_URL + "?" + params.toString();
+  if (nameInput.value.trim()) add("Employee Name", nameInput.value.trim());
+  add("Date", dateStr);
+  if (venueSelect.value) add("Venue", venueSelect.value);
+  add("Supplies Needed", suppliesText);
+  add("Supplies Needed?", suppliesText);
+  add("Ambulance On Site", "None");
+  add("Physician On Site", "No");
+  // Radio Accountability — hedge column-name variants
+  const radioVal = "Start: 1  |  End: 1";
+  add("Radio Accountability", radioVal);
+  add("Radios", radioVal);
+  add("Radio Count", radioVal);
+  add("Radio", radioVal);
+  // Tech Bag Medication Pouch — hedge column-name variants
+  const pouchVal = "All Zip Ties Intact";
+  add("Tech Bag Medication Pouch", pouchVal);
+  add("Tech Bag Med Pouch", pouchVal);
+  add("Medication Pouch", pouchVal);
+  add("Med Pouch", pouchVal);
+  add("Tech Bag", pouchVal);
+  add("Pouch", pouchVal);
+  add("Zip Ties", pouchVal);
+  // After Party — hedge spacing variants
+  add("After Party/ Talent Delay", "No");
+  add("After Party/Talent Delay", "No");
+  add("After Party / Talent Delay", "No");
+
+  // Manual encoding with %20 for spaces (URLSearchParams uses + which Smartsheet may not decode)
+  const qs = fields.map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v)).join("&");
+  return EOT_FORM_URL + "?" + qs;
 }
 
 document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
