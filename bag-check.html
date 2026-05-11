@@ -825,7 +825,6 @@ function persist() {
 
 function check() {
   const missing = [];
-  const blank = [];
   const extra = [];
   let okCount = 0, total = 0;
 
@@ -836,16 +835,16 @@ function check() {
       if (v) okCount++;
       else missing.push({ label: it.label, have: "missing" });
     } else {
-      if (v === null) blank.push({ label: it.label, need: it.qty });
-      else if (v < it.qty) missing.push({ label: it.label, need: it.qty, have: v, short: it.qty - v });
-      else if (v > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have: v }); }
+      const have = v === null ? 0 : v;
+      if (have < it.qty) missing.push({ label: it.label, need: it.qty, have, short: it.qty - have });
+      else if (have > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have }); }
       else okCount++;
     }
   }
 
   const r = document.getElementById("report");
   r.hidden = false;
-  const allGood = missing.length === 0 && blank.length === 0;
+  const allGood = missing.length === 0;
 
   let html = "";
   if (allGood) {
@@ -859,24 +858,19 @@ function check() {
     html += `
       <div class="report-hero bad">
         <div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <h2>${missing.length + blank.length} item${missing.length + blank.length === 1 ? "" : "s"} need attention</h2>
-        <div class="stats">${okCount} of ${total} OK · ${missing.length} short · ${blank.length} not entered</div>
+        <h2>${missing.length} item${missing.length === 1 ? "" : "s"} need restocking</h2>
+        <div class="stats">${okCount} of ${total} OK · ${missing.length} to restock</div>
       </div>`;
   }
 
   let body = `<div class="report-body">`;
 
   if (missing.length) {
-    body += `<div class="report-group"><h3>Missing or short</h3><ul class="report-list">`;
+    body += `<div class="report-group"><h3>Restock needed</h3><ul class="report-list">`;
     for (const m of missing) {
       if (m.have === "missing") body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Not present</span></li>`;
       else body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Have ${m.have} / ${m.need}</span></li>`;
     }
-    body += `</ul></div>`;
-  }
-  if (blank.length) {
-    body += `<div class="report-group"><h3>Not entered</h3><ul class="report-list">`;
-    for (const b of blank) body += `<li><span class="item-name">${escapeHtml(b.label)}</span><span class="pill warn">Need ${b.need}</span></li>`;
     body += `</ul></div>`;
   }
   if (extra.length) {
