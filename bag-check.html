@@ -587,6 +587,57 @@
     background-position: right 14px center;
     padding-right: 36px;
   }
+  /* Bag check expand/collapse toggle */
+  .checklist-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font: 700 16px/1.2 inherit;
+    cursor: pointer;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.1s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .checklist-toggle:active { transform: scale(0.99); }
+  .checklist-toggle.expanded { border-color: var(--accent); box-shadow: var(--shadow-md); }
+  .checklist-toggle .toggle-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .checklist-toggle .icon-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .checklist-toggle .icon-circle svg { width: 20px; height: 20px; }
+  .checklist-toggle .toggle-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .checklist-toggle .toggle-label { font-size: 16px; font-weight: 700; }
+  .checklist-toggle .toggle-sub { font-size: 12px; color: var(--text-3); font-weight: 500; }
+  .checklist-toggle .toggle-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .checklist-toggle .toggle-count {
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .checklist-toggle.complete .toggle-count { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+  .checklist-toggle .chevron {
+    width: 20px; height: 20px;
+    transition: transform 0.2s;
+    color: var(--text-3);
+  }
+  .checklist-toggle.expanded .chevron { transform: rotate(180deg); }
+
   .venue-row { display: flex; gap: 8px; align-items: stretch; }
   .venue-row select { flex: 1; min-width: 0; }
   .locate-btn {
@@ -690,7 +741,25 @@
 
   <div id="report" hidden></div>
 
-  <form id="checklist" autocomplete="off"></form>
+  <button type="button" class="checklist-toggle" id="checklistToggle" aria-expanded="false">
+    <span class="toggle-left">
+      <span class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span class="toggle-text">
+        <span class="toggle-label" id="toggleLabel">Start Bag Check</span>
+        <span class="toggle-sub" id="toggleSub">Tap to count items</span>
+      </span>
+    </span>
+    <span class="toggle-right">
+      <span class="toggle-count" id="toggleCount">0 / 0</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </span>
+  </button>
+
+  <div id="checklistWrap" hidden>
+    <form id="checklist" autocomplete="off"></form>
+  </div>
 </main>
 
 <div class="actions">
@@ -914,6 +983,10 @@ function updateAllProgress() {
   const pct = total > 0 ? (done / total) * 100 : 0;
   fill.style.width = pct + "%";
   fill.classList.toggle("complete", done === total);
+  const toggleCount = document.getElementById("toggleCount");
+  const toggleBtn = document.getElementById("checklistToggle");
+  if (toggleCount) toggleCount.textContent = `${done} / ${total}`;
+  if (toggleBtn) toggleBtn.classList.toggle("complete", done === total && total > 0);
 }
 
 function cssEscape(s) { return s.replace(/"/g, '\\"'); }
@@ -1213,6 +1286,34 @@ document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
 });
 
 buildForm();
+
+// Collapse / expand the checklist
+const checklistToggle = document.getElementById("checklistToggle");
+const checklistWrap = document.getElementById("checklistWrap");
+const actionBar = document.querySelector(".actions");
+const toggleLabel = document.getElementById("toggleLabel");
+const toggleSub = document.getElementById("toggleSub");
+
+function setChecklistExpanded(on) {
+  checklistWrap.hidden = !on;
+  checklistToggle.setAttribute("aria-expanded", on ? "true" : "false");
+  checklistToggle.classList.toggle("expanded", on);
+  actionBar.style.display = on ? "" : "none";
+  document.body.style.paddingBottom = on ? "100px" : "20px";
+  toggleLabel.textContent = on ? "Hide Bag Check" : "Start Bag Check";
+  toggleSub.textContent = on ? "Tap items to count" : "Tap to count items";
+  if (on) {
+    requestAnimationFrame(() => {
+      checklistWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+}
+
+checklistToggle.addEventListener("click", () => {
+  setChecklistExpanded(checklistWrap.hidden);
+});
+
+setChecklistExpanded(false);
 </script>
 </body>
 </html>
