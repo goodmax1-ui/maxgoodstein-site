@@ -375,8 +375,54 @@ function check() {
     html += `</ul>`;
   }
 
+  const suppliesText = buildSuppliesText(missing);
+  if (suppliesText) {
+    html += `
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <p style="margin:0 0 6px;font-weight:600;font-size:14px;">Supplies needed (for End of Tour form):</p>
+        <textarea id="suppliesText" readonly style="width:100%;min-height:90px;padding:10px;font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;resize:vertical;">${escapeHtml(suppliesText)}</textarea>
+        <button type="button" id="copyBtn" class="primary" style="margin-top:8px;width:100%;max-width:none;">Copy Supplies List</button>
+      </div>`;
+  } else if (!allGood) {
+    html += `<p class="hint" style="padding:0;margin-top:10px;">No restock list — all shortages are presence-only items (check those manually).</p>`;
+  }
+
   r.innerHTML = html;
+
+  const copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) copyBtn.addEventListener("click", copySupplies);
+
   r.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function buildSuppliesText(missing) {
+  const lines = [];
+  for (const m of missing) {
+    if (m.have === "missing") lines.push(m.label);
+    else lines.push(`${m.label} x${m.short}`);
+  }
+  return lines.join("\n");
+}
+
+async function copySupplies() {
+  const ta = document.getElementById("suppliesText");
+  const btn = document.getElementById("copyBtn");
+  const text = ta.value;
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } else {
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      ok = document.execCommand("copy");
+    }
+  } catch (e) { ok = false; }
+  const original = btn.textContent;
+  btn.textContent = ok ? "Copied!" : "Press & hold the text to copy";
+  btn.style.background = ok ? "var(--ok)" : "var(--warn)";
+  setTimeout(() => { btn.textContent = original; btn.style.background = ""; }, 1800);
 }
 
 function reset() {
