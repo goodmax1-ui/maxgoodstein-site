@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BLS Bag Check</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1f242d;
+    --text: #e7eaf0;
+    --muted: #9aa3b2;
+    --accent: #e63946;
+    --ok: #2ecc71;
+    --bad: #ff5a5f;
+    --warn: #f0a500;
+    --border: #262b35;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif; }
+  header {
+    padding: 18px 16px 12px;
+    background: linear-gradient(180deg, #1a1f29 0%, #0f1115 100%);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 5;
+  }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+  main { padding: 12px 12px 120px; max-width: 760px; margin: 0 auto; }
+  .section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 10px 0 16px;
+    overflow: hidden;
+  }
+  .section h2 {
+    margin: 0;
+    padding: 12px 14px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .row:first-of-type { border-top: none; }
+  .row .label { flex: 1; font-size: 15px; }
+  .row .sub { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .row .expected {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .row input[type=number] {
+    width: 72px;
+    padding: 8px 10px;
+    font-size: 16px;
+    text-align: center;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    -moz-appearance: textfield;
+  }
+  .row input[type=number]::-webkit-outer-spin-button,
+  .row input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .row input[type=checkbox] {
+    width: 22px; height: 22px;
+    accent-color: var(--accent);
+  }
+  .actions {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(15,17,21,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    display: flex; gap: 10px;
+    justify-content: center;
+    z-index: 10;
+  }
+  button {
+    flex: 1; max-width: 260px;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: white; }
+  button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+  #report {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin: 12px 0 16px;
+  }
+  #report h3 { margin: 0 0 8px; font-size: 16px; }
+  #report .ok { color: var(--ok); }
+  #report .bad { color: var(--bad); }
+  #report .warn { color: var(--warn); }
+  #report ul { padding-left: 18px; margin: 6px 0 0; }
+  #report li { margin: 4px 0; font-size: 14px; }
+  #report .summary { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+  .pill.ok { background: rgba(46,204,113,0.15); color: var(--ok); }
+  .pill.bad { background: rgba(255,90,95,0.15); color: var(--bad); }
+  .hint { color: var(--muted); font-size: 12px; padding: 8px 14px 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>BLS Bag Check — CrowdRx</h1>
+  <p>Enter what you actually counted. Missing items will be flagged.</p>
+</header>
+
+<main>
+  <div id="report" hidden></div>
+  <form id="checklist"></form>
+</main>
+
+<div class="actions">
+  <button type="button" class="secondary" id="resetBtn">Reset</button>
+  <button type="button" class="primary" id="checkBtn">Check Bag</button>
+</div>
+
+<script>
+// Inventory definition — each item has either a `qty` (numeric expected count) or `bool: true` (presence-only)
+const SECTIONS = [
+  { name: "Outside Zipper", items: [
+    { id: "burn_sheet",        label: "Burn Sheet",              qty: 1 },
+    { id: "multi_trauma",      label: "Multi-Trauma Dressing",   qty: 1 },
+    { id: "adult_collar",      label: "Adult Collar",            qty: 1 },
+    { id: "ped_collar",        label: "Pediatric Collar",        qty: 1 },
+    { id: "triangular",        label: "Triangular Bandages",     qty: 4 },
+  ]},
+  { name: "Top Flap (Main)", items: [
+    { id: "suction",           label: "Portable Suction",        qty: 1 },
+    { id: "biohazard",         label: "Biohazard Bags",          qty: 2 },
+    { id: "shears",            label: "Trauma Shears",           qty: 1 },
+  ]},
+  { name: "Left Top Flap", items: [
+    { id: "abd_pads",          label: "ABD Pads",                qty: 5 },
+    { id: "fourxfour",         label: "4x4 Gauze",               qty: 5 },
+    { id: "tape_1in",          label: "1\" Tape",                qty: 1 },
+    { id: "tape_23in",         label: "2\" or 3\" Tape",         qty: 1 },
+    { id: "gauze_roll",        label: "Gauze Roll",              qty: 5, sub: "2 different sizes" },
+  ]},
+  { name: "Right Top Flap", items: [
+    { id: "cold_packs",        label: "Cold Packs",              qty: 2 },
+    { id: "sam_splint",        label: "SAM Splint",              qty: 1 },
+    { id: "sterile_water",     label: "Sterile Water",           qty: 1 },
+  ]},
+  { name: "Main Compartment", items: [
+    { id: "o2_tank",           label: "Oxygen D-Tank w/ Regulator", qty: 1, sub: "Min. 1000 PSI" },
+    { id: "opa",               label: "Oral Airways (OPAs)",     qty: 6 },
+    { id: "adult_bvm",         label: "Adult BVM",               qty: 1 },
+    { id: "ped_bvm",           label: "Pediatric BVM",           qty: 1 },
+  ]},
+  { name: "Main — Bottom Left", items: [
+    { id: "adult_nrb",         label: "Adult NRB",               qty: 2 },
+    { id: "adult_nc",          label: "Adult NC",                qty: 2 },
+  ]},
+  { name: "Main — Bottom Middle", items: [
+    { id: "ped_nrb",           label: "Pediatric NRB",           qty: 2 },
+    { id: "ped_nc",            label: "Pediatric NC",            qty: 2 },
+  ]},
+  { name: "Main — Bottom Right", items: [
+    { id: "adult_bp",          label: "Adult BP Cuff",           qty: 1 },
+    { id: "ped_bp",            label: "Pediatric BP Cuff",       qty: 1 },
+    { id: "oral_glucose",      label: "Oral Glucose (BGL Kit)",  qty: 2 },
+    { id: "bgl_kit",           label: "BGL Kit complete",        bool: true, sub: "Lancets, bandaids, test strips, prep pads" },
+    { id: "gloves_s",          label: "Gloves — Small",          qty: 3, sub: "3 pairs" },
+    { id: "gloves_m",          label: "Gloves — Medium",         qty: 3, sub: "3 pairs" },
+    { id: "gloves_l",          label: "Gloves — Large",          qty: 3, sub: "3 pairs" },
+  ]},
+  { name: "Left Front Pouch", items: [
+    { id: "nebulizer",         label: "Nebulizer",               qty: 1 },
+    { id: "aspirin",           label: "Aspirin",                 qty: 4 },
+    { id: "albuterol",         label: "Albuterol",               qty: 2 },
+    { id: "med_kit",           label: "Med Kit",                 qty: 1 },
+    { id: "epi_check",         label: "Epi Check",               bool: true },
+    { id: "epi_inject",        label: "Epi Inject",              bool: true },
+    { id: "nasal_narcan",      label: "Nasal Narcan",            bool: true },
+  ]},
+  { name: "Right Front Pouch", items: [
+    { id: "bandaids",          label: "Bandaids",                qty: 10 },
+    { id: "acetaminophen",     label: "Acetaminophen",           qty: 10 },
+    { id: "ibuprofen",         label: "Ibuprofen",               qty: 10 },
+    { id: "antacids",          label: "Antacids",                qty: 5 },
+    { id: "diphenhydramine",   label: "Diphenhydramine",         qty: 5 },
+    { id: "emesis",            label: "Emesis Bags",             qty: 3 },
+  ]},
+];
+
+const STORAGE_KEY = "bls_bag_check_v1";
+
+function buildForm() {
+  const form = document.getElementById("checklist");
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  for (const section of SECTIONS) {
+    const wrap = document.createElement("section");
+    wrap.className = "section";
+    const h = document.createElement("h2");
+    h.textContent = section.name;
+    wrap.appendChild(h);
+    for (const it of section.items) {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const label = document.createElement("label");
+      label.className = "label";
+      label.setAttribute("for", it.id);
+      label.innerHTML = it.label + (it.sub ? `<span class="sub">${it.sub}</span>` : "");
+      row.appendChild(label);
+
+      if (it.bool) {
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.id = it.id;
+        cb.checked = !!saved[it.id];
+        cb.addEventListener("change", persist);
+        row.appendChild(cb);
+      } else {
+        const exp = document.createElement("span");
+        exp.className = "expected";
+        exp.textContent = `need ${it.qty}`;
+        row.appendChild(exp);
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.inputMode = "numeric";
+        input.id = it.id;
+        input.placeholder = "0";
+        if (saved[it.id] !== undefined && saved[it.id] !== null && saved[it.id] !== "") input.value = saved[it.id];
+        input.addEventListener("input", persist);
+        row.appendChild(input);
+      }
+      wrap.appendChild(row);
+    }
+    form.appendChild(wrap);
+  }
+  const hint = document.createElement("p");
+  hint.className = "hint";
+  hint.textContent = "Your entries are saved automatically on this device.";
+  form.appendChild(hint);
+}
+
+function persist() {
+  const data = {};
+  for (const s of SECTIONS) for (const it of s.items) {
+    const el = document.getElementById(it.id);
+    if (!el) continue;
+    if (it.bool) data[it.id] = el.checked;
+    else data[it.id] = el.value === "" ? "" : Number(el.value);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function check() {
+  const missing = [];   // items below required count
+  const blank = [];     // items not entered at all
+  const extra = [];     // items above required count (worth noting)
+  let okCount = 0, total = 0;
+
+  for (const s of SECTIONS) for (const it of s.items) {
+    total++;
+    const el = document.getElementById(it.id);
+    if (it.bool) {
+      if (el.checked) okCount++;
+      else missing.push({ label: it.label, need: "present", have: "missing" });
+    } else {
+      const raw = el.value;
+      if (raw === "" || raw === null) {
+        blank.push({ label: it.label, need: it.qty });
+      } else {
+        const have = Number(raw);
+        if (have < it.qty) missing.push({ label: it.label, need: it.qty, have, short: it.qty - have });
+        else if (have > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have }); }
+        else okCount++;
+      }
+    }
+  }
+
+  const r = document.getElementById("report");
+  r.hidden = false;
+  let html = "";
+  const allGood = missing.length === 0 && blank.length === 0;
+
+  if (allGood) {
+    html += `<h3 class="ok">Bag complete — ${okCount}/${total} items accounted for</h3>`;
+  } else {
+    html += `<h3 class="bad">Bag NOT complete</h3>`;
+    html += `<div class="summary">${okCount}/${total} OK · ${missing.length} short · ${blank.length} not checked</div>`;
+  }
+
+  if (missing.length) {
+    html += `<p class="bad" style="margin:10px 0 2px;font-weight:600;">Missing / short:</p><ul>`;
+    for (const m of missing) {
+      if (m.have === "missing") html += `<li>${escapeHtml(m.label)} — <span class="pill bad">not present</span></li>`;
+      else html += `<li>${escapeHtml(m.label)} — have ${m.have} of ${m.need} <span class="pill bad">short ${m.short}</span></li>`;
+    }
+    html += `</ul>`;
+  }
+  if (blank.length) {
+    html += `<p class="warn" style="margin:10px 0 2px;font-weight:600;">Not entered:</p><ul>`;
+    for (const b of blank) html += `<li>${escapeHtml(b.label)} (need ${b.need})</li>`;
+    html += `</ul>`;
+  }
+  if (extra.length) {
+    html += `<p style="margin:10px 0 2px;color:var(--muted);font-weight:600;">Over-stocked (FYI):</p><ul>`;
+    for (const e of extra) html += `<li>${escapeHtml(e.label)} — have ${e.have} of ${e.need}</li>`;
+    html += `</ul>`;
+  }
+
+  r.innerHTML = html;
+  r.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function reset() {
+  if (!confirm("Clear all entered counts?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  for (const s of SECTIONS) for (const it of s.items) {
+    const el = document.getElementById(it.id);
+    if (!el) continue;
+    if (it.bool) el.checked = false;
+    else el.value = "";
+  }
+  document.getElementById("report").hidden = true;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+}
+
+document.getElementById("checkBtn").addEventListener("click", check);
+document.getElementById("resetBtn").addEventListener("click", reset);
+buildForm();
+</script>
+</body>
+</html>
