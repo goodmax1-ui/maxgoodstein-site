@@ -598,7 +598,15 @@
     font: 600 15px/1.4 ui-monospace, 'SF Mono', Menlo, monospace;
     color: var(--text);
     word-break: break-word;
+    user-select: all;
+    -webkit-user-select: all;
+    padding: 8px 10px;
+    background: var(--bg-elev);
+    border: 1px dashed var(--border-strong);
+    border-radius: 6px;
+    cursor: copy;
   }
+  .eot-item-val:active { background: var(--accent-soft); border-color: var(--accent); }
   .eot-item-copy {
     padding: 6px 12px;
     background: var(--bg-elev);
@@ -1427,36 +1435,51 @@ document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
 eotCancel.addEventListener("click", () => eotModal.classList.remove("open"));
 eotModal.addEventListener("click", (e) => { if (e.target === eotModal) eotModal.classList.remove("open"); });
 
-eotOpen.addEventListener("click", async () => {
-  // Auto-copy the Radio value so user just pastes in the form
+function copyText(text) {
+  let ok = false;
+  // Synchronous execCommand path works best inside iOS Safari user gestures
   try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(radioVal.textContent.trim());
-    }
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px;";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    ok = document.execCommand("copy");
+    ta.remove();
   } catch (e) {}
+  // If that failed, try async clipboard API as fallback
+  if (!ok && navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).catch(() => {});
+    ok = true;
+  }
+  return ok;
+}
+
+function flashCopied(btn) {
+  const orig = btn.innerHTML;
+  btn.classList.add("copied");
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+  setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = orig; }, 1500);
+}
+
+eotOpen.addEventListener("click", () => {
+  copyText(radioVal.textContent.trim());
   window.open(buildEndOfTourUrl(), "_blank", "noopener");
   eotModal.classList.remove("open");
 });
 
-copyRadioBtn.addEventListener("click", async () => {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(radioVal.textContent.trim());
-    } else {
-      const ta = document.createElement("textarea");
-      ta.value = radioVal.textContent.trim();
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-    }
-    copyRadioBtn.classList.add("copied");
-    copyRadioBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied';
-    setTimeout(() => {
-      copyRadioBtn.classList.remove("copied");
-      copyRadioBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
-    }, 1500);
-  } catch (e) {}
+copyRadioBtn.addEventListener("click", () => {
+  copyText(radioVal.textContent.trim());
+  flashCopied(copyRadioBtn);
+});
+
+// Tap the value text itself to copy
+radioVal.addEventListener("click", () => {
+  copyText(radioVal.textContent.trim());
+  flashCopied(copyRadioBtn);
 });
 
 buildForm();
