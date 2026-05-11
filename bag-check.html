@@ -545,6 +545,49 @@
 
   .hint { color: var(--text-3); font-size: 12px; padding: 12px 18px; text-align: center; }
 
+  /* Tour info panel */
+  .tour-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .tour-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tour-field { display: flex; flex-direction: column; gap: 4px; }
+  .tour-field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .tour-field input, .tour-field select {
+    padding: 12px 14px;
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font: 500 15px/1.3 inherit;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .tour-field input:focus, .tour-field select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .tour-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23475569' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
   @media (min-width: 600px) {
     .row { padding: 16px 22px; }
     h1 { font-size: 26px; }
@@ -564,6 +607,32 @@
 </header>
 
 <main>
+  <div class="tour-panel">
+    <div class="tour-grid">
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="tourName">Your Name</label>
+        <input type="text" id="tourName" placeholder="First Last" autocomplete="name" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="tourVenue">Venue</label>
+        <select id="tourVenue">
+          <option value="">— Select venue —</option>
+          <option>Beacon Theater</option>
+          <option>Brooklyn Academy of Music</option>
+          <option>Brooklyn Steel</option>
+          <option>Citi Bank</option>
+          <option>Coney Island Amphitheater</option>
+          <option>MSG Arena</option>
+          <option>MSG Theater</option>
+          <option>Radio City Music Hall</option>
+          <option>Yankee Stadium</option>
+          <option>Palladium Time Square</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div class="quick">
     <p class="quick-label">Quick Forms</p>
     <div class="quick-grid">
@@ -575,9 +644,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         PCR<span class="sub">First Aid</span>
       </a>
-      <a href="https://app.smartsheet.com/b/form/93aca619fab949a4bdaff1f25e6db0e6" target="_blank" rel="noopener">
+      <a href="#" id="endOfTourBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        End of Tour<span class="sub">Smartsheet</span>
+        End of Tour<span class="sub">Prefilled</span>
       </a>
     </div>
     <button type="button" class="quick-ref" id="refBtn">
@@ -676,6 +745,8 @@ const SECTIONS = [
 ];
 
 const STORAGE_KEY = "bls_bag_check_v2";
+const TOUR_KEY = "bls_tour_info_v1";
+const EOT_FORM_URL = "https://app.smartsheet.com/b/form/93aca619fab949a4bdaff1f25e6db0e6";
 const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
 function buildForm() {
@@ -964,6 +1035,51 @@ const refModal = document.getElementById("refModal");
 document.getElementById("refBtn").addEventListener("click", () => refModal.classList.add("open"));
 document.getElementById("refClose").addEventListener("click", () => refModal.classList.remove("open"));
 refModal.addEventListener("click", (e) => { if (e.target === refModal) refModal.classList.remove("open"); });
+
+// Tour info — persist name + venue, build prefilled End of Tour URL
+const nameInput = document.getElementById("tourName");
+const venueSelect = document.getElementById("tourVenue");
+const tourSaved = JSON.parse(localStorage.getItem(TOUR_KEY) || "{}");
+if (tourSaved.name) nameInput.value = tourSaved.name;
+if (tourSaved.venue) venueSelect.value = tourSaved.venue;
+const persistTour = () => localStorage.setItem(TOUR_KEY, JSON.stringify({ name: nameInput.value, venue: venueSelect.value }));
+nameInput.addEventListener("input", persistTour);
+venueSelect.addEventListener("change", persistTour);
+
+function buildEndOfTourUrl() {
+  // Compute current supplies needed from the live form state
+  const missing = [];
+  for (const s of SECTIONS) for (const it of s.items) {
+    const v = getValue(it);
+    if (it.bool) { if (!v) missing.push({ label: it.label, have: "missing" }); }
+    else {
+      const have = v === null ? 0 : v;
+      if (have < it.qty) missing.push({ label: it.label, short: it.qty - have });
+    }
+  }
+  const suppliesText = missing.length ? buildSuppliesText(missing) : "NONE";
+
+  // mm/dd/yyyy
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const dateStr = `${mm}/${dd}/${d.getFullYear()}`;
+
+  const params = new URLSearchParams();
+  if (nameInput.value.trim()) params.set("Employee Name", nameInput.value.trim());
+  params.set("Date", dateStr);
+  if (venueSelect.value) params.set("Venue", venueSelect.value);
+  params.set("Supplies Needed", suppliesText);
+  // Hedge for column-name variants — Smartsheet ignores unknown params
+  params.set("Supplies Needed?", suppliesText);
+
+  return EOT_FORM_URL + "?" + params.toString();
+}
+
+document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
+  e.preventDefault();
+  window.open(buildEndOfTourUrl(), "_blank", "noopener");
+});
 
 buildForm();
 </script>
