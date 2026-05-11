@@ -1304,7 +1304,11 @@ function setChecklistExpanded(on) {
   toggleSub.textContent = on ? "Tap items to count" : "Tap to count items";
   if (on) {
     requestAnimationFrame(() => {
-      checklistWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+      const firstSection = checklistWrap.querySelector(".section");
+      if (!firstSection) return;
+      const headerH = document.querySelector("header").offsetHeight;
+      const y = firstSection.getBoundingClientRect().top + window.pageYOffset - headerH - 8;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     });
   }
 }
