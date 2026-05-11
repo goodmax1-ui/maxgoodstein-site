@@ -1748,7 +1748,30 @@ async function startScanner() {
     });
   } catch (e) {
     console.error(e);
-    scannerStatus.textContent = "Camera permission denied or unavailable.";
+    let msg;
+    switch (e.name) {
+      case "NotAllowedError":
+      case "PermissionDeniedError":
+        msg = "Camera blocked. Settings → Safari → Camera → Allow, then reload.";
+        break;
+      case "NotFoundError":
+      case "DevicesNotFoundError":
+        msg = "No camera found on this device.";
+        break;
+      case "NotReadableError":
+      case "TrackStartError":
+        msg = "Camera in use by another app. Close other camera apps and retry.";
+        break;
+      case "OverconstrainedError":
+        msg = "Camera doesn't support the required resolution.";
+        break;
+      case "SecurityError":
+        msg = "Page must be loaded over https:// (or via the chat preview, camera is blocked in iframes).";
+        break;
+      default:
+        msg = "Camera error: " + (e.name || e.message || "unknown");
+    }
+    scannerStatus.textContent = msg;
   }
 }
 
