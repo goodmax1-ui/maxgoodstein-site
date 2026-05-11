@@ -1274,8 +1274,15 @@ function buildEndOfTourUrl() {
   // Dropdown defaults (override manually in the form if a shift differs)
   params.set("Ambulance On Site", "None");
   params.set("Physician On Site", "No");
+  // Tech Bag Medication Pouch — hedge column-name variants
   params.set("Tech Bag Medication Pouch", "All Zip Ties Intact");
+  params.set("Tech Bag Med Pouch", "All Zip Ties Intact");
+  params.set("Medication Pouch", "All Zip Ties Intact");
+  params.set("Tech Bag", "All Zip Ties Intact");
+  // After Party — hedge spacing variants
   params.set("After Party/ Talent Delay", "No");
+  params.set("After Party/Talent Delay", "No");
+  params.set("After Party / Talent Delay", "No");
 
   return EOT_FORM_URL + "?" + params.toString();
 }
