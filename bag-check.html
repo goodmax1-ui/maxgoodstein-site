@@ -1277,19 +1277,10 @@ function buildEndOfTourUrl() {
   add("Physician On Site", "No");
   // Radio Accountability — hedge column-name variants
   const radioVal = "Start: 1  |  End: 1";
-  add("Radio Accountability", radioVal);
-  add("Radios", radioVal);
-  add("Radio Count", radioVal);
-  add("Radio", radioVal);
+  ["Radio Accountability","Radios","Radio Count","Radio","Radio Inventory","Radio Tracking","Radio Notes","Radio Check","Radio Status","Radio Information","radio accountability","Radio Accountabilty"].forEach(k => add(k, radioVal));
   // Tech Bag Medication Pouch — hedge column-name variants
   const pouchVal = "All Zip Ties Intact";
-  add("Tech Bag Medication Pouch", pouchVal);
-  add("Tech Bag Med Pouch", pouchVal);
-  add("Medication Pouch", pouchVal);
-  add("Med Pouch", pouchVal);
-  add("Tech Bag", pouchVal);
-  add("Pouch", pouchVal);
-  add("Zip Ties", pouchVal);
+  ["Tech Bag Medication Pouch","Tech Bag Med Pouch","Medication Pouch","Med Pouch","Tech Bag","Pouch","Zip Ties","Zip Tie","Zip Tie Status","Tech Bag Pouch","Tech Bag Status","Pouch Status","Medication Bag","Bag Seal","Zip Tie Check","Med Bag","tech bag medication pouch"].forEach(k => add(k, pouchVal));
   // After Party — hedge spacing variants
   add("After Party/ Talent Delay", "No");
   add("After Party/Talent Delay", "No");
