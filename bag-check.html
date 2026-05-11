@@ -2,393 +2,905 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>BLS Bag Check</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#dc2626" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c0e13" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Bag Check" />
+<title>Bag Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1115;
-    --panel: #171a21;
-    --panel-2: #1f242d;
-    --text: #e7eaf0;
-    --muted: #9aa3b2;
-    --accent: #e63946;
-    --ok: #2ecc71;
-    --bad: #ff5a5f;
-    --warn: #f0a500;
-    --border: #262b35;
+    --bg: #f5f6f8;
+    --bg-elev: #ffffff;
+    --bg-soft: #fafbfc;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --accent: #dc2626;
+    --accent-2: #b91c1c;
+    --accent-soft: #fee2e2;
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
+    --shadow-md: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 40px rgba(15,23,42,0.12);
+    --radius: 14px;
+    --radius-sm: 10px;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11;
+      --bg-elev: #15181f;
+      --bg-soft: #1a1e26;
+      --text: #f1f5f9;
+      --text-2: #cbd5e1;
+      --text-3: #64748b;
+      --border: #232832;
+      --border-strong: #2f3540;
+      --accent: #ef4444;
+      --accent-2: #dc2626;
+      --accent-soft: rgba(239,68,68,0.15);
+      --ok: #22c55e;
+      --ok-soft: rgba(34,197,94,0.15);
+      --warn: #f59e0b;
+      --warn-soft: rgba(245,158,11,0.15);
+      --bad: #f87171;
+      --bad-soft: rgba(248,113,113,0.15);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* Header */
   header {
-    padding: 18px 16px 12px;
-    background: linear-gradient(180deg, #1a1f29 0%, #0f1115 100%);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 5;
+    padding: env(safe-area-inset-top) 0 0;
   }
-  header h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
-  header p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
-  main { padding: 12px 12px 120px; max-width: 760px; margin: 0 auto; }
-  .section {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin: 10px 0 16px;
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 14px 18px 10px;
+  }
+  .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  h1 .dot { color: var(--accent); }
+  .count-badge {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .count-badge.complete { color: var(--ok); }
+  .progress {
+    margin-top: 10px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
     overflow: hidden;
   }
-  .section h2 {
-    margin: 0;
-    padding: 12px 14px;
-    font-size: 14px;
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+  }
+  .progress-fill.complete {
+    background: linear-gradient(90deg, var(--ok), #15803d);
+  }
+
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* Quick links */
+  .quick {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    margin: 0 0 10px;
+  }
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .quick-grid a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .quick-grid a:active { transform: scale(0.97); background: var(--accent-soft); border-color: var(--accent); }
+  .quick-grid a svg { width: 22px; height: 22px; color: var(--accent); }
+  .quick-grid a .sub { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .quick-ref {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    width: 100%;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
     color: var(--accent);
-    background: var(--panel-2);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .quick-ref:active { transform: scale(0.98); }
+  .quick-ref svg { width: 18px; height: 18px; }
+
+  /* Sections */
+  .section {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--bg-soft);
     border-bottom: 1px solid var(--border);
   }
+  .section-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .section-progress {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .section-progress.complete { color: var(--ok); }
+
+  /* Item rows */
   .row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: 14px;
+    padding: 14px 18px;
     border-top: 1px solid var(--border);
+    transition: background 0.2s;
   }
   .row:first-of-type { border-top: none; }
-  .row .label { flex: 1; font-size: 15px; }
-  .row .sub { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-  .row .expected {
-    color: var(--muted);
-    font-size: 12px;
-    padding: 2px 8px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    white-space: nowrap;
+  .row.satisfied { background: var(--ok-soft); }
+  .row.short { background: var(--warn-soft); }
+  .row .label-block { flex: 1; min-width: 0; }
+  .row .label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
   }
-  .row input[type=number] {
-    width: 72px;
-    padding: 8px 10px;
-    font-size: 16px;
+  .row .sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .row .need-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .row.satisfied .need-tag { color: var(--ok); }
+  .row.short .need-tag { color: var(--warn); }
+
+  /* Counter */
+  .counter {
+    display: flex;
+    align-items: center;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .counter button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .counter button:active { background: var(--accent-soft); }
+  .counter button:disabled { color: var(--text-3); cursor: not-allowed; }
+  .counter input {
+    width: 44px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text);
     text-align: center;
-    background: var(--panel-2);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+    font-family: inherit;
+  }
+  .counter input::-webkit-outer-spin-button,
+  .counter input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .counter input:focus { outline: none; }
+  .row.satisfied .counter { border-color: var(--ok); background: var(--bg-elev); }
+  .row.short .counter { border-color: var(--warn); background: var(--bg-elev); }
+
+  /* Toggle */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    transition: all 0.15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .toggle input { display: none; }
+  .toggle .checkmark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .toggle .checkmark svg { width: 14px; height: 14px; color: white; opacity: 0; transition: opacity 0.15s; }
+  .toggle.on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+  .toggle.on .checkmark { background: var(--ok); }
+  .toggle.on .checkmark svg { opacity: 1; }
+
+  /* Report */
+  #report {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .report-hero {
+    padding: 22px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .report-hero.ok { background: var(--ok-soft); }
+  .report-hero.bad { background: var(--bad-soft); }
+  .report-hero h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .report-hero.ok h2 { color: var(--ok); }
+  .report-hero.bad h2 { color: var(--bad); }
+  .report-hero .stats { font-size: 14px; color: var(--text-2); font-weight: 500; }
+  .report-hero .big-icon {
+    width: 56px; height: 56px; margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .report-hero.ok .big-icon { background: var(--ok); }
+  .report-hero.bad .big-icon { background: var(--bad); }
+  .report-hero .big-icon svg { width: 32px; height: 32px; color: white; }
+  .report-body { padding: 16px 20px; }
+  .report-group { margin-bottom: 14px; }
+  .report-group:last-child { margin-bottom: 0; }
+  .report-group h3 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+  .report-list { list-style: none; padding: 0; margin: 0; }
+  .report-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .report-list li:last-child { border-bottom: none; }
+  .report-list .item-name { font-weight: 500; color: var(--text); }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.muted { background: var(--bg-soft); color: var(--text-3); border: 1px solid var(--border); }
+
+  /* Supplies copy block */
+  .supplies-block {
+    margin: 16px 20px 20px;
+    padding: 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .supplies-block h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .supplies-block textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 10px 12px;
+    font: 13px/1.55 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--bg-elev);
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: 8px;
-    -moz-appearance: textfield;
+    resize: vertical;
+    font-variant-numeric: tabular-nums;
   }
-  .row input[type=number]::-webkit-outer-spin-button,
-  .row input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .row input[type=checkbox] {
-    width: 22px; height: 22px;
-    accent-color: var(--accent);
+  .supplies-block textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .supplies-block button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
+  .supplies-block button:active { transform: scale(0.98); }
+  .supplies-block button.copied { background: var(--ok); }
+  .supplies-block button svg { width: 18px; height: 18px; }
+
+  /* Bottom action bar */
   .actions {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: rgba(15,17,21,0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-top: 1px solid var(--border);
-    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-    display: flex; gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
     justify-content: center;
-    z-index: 10;
+    z-index: 30;
   }
-  button {
-    flex: 1; max-width: 260px;
-    padding: 14px 18px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 12px;
+  @media (prefers-color-scheme: dark) {
+    .actions { background: rgba(10,12,17,0.85); }
+  }
+  .actions button {
+    flex: 1;
+    max-width: 280px;
+    padding: 15px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
     border: none;
     cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
-  button.primary { background: var(--accent); color: white; }
-  button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
-  #report {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    margin: 12px 0 16px;
+  .actions button:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.3);
   }
-  #report h3 { margin: 0 0 8px; font-size: 16px; }
-  #report .ok { color: var(--ok); }
-  #report .bad { color: var(--bad); }
-  #report .warn { color: var(--warn); }
-  #report ul { padding-left: 18px; margin: 6px 0 0; }
-  #report li { margin: 4px 0; font-size: 14px; }
-  #report .summary { font-size: 14px; color: var(--muted); margin-top: 8px; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
-  .pill.ok { background: rgba(46,204,113,0.15); color: var(--ok); }
-  .pill.bad { background: rgba(255,90,95,0.15); color: var(--bad); }
-  .hint { color: var(--muted); font-size: 12px; padding: 8px 14px 12px; }
-  .quicklinks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
-  .quicklinks a {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; padding: 14px 10px;
-    background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px;
-    text-decoration: none; font-weight: 600; font-size: 14px;
-    text-align: center;
+  .btn-primary:hover { background: var(--accent-2); }
+  .btn-secondary {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border-strong) !important;
   }
-  .quicklinks a:active { background: #2a313d; }
-  .quicklinks a .small { font-size: 11px; color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 0.5px; }
-  .quicklinks a.full { grid-column: 1 / -1; }
-  .quicklinks a.ref { background: rgba(230,57,70,0.12); border-color: rgba(230,57,70,0.4); color: var(--accent); }
+  .actions button svg { width: 18px; height: 18px; }
+
+  /* Modal */
   .modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-    display: none; align-items: center; justify-content: center;
-    z-index: 100; padding: 12px;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+    animation: fadeIn 0.2s ease;
   }
   .modal.open { display: flex; }
-  .modal img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal img {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+  }
   .modal .close {
-    position: absolute; top: 16px; right: 16px;
-    background: var(--panel); color: var(--text);
-    border: 1px solid var(--border); border-radius: 999px;
-    width: 40px; height: 40px; font-size: 20px; cursor: pointer;
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal .close:active { background: rgba(255,255,255,0.25); }
+
+  .hint { color: var(--text-3); font-size: 12px; padding: 12px 18px; text-align: center; }
+
+  @media (min-width: 600px) {
+    .row { padding: 16px 22px; }
+    h1 { font-size: 26px; }
   }
 </style>
 </head>
 <body>
+
 <header>
-  <h1>BLS Bag Check — CrowdRx</h1>
-  <p>Enter what you actually counted. Missing items will be flagged.</p>
+  <div class="header-inner">
+    <div class="title-row">
+      <h1>Bag Check<span class="dot">.</span></h1>
+      <span class="count-badge" id="countBadge">0 / 0</span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
 </header>
 
 <main>
-  <section class="section">
-    <h2>Quick Links</h2>
-    <div class="quicklinks">
+  <div class="quick">
+    <p class="quick-label">Quick Forms</p>
+    <div class="quick-grid">
       <a href="https://crowdrx.formstack.com/forms/otc_encounter" target="_blank" rel="noopener">
-        OTC<span class="small">Encounter</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        OTC<span class="sub">Encounter</span>
       </a>
       <a href="https://crowdrx.formstack.com/forms/special_event_first_aid_encounter_report" target="_blank" rel="noopener">
-        PCR<span class="small">First Aid Encounter</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        PCR<span class="sub">First Aid</span>
       </a>
-      <a href="https://app.smartsheet.com/b/form/93aca619fab949a4bdaff1f25e6db0e6" target="_blank" rel="noopener" class="full">
-        End of Tour Form
+      <a href="https://app.smartsheet.com/b/form/93aca619fab949a4bdaff1f25e6db0e6" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        End of Tour<span class="sub">Smartsheet</span>
       </a>
-      <a href="#" id="refBtn" class="full ref">Show Bag Reference Image</a>
     </div>
-  </section>
+    <button type="button" class="quick-ref" id="refBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Show Bag Reference
+    </button>
+  </div>
 
   <div id="report" hidden></div>
-  <form id="checklist"></form>
+
+  <form id="checklist" autocomplete="off"></form>
 </main>
+
+<div class="actions">
+  <button type="button" class="btn-secondary" id="resetBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    Reset
+  </button>
+  <button type="button" class="btn-primary" id="checkBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Check Bag
+  </button>
+</div>
 
 <div class="modal" id="refModal" role="dialog" aria-modal="true">
   <button class="close" id="refClose" aria-label="Close">&times;</button>
-  <img src="bag-reference.jpg" alt="BLS bag layout reference" id="refImg" />
-</div>
-
-<div class="actions">
-  <button type="button" class="secondary" id="resetBtn">Reset</button>
-  <button type="button" class="primary" id="checkBtn">Check Bag</button>
+  <img src="bag-reference.jpg" alt="BLS bag layout reference" />
 </div>
 
 <script>
-// Inventory definition — each item has either a `qty` (numeric expected count) or `bool: true` (presence-only)
 const SECTIONS = [
   { name: "Outside Zipper", items: [
-    { id: "burn_sheet",        label: "Burn Sheet",              qty: 1 },
-    { id: "multi_trauma",      label: "Multi-Trauma Dressing",   qty: 1 },
-    { id: "adult_collar",      label: "Adult Collar",            qty: 1 },
-    { id: "ped_collar",        label: "Pediatric Collar",        qty: 1 },
-    { id: "triangular",        label: "Triangular Bandages",     qty: 4 },
+    { id: "burn_sheet",    label: "Burn Sheet",            qty: 1 },
+    { id: "multi_trauma",  label: "Multi-Trauma Dressing", qty: 1 },
+    { id: "adult_collar",  label: "Adult Collar",          qty: 1 },
+    { id: "ped_collar",    label: "Pediatric Collar",      qty: 1 },
+    { id: "triangular",    label: "Triangular Bandages",   qty: 4 },
   ]},
   { name: "Top Flap (Main)", items: [
-    { id: "suction",           label: "Portable Suction",        qty: 1 },
-    { id: "biohazard",         label: "Biohazard Bags",          qty: 2 },
-    { id: "shears",            label: "Trauma Shears",           qty: 1 },
+    { id: "suction",       label: "Portable Suction",      qty: 1 },
+    { id: "biohazard",     label: "Biohazard Bags",        qty: 2 },
+    { id: "shears",        label: "Trauma Shears",         qty: 1 },
   ]},
   { name: "Left Top Flap", items: [
-    { id: "abd_pads",          label: "ABD Pads",                qty: 5 },
-    { id: "fourxfour",         label: "4x4 Gauze",               qty: 5 },
-    { id: "tape_1in",          label: "1\" Tape",                qty: 1 },
-    { id: "tape_23in",         label: "2\" or 3\" Tape",         qty: 1 },
-    { id: "gauze_roll",        label: "Gauze Roll",              qty: 5, sub: "2 different sizes" },
+    { id: "abd_pads",      label: "ABD Pads",              qty: 5 },
+    { id: "fourxfour",     label: "4×4 Gauze",             qty: 5 },
+    { id: "tape_1in",      label: "1\" Tape",              qty: 1 },
+    { id: "tape_23in",     label: "2\" or 3\" Tape",       qty: 1 },
+    { id: "gauze_roll",    label: "Gauze Roll",            qty: 5, sub: "2 different sizes" },
   ]},
   { name: "Right Top Flap", items: [
-    { id: "cold_packs",        label: "Cold Packs",              qty: 2 },
-    { id: "sam_splint",        label: "SAM Splint",              qty: 1 },
-    { id: "sterile_water",     label: "Sterile Water",           qty: 1 },
+    { id: "cold_packs",    label: "Cold Packs",            qty: 2 },
+    { id: "sam_splint",    label: "SAM Splint",            qty: 1 },
+    { id: "sterile_water", label: "Sterile Water",         qty: 1 },
   ]},
   { name: "Main Compartment", items: [
-    { id: "o2_tank",           label: "Oxygen D-Tank w/ Regulator", qty: 1, sub: "Min. 1000 PSI" },
-    { id: "opa",               label: "Oral Airways (OPAs)",     qty: 6 },
-    { id: "adult_bvm",         label: "Adult BVM",               qty: 1 },
-    { id: "ped_bvm",           label: "Pediatric BVM",           qty: 1 },
+    { id: "o2_tank",       label: "Oxygen D-Tank w/ Regulator", qty: 1, sub: "Min. 1000 PSI" },
+    { id: "opa",           label: "Oral Airways (OPAs)",   qty: 6 },
+    { id: "adult_bvm",     label: "Adult BVM",             qty: 1 },
+    { id: "ped_bvm",       label: "Pediatric BVM",         qty: 1 },
   ]},
   { name: "Main — Bottom Left", items: [
-    { id: "adult_nrb",         label: "Adult NRB",               qty: 2 },
-    { id: "adult_nc",          label: "Adult NC",                qty: 2 },
+    { id: "adult_nrb",     label: "Adult NRB",             qty: 2 },
+    { id: "adult_nc",      label: "Adult NC",              qty: 2 },
   ]},
   { name: "Main — Bottom Middle", items: [
-    { id: "ped_nrb",           label: "Pediatric NRB",           qty: 2 },
-    { id: "ped_nc",            label: "Pediatric NC",            qty: 2 },
+    { id: "ped_nrb",       label: "Pediatric NRB",         qty: 2 },
+    { id: "ped_nc",        label: "Pediatric NC",          qty: 2 },
   ]},
   { name: "Main — Bottom Right", items: [
-    { id: "adult_bp",          label: "Adult BP Cuff",           qty: 1 },
-    { id: "ped_bp",            label: "Pediatric BP Cuff",       qty: 1 },
-    { id: "oral_glucose",      label: "Oral Glucose (BGL Kit)",  qty: 2 },
-    { id: "bgl_kit",           label: "BGL Kit complete",        bool: true, sub: "Lancets, bandaids, test strips, prep pads" },
-    { id: "gloves_s",          label: "Gloves — Small",          qty: 3, sub: "3 pairs" },
-    { id: "gloves_m",          label: "Gloves — Medium",         qty: 3, sub: "3 pairs" },
-    { id: "gloves_l",          label: "Gloves — Large",          qty: 3, sub: "3 pairs" },
+    { id: "adult_bp",      label: "Adult BP Cuff",         qty: 1 },
+    { id: "ped_bp",        label: "Pediatric BP Cuff",     qty: 1 },
+    { id: "oral_glucose",  label: "Oral Glucose",          qty: 2, sub: "Part of BGL Kit" },
+    { id: "bgl_kit",       label: "BGL Kit complete",      bool: true, sub: "Lancets, bandaids, test strips, prep pads" },
+    { id: "gloves_s",      label: "Gloves — Small",        qty: 3, sub: "3 pairs" },
+    { id: "gloves_m",      label: "Gloves — Medium",       qty: 3, sub: "3 pairs" },
+    { id: "gloves_l",      label: "Gloves — Large",        qty: 3, sub: "3 pairs" },
   ]},
   { name: "Left Front Pouch", items: [
-    { id: "nebulizer",         label: "Nebulizer",               qty: 1 },
-    { id: "aspirin",           label: "Aspirin",                 qty: 4 },
-    { id: "albuterol",         label: "Albuterol",               qty: 2 },
-    { id: "med_kit",           label: "Med Kit",                 qty: 1 },
-    { id: "epi_check",         label: "Epi Check",               bool: true },
-    { id: "epi_inject",        label: "Epi Inject",              bool: true },
-    { id: "nasal_narcan",      label: "Nasal Narcan",            bool: true },
+    { id: "nebulizer",     label: "Nebulizer",             qty: 1 },
+    { id: "aspirin",       label: "Aspirin",               qty: 4 },
+    { id: "albuterol",     label: "Albuterol",             qty: 2 },
+    { id: "med_kit",       label: "Med Kit",               qty: 1 },
+    { id: "epi_check",     label: "Epi Check",             bool: true },
+    { id: "epi_inject",    label: "Epi Inject",            bool: true },
+    { id: "nasal_narcan",  label: "Nasal Narcan",          bool: true },
   ]},
   { name: "Right Front Pouch", items: [
-    { id: "bandaids",          label: "Bandaids",                qty: 10 },
-    { id: "acetaminophen",     label: "Acetaminophen",           qty: 10 },
-    { id: "ibuprofen",         label: "Ibuprofen",               qty: 10 },
-    { id: "antacids",          label: "Antacids",                qty: 5 },
-    { id: "diphenhydramine",   label: "Diphenhydramine",         qty: 5 },
-    { id: "emesis",            label: "Emesis Bags",             qty: 3 },
+    { id: "bandaids",        label: "Bandaids",            qty: 10 },
+    { id: "acetaminophen",   label: "Acetaminophen",       qty: 10 },
+    { id: "ibuprofen",       label: "Ibuprofen",           qty: 10 },
+    { id: "antacids",        label: "Antacids",            qty: 5 },
+    { id: "diphenhydramine", label: "Diphenhydramine",     qty: 5 },
+    { id: "emesis",          label: "Emesis Bags",         qty: 3 },
   ]},
 ];
 
-const STORAGE_KEY = "bls_bag_check_v1";
+const STORAGE_KEY = "bls_bag_check_v2";
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
 function buildForm() {
   const form = document.getElementById("checklist");
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
   for (const section of SECTIONS) {
     const wrap = document.createElement("section");
     wrap.className = "section";
-    const h = document.createElement("h2");
-    h.textContent = section.name;
-    wrap.appendChild(h);
+    wrap.dataset.section = section.name;
+
+    const header = document.createElement("div");
+    header.className = "section-header";
+    header.innerHTML = `
+      <h2 class="section-title">${escapeHtml(section.name)}</h2>
+      <span class="section-progress" data-section-progress>0 / ${section.items.length}</span>
+    `;
+    wrap.appendChild(header);
+
     for (const it of section.items) {
       const row = document.createElement("div");
       row.className = "row";
+      row.dataset.itemId = it.id;
 
-      const label = document.createElement("label");
-      label.className = "label";
-      label.setAttribute("for", it.id);
-      label.innerHTML = it.label + (it.sub ? `<span class="sub">${it.sub}</span>` : "");
-      row.appendChild(label);
+      const labelBlock = document.createElement("div");
+      labelBlock.className = "label-block";
+      labelBlock.innerHTML = `
+        <div class="label">${escapeHtml(it.label)}</div>
+        ${it.sub ? `<span class="sub">${escapeHtml(it.sub)}</span>` : ""}
+        <div class="need-tag" data-need-tag>${it.bool ? "Required" : `Need ${it.qty}`}</div>
+      `;
+      row.appendChild(labelBlock);
 
       if (it.bool) {
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.id = it.id;
+        const toggle = document.createElement("label");
+        toggle.className = "toggle";
+        toggle.innerHTML = `
+          <input type="checkbox" id="${it.id}" />
+          <div class="checkmark">${CHECK_ICON}</div>
+          <span data-toggle-label>Present</span>
+        `;
+        const cb = toggle.querySelector("input");
         cb.checked = !!saved[it.id];
-        cb.addEventListener("change", persist);
-        row.appendChild(cb);
+        if (cb.checked) toggle.classList.add("on");
+        cb.addEventListener("change", () => {
+          toggle.classList.toggle("on", cb.checked);
+          updateRowState(it, row);
+          persist();
+        });
+        row.appendChild(toggle);
       } else {
-        const exp = document.createElement("span");
-        exp.className = "expected";
-        exp.textContent = `need ${it.qty}`;
-        row.appendChild(exp);
-
-        const input = document.createElement("input");
-        input.type = "number";
-        input.min = "0";
-        input.inputMode = "numeric";
-        input.id = it.id;
-        input.placeholder = "0";
-        if (saved[it.id] !== undefined && saved[it.id] !== null && saved[it.id] !== "") input.value = saved[it.id];
-        input.addEventListener("input", persist);
-        row.appendChild(input);
+        const counter = document.createElement("div");
+        counter.className = "counter";
+        counter.innerHTML = `
+          <button type="button" data-step="-1" aria-label="decrease">−</button>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="${it.id}" value="${saved[it.id] !== undefined && saved[it.id] !== "" ? saved[it.id] : ""}" placeholder="0" />
+          <button type="button" data-step="1" aria-label="increase">+</button>
+        `;
+        const input = counter.querySelector("input");
+        const [minus, plus] = counter.querySelectorAll("button");
+        const step = (delta) => {
+          const cur = input.value === "" ? 0 : parseInt(input.value, 10) || 0;
+          const next = Math.max(0, cur + delta);
+          input.value = next;
+          updateRowState(it, row);
+          persist();
+        };
+        minus.addEventListener("click", () => step(-1));
+        plus.addEventListener("click", () => step(1));
+        input.addEventListener("input", () => {
+          input.value = input.value.replace(/[^0-9]/g, "");
+          updateRowState(it, row);
+          persist();
+        });
+        input.addEventListener("focus", () => input.select());
+        row.appendChild(counter);
       }
+
       wrap.appendChild(row);
+      updateRowState(it, row);
     }
     form.appendChild(wrap);
   }
+
   const hint = document.createElement("p");
   hint.className = "hint";
   hint.textContent = "Your entries are saved automatically on this device.";
   form.appendChild(hint);
+
+  updateAllProgress();
 }
+
+function getValue(it) {
+  const el = document.getElementById(it.id);
+  if (!el) return null;
+  if (it.bool) return el.checked;
+  return el.value === "" ? null : Math.max(0, parseInt(el.value, 10) || 0);
+}
+
+function updateRowState(it, row) {
+  const val = getValue(it);
+  row.classList.remove("satisfied", "short");
+  if (it.bool) {
+    if (val) row.classList.add("satisfied");
+  } else {
+    if (val === null) {} // blank
+    else if (val >= it.qty) row.classList.add("satisfied");
+    else if (val < it.qty) row.classList.add("short");
+  }
+  updateAllProgress();
+}
+
+function updateAllProgress() {
+  let total = 0, done = 0;
+  for (const s of SECTIONS) {
+    let sTotal = 0, sDone = 0;
+    for (const it of s.items) {
+      sTotal++; total++;
+      const v = getValue(it);
+      if (it.bool ? v : (v !== null && v >= it.qty)) { sDone++; done++; }
+    }
+    const sec = document.querySelector(`[data-section="${cssEscape(s.name)}"] [data-section-progress]`);
+    if (sec) {
+      sec.textContent = `${sDone} / ${sTotal}`;
+      sec.classList.toggle("complete", sDone === sTotal);
+    }
+  }
+  const badge = document.getElementById("countBadge");
+  badge.textContent = `${done} / ${total}`;
+  badge.classList.toggle("complete", done === total);
+  const fill = document.getElementById("progressFill");
+  const pct = total > 0 ? (done / total) * 100 : 0;
+  fill.style.width = pct + "%";
+  fill.classList.toggle("complete", done === total);
+}
+
+function cssEscape(s) { return s.replace(/"/g, '\\"'); }
 
 function persist() {
   const data = {};
   for (const s of SECTIONS) for (const it of s.items) {
-    const el = document.getElementById(it.id);
-    if (!el) continue;
-    if (it.bool) data[it.id] = el.checked;
-    else data[it.id] = el.value === "" ? "" : Number(el.value);
+    const v = getValue(it);
+    data[it.id] = v === null ? "" : v;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 function check() {
-  const missing = [];   // items below required count
-  const blank = [];     // items not entered at all
-  const extra = [];     // items above required count (worth noting)
+  const missing = [];
+  const blank = [];
+  const extra = [];
   let okCount = 0, total = 0;
 
   for (const s of SECTIONS) for (const it of s.items) {
     total++;
-    const el = document.getElementById(it.id);
+    const v = getValue(it);
     if (it.bool) {
-      if (el.checked) okCount++;
-      else missing.push({ label: it.label, need: "present", have: "missing" });
+      if (v) okCount++;
+      else missing.push({ label: it.label, have: "missing" });
     } else {
-      const raw = el.value;
-      if (raw === "" || raw === null) {
-        blank.push({ label: it.label, need: it.qty });
-      } else {
-        const have = Number(raw);
-        if (have < it.qty) missing.push({ label: it.label, need: it.qty, have, short: it.qty - have });
-        else if (have > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have }); }
-        else okCount++;
-      }
+      if (v === null) blank.push({ label: it.label, need: it.qty });
+      else if (v < it.qty) missing.push({ label: it.label, need: it.qty, have: v, short: it.qty - v });
+      else if (v > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have: v }); }
+      else okCount++;
     }
   }
 
   const r = document.getElementById("report");
   r.hidden = false;
-  let html = "";
   const allGood = missing.length === 0 && blank.length === 0;
 
+  let html = "";
   if (allGood) {
-    html += `<h3 class="ok">Bag complete — ${okCount}/${total} items accounted for</h3>`;
+    html += `
+      <div class="report-hero ok">
+        <div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h2>Bag complete</h2>
+        <div class="stats">All ${total} items accounted for</div>
+      </div>`;
   } else {
-    html += `<h3 class="bad">Bag NOT complete</h3>`;
-    html += `<div class="summary">${okCount}/${total} OK · ${missing.length} short · ${blank.length} not checked</div>`;
+    html += `
+      <div class="report-hero bad">
+        <div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <h2>${missing.length + blank.length} item${missing.length + blank.length === 1 ? "" : "s"} need attention</h2>
+        <div class="stats">${okCount} of ${total} OK · ${missing.length} short · ${blank.length} not entered</div>
+      </div>`;
   }
 
+  let body = `<div class="report-body">`;
+
   if (missing.length) {
-    html += `<p class="bad" style="margin:10px 0 2px;font-weight:600;">Missing / short:</p><ul>`;
+    body += `<div class="report-group"><h3>Missing or short</h3><ul class="report-list">`;
     for (const m of missing) {
-      if (m.have === "missing") html += `<li>${escapeHtml(m.label)} — <span class="pill bad">not present</span></li>`;
-      else html += `<li>${escapeHtml(m.label)} — have ${m.have} of ${m.need} <span class="pill bad">short ${m.short}</span></li>`;
+      if (m.have === "missing") body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Not present</span></li>`;
+      else body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Have ${m.have} / ${m.need}</span></li>`;
     }
-    html += `</ul>`;
+    body += `</ul></div>`;
   }
   if (blank.length) {
-    html += `<p class="warn" style="margin:10px 0 2px;font-weight:600;">Not entered:</p><ul>`;
-    for (const b of blank) html += `<li>${escapeHtml(b.label)} (need ${b.need})</li>`;
-    html += `</ul>`;
+    body += `<div class="report-group"><h3>Not entered</h3><ul class="report-list">`;
+    for (const b of blank) body += `<li><span class="item-name">${escapeHtml(b.label)}</span><span class="pill warn">Need ${b.need}</span></li>`;
+    body += `</ul></div>`;
   }
   if (extra.length) {
-    html += `<p style="margin:10px 0 2px;color:var(--muted);font-weight:600;">Over-stocked (FYI):</p><ul>`;
-    for (const e of extra) html += `<li>${escapeHtml(e.label)} — have ${e.have} of ${e.need}</li>`;
-    html += `</ul>`;
+    body += `<div class="report-group"><h3>Over-stocked</h3><ul class="report-list">`;
+    for (const e of extra) body += `<li><span class="item-name">${escapeHtml(e.label)}</span><span class="pill muted">${e.have} / ${e.need}</span></li>`;
+    body += `</ul></div>`;
   }
+  body += `</div>`;
+  html += body;
 
   const suppliesText = buildSuppliesText(missing);
   if (suppliesText) {
     html += `
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-        <p style="margin:0 0 6px;font-weight:600;font-size:14px;">Supplies needed (for End of Tour form):</p>
-        <textarea id="suppliesText" readonly style="width:100%;min-height:90px;padding:10px;font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;resize:vertical;">${escapeHtml(suppliesText)}</textarea>
-        <button type="button" id="copyBtn" class="primary" style="margin-top:8px;width:100%;max-width:none;">Copy Supplies List</button>
+      <div class="supplies-block">
+        <h4>Restock list — for End of Tour form</h4>
+        <textarea id="suppliesText" readonly>${escapeHtml(suppliesText)}</textarea>
+        <button type="button" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to Clipboard
+        </button>
       </div>`;
-  } else if (!allGood) {
-    html += `<p class="hint" style="padding:0;margin-top:10px;">No restock list — all shortages are presence-only items (check those manually).</p>`;
   }
 
   r.innerHTML = html;
-
   const copyBtn = document.getElementById("copyBtn");
   if (copyBtn) copyBtn.addEventListener("click", copySupplies);
 
@@ -396,12 +908,7 @@ function check() {
 }
 
 function buildSuppliesText(missing) {
-  const lines = [];
-  for (const m of missing) {
-    if (m.have === "missing") lines.push(m.label);
-    else lines.push(`${m.label} x${m.short}`);
-  }
-  return lines.join("\n");
+  return missing.map(m => m.have === "missing" ? m.label : `${m.label} x${m.short}`).join("\n");
 }
 
 async function copySupplies() {
@@ -419,10 +926,17 @@ async function copySupplies() {
       ok = document.execCommand("copy");
     }
   } catch (e) { ok = false; }
-  const original = btn.textContent;
-  btn.textContent = ok ? "Copied!" : "Press & hold the text to copy";
-  btn.style.background = ok ? "var(--ok)" : "var(--warn)";
-  setTimeout(() => { btn.textContent = original; btn.style.background = ""; }, 1800);
+  const orig = btn.innerHTML;
+  if (ok) {
+    btn.classList.add("copied");
+    btn.innerHTML = `${CHECK_ICON} Copied!`;
+  } else {
+    btn.innerHTML = "Press &amp; hold the text to copy";
+  }
+  setTimeout(() => {
+    btn.classList.remove("copied");
+    btn.innerHTML = orig;
+  }, 1800);
 }
 
 function reset() {
@@ -431,10 +945,18 @@ function reset() {
   for (const s of SECTIONS) for (const it of s.items) {
     const el = document.getElementById(it.id);
     if (!el) continue;
-    if (it.bool) el.checked = false;
-    else el.value = "";
+    if (it.bool) {
+      el.checked = false;
+      el.closest(".toggle").classList.remove("on");
+    } else {
+      el.value = "";
+    }
+    const row = el.closest(".row");
+    if (row) row.classList.remove("satisfied", "short");
   }
   document.getElementById("report").hidden = true;
+  updateAllProgress();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function escapeHtml(s) {
@@ -445,10 +967,7 @@ document.getElementById("checkBtn").addEventListener("click", check);
 document.getElementById("resetBtn").addEventListener("click", reset);
 
 const refModal = document.getElementById("refModal");
-document.getElementById("refBtn").addEventListener("click", (e) => {
-  e.preventDefault();
-  refModal.classList.add("open");
-});
+document.getElementById("refBtn").addEventListener("click", () => refModal.classList.add("open"));
 document.getElementById("refClose").addEventListener("click", () => refModal.classList.remove("open"));
 refModal.addEventListener("click", (e) => { if (e.target === refModal) refModal.classList.remove("open"); });
 
