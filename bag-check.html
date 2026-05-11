@@ -587,6 +587,32 @@
     background-position: right 14px center;
     padding-right: 36px;
   }
+  .venue-row { display: flex; gap: 8px; align-items: stretch; }
+  .venue-row select { flex: 1; min-width: 0; }
+  .locate-btn {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 14px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 13px;
+    cursor: pointer;
+    gap: 4px;
+    transition: transform 0.15s, background 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .locate-btn:active { transform: scale(0.96); }
+  .locate-btn:disabled { opacity: 0.6; cursor: wait; }
+  .locate-btn svg { width: 16px; height: 16px; }
+  .locate-status {
+    font-size: 12px; margin-top: 6px;
+    color: var(--text-3);
+    min-height: 16px;
+  }
+  .locate-status.ok { color: var(--ok); }
+  .locate-status.bad { color: var(--bad); }
 
   @media (min-width: 600px) {
     .row { padding: 16px 22px; }
@@ -615,20 +641,27 @@
       </div>
       <div class="tour-field" style="grid-column: 1 / -1;">
         <label for="tourVenue">Venue</label>
-        <select id="tourVenue">
-          <option value="">— Select venue —</option>
-          <option>Beacon Theater</option>
-          <option>Brooklyn Academy of Music</option>
-          <option>Brooklyn Steel</option>
-          <option>Citi Bank</option>
-          <option>Coney Island Amphitheater</option>
-          <option>MSG Arena</option>
-          <option>MSG Theater</option>
-          <option>Radio City Music Hall</option>
-          <option>Yankee Stadium</option>
-          <option>Palladium Time Square</option>
-          <option>Other</option>
-        </select>
+        <div class="venue-row">
+          <select id="tourVenue">
+            <option value="">— Select venue —</option>
+            <option>Beacon Theater</option>
+            <option>Brooklyn Academy of Music</option>
+            <option>Brooklyn Steel</option>
+            <option>Citi Bank</option>
+            <option>Coney Island Amphitheater</option>
+            <option>MSG Arena</option>
+            <option>MSG Theater</option>
+            <option>Radio City Music Hall</option>
+            <option>Yankee Stadium</option>
+            <option>Palladium Time Square</option>
+            <option>Other</option>
+          </select>
+          <button type="button" class="locate-btn" id="locateBtn" title="Auto-detect from GPS">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            Detect
+          </button>
+        </div>
+        <div class="locate-status" id="locateStatus"></div>
       </div>
     </div>
   </div>
@@ -1045,6 +1078,86 @@ if (tourSaved.venue) venueSelect.value = tourSaved.venue;
 const persistTour = () => localStorage.setItem(TOUR_KEY, JSON.stringify({ name: nameInput.value, venue: venueSelect.value }));
 nameInput.addEventListener("input", persistTour);
 venueSelect.addEventListener("change", persistTour);
+
+// Geolocation — auto-pick venue from current GPS
+const VENUES = [
+  { name: "Beacon Theater",            lat: 40.7800, lon: -73.9817 },
+  { name: "Brooklyn Academy of Music", lat: 40.6862, lon: -73.9788 },
+  { name: "Brooklyn Steel",            lat: 40.7163, lon: -73.9402 },
+  { name: "Citi Bank",                 lat: 40.7571, lon: -73.8458 }, // Citi Field
+  { name: "Coney Island Amphitheater", lat: 40.5733, lon: -73.9890 },
+  { name: "MSG Arena",                 lat: 40.7505, lon: -73.9934 },
+  { name: "MSG Theater",               lat: 40.7505, lon: -73.9930 },
+  { name: "Radio City Music Hall",     lat: 40.7599, lon: -73.9799 },
+  { name: "Yankee Stadium",            lat: 40.8296, lon: -73.9262 },
+  { name: "Palladium Time Square",     lat: 40.7569, lon: -73.9851 },
+];
+
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function fmtDist(m) {
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(1)} km`;
+}
+
+const locateBtn = document.getElementById("locateBtn");
+const locateStatus = document.getElementById("locateStatus");
+
+locateBtn.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    locateStatus.textContent = "Geolocation not supported on this device.";
+    locateStatus.className = "locate-status bad";
+    return;
+  }
+  if (!window.isSecureContext) {
+    locateStatus.textContent = "Needs HTTPS — use https://maxgoodstein.com";
+    locateStatus.className = "locate-status bad";
+    return;
+  }
+  locateBtn.disabled = true;
+  locateStatus.textContent = "Getting your location…";
+  locateStatus.className = "locate-status";
+
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    const ranked = VENUES
+      .map(v => ({ ...v, dist: haversineMeters(latitude, longitude, v.lat, v.lon) }))
+      .sort((a, b) => a.dist - b.dist);
+    const nearest = ranked[0];
+    locateBtn.disabled = false;
+
+    if (nearest.dist <= 500) {
+      venueSelect.value = nearest.name;
+      persistTour();
+      locateStatus.textContent = `📍 ${nearest.name} (${fmtDist(nearest.dist)} away)`;
+      locateStatus.className = "locate-status ok";
+    } else if (nearest.dist <= 5000) {
+      venueSelect.value = nearest.name;
+      persistTour();
+      locateStatus.textContent = `Best guess: ${nearest.name} (${fmtDist(nearest.dist)} away) — confirm or pick manually`;
+      locateStatus.className = "locate-status";
+    } else {
+      locateStatus.textContent = `Nearest venue (${nearest.name}) is ${fmtDist(nearest.dist)} away — pick manually`;
+      locateStatus.className = "locate-status bad";
+    }
+  }, (err) => {
+    locateBtn.disabled = false;
+    const msg = {
+      1: "Location permission denied — enable it in browser settings",
+      2: "Location unavailable right now",
+      3: "Timed out — try again"
+    }[err.code] || "Couldn't get location";
+    locateStatus.textContent = msg;
+    locateStatus.className = "locate-status bad";
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+});
 
 function buildEndOfTourUrl() {
   // Compute current supplies needed from the live form state
