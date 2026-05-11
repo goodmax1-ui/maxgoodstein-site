@@ -1,0 +1,1334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#dc2626" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c0e13" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="CrowdRx" />
+<title>CrowdRx Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --bg-elev: #ffffff;
+    --bg-soft: #fafbfc;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --accent: #dc2626;
+    --accent-2: #b91c1c;
+    --accent-soft: #fee2e2;
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
+    --shadow-md: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 40px rgba(15,23,42,0.12);
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11;
+      --bg-elev: #15181f;
+      --bg-soft: #1a1e26;
+      --text: #f1f5f9;
+      --text-2: #cbd5e1;
+      --text-3: #64748b;
+      --border: #232832;
+      --border-strong: #2f3540;
+      --accent: #ef4444;
+      --accent-2: #dc2626;
+      --accent-soft: rgba(239,68,68,0.15);
+      --ok: #22c55e;
+      --ok-soft: rgba(34,197,94,0.15);
+      --warn: #f59e0b;
+      --warn-soft: rgba(245,158,11,0.15);
+      --bad: #f87171;
+      --bad-soft: rgba(248,113,113,0.15);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html, body { margin: 0; padding: 0; touch-action: manipulation; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: env(safe-area-inset-top) 0 0;
+  }
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 14px 18px 10px;
+  }
+  .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  h1 .dot { color: var(--accent); }
+  .count-badge {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .count-badge.complete { color: var(--ok); }
+  .progress {
+    margin-top: 10px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+  }
+  .progress-fill.complete {
+    background: linear-gradient(90deg, var(--ok), #15803d);
+  }
+
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* Quick links */
+  .quick {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .quick-grid a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .quick-grid a:active { transform: scale(0.97); background: var(--accent-soft); border-color: var(--accent); }
+  .quick-grid a svg { width: 22px; height: 22px; color: var(--accent); }
+  .quick-grid a .sub { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .quick-ref {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    width: 100%;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .quick-ref:active { transform: scale(0.98); }
+  .quick-ref svg { width: 18px; height: 18px; }
+
+  /* Sections */
+  .section {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .section-progress {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .section-progress.complete { color: var(--ok); }
+
+  /* Item rows */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .row:first-of-type { border-top: none; }
+  .row.satisfied { background: var(--ok-soft); }
+  .row.short { background: var(--warn-soft); }
+  .row .label-block { flex: 1; min-width: 0; }
+  .row .label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .row .sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .row .need-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .row.satisfied .need-tag { color: var(--ok); }
+  .row.short .need-tag { color: var(--warn); }
+
+  /* Counter */
+  .counter {
+    display: flex;
+    align-items: center;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .counter button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .counter button:active { background: var(--accent-soft); }
+  .counter button:disabled { color: var(--text-3); cursor: not-allowed; }
+  .counter input {
+    width: 44px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+    font-family: inherit;
+  }
+  .counter input::-webkit-outer-spin-button,
+  .counter input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .counter input:focus { outline: none; }
+  .row.satisfied .counter { border-color: var(--ok); background: var(--bg-elev); }
+  .row.short .counter { border-color: var(--warn); background: var(--bg-elev); }
+
+  /* Toggle */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    transition: all 0.15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .toggle input { display: none; }
+  .toggle .checkmark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .toggle .checkmark svg { width: 14px; height: 14px; color: white; opacity: 0; transition: opacity 0.15s; }
+  .toggle.on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+  .toggle.on .checkmark { background: var(--ok); }
+  .toggle.on .checkmark svg { opacity: 1; }
+
+  /* Report */
+  #report {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .report-hero {
+    padding: 22px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .report-hero.ok { background: var(--ok-soft); }
+  .report-hero.bad { background: var(--bad-soft); }
+  .report-hero h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .report-hero.ok h2 { color: var(--ok); }
+  .report-hero.bad h2 { color: var(--bad); }
+  .report-hero .stats { font-size: 14px; color: var(--text-2); font-weight: 500; }
+  .report-hero .big-icon {
+    width: 56px; height: 56px; margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .report-hero.ok .big-icon { background: var(--ok); }
+  .report-hero.bad .big-icon { background: var(--bad); }
+  .report-hero .big-icon svg { width: 32px; height: 32px; color: white; }
+  .report-body { padding: 16px 20px; }
+  .report-group { margin-bottom: 14px; }
+  .report-group:last-child { margin-bottom: 0; }
+  .report-group h3 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+  .report-list { list-style: none; padding: 0; margin: 0; }
+  .report-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .report-list li:last-child { border-bottom: none; }
+  .report-list .item-name { font-weight: 500; color: var(--text); }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.muted { background: var(--bg-soft); color: var(--text-3); border: 1px solid var(--border); }
+
+  /* Supplies copy block */
+  .supplies-block {
+    margin: 16px 20px 20px;
+    padding: 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .supplies-block h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .supplies-block textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 10px 12px;
+    font: 13px/1.55 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: vertical;
+    font-variant-numeric: tabular-nums;
+  }
+  .supplies-block textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .supplies-block button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .supplies-block button:active { transform: scale(0.98); }
+  .supplies-block button.copied { background: var(--ok); }
+  .supplies-block button svg { width: 18px; height: 18px; }
+
+  /* Bottom action bar */
+  .actions {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    z-index: 30;
+  }
+  @media (prefers-color-scheme: dark) {
+    .actions { background: rgba(10,12,17,0.85); }
+  }
+  .actions button {
+    flex: 1;
+    max-width: 280px;
+    padding: 15px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .actions button:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+  }
+  .btn-primary:hover { background: var(--accent-2); }
+  .btn-secondary {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border-strong) !important;
+  }
+  .actions button svg { width: 18px; height: 18px; }
+
+  /* Modal */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal img {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+  }
+  .modal .close {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal .close:active { background: rgba(255,255,255,0.25); }
+
+  .hint { color: var(--text-3); font-size: 12px; padding: 12px 18px; text-align: center; }
+
+  /* Tour info panel */
+  .tour-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .tour-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tour-field { display: flex; flex-direction: column; gap: 4px; }
+  .tour-field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .tour-field input, .tour-field select {
+    padding: 12px 14px;
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font: 500 15px/1.3 inherit;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .tour-field input:focus, .tour-field select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .tour-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23475569' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  /* Bag check expand/collapse toggle */
+  .checklist-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font: 700 16px/1.2 inherit;
+    cursor: pointer;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.1s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .checklist-toggle:active { transform: scale(0.99); }
+  .checklist-toggle.expanded { border-color: var(--accent); box-shadow: var(--shadow-md); }
+  .checklist-toggle .toggle-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .checklist-toggle .icon-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .checklist-toggle .icon-circle svg { width: 20px; height: 20px; }
+  .checklist-toggle .toggle-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .checklist-toggle .toggle-label { font-size: 16px; font-weight: 700; }
+  .checklist-toggle .toggle-sub { font-size: 12px; color: var(--text-3); font-weight: 500; }
+  .checklist-toggle .toggle-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .checklist-toggle .toggle-count {
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .checklist-toggle.complete .toggle-count { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+  .checklist-toggle .chevron {
+    width: 20px; height: 20px;
+    transition: transform 0.2s;
+    color: var(--text-3);
+  }
+  .checklist-toggle.expanded .chevron { transform: rotate(180deg); }
+
+  .venue-row { display: flex; gap: 8px; align-items: stretch; }
+  .venue-row select { flex: 1; min-width: 0; }
+  .locate-btn {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 14px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 13px;
+    cursor: pointer;
+    gap: 4px;
+    transition: transform 0.15s, background 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .locate-btn:active { transform: scale(0.96); }
+  .locate-btn:disabled { opacity: 0.6; cursor: wait; }
+  .locate-btn svg { width: 16px; height: 16px; }
+  .locate-status {
+    font-size: 12px; margin-top: 6px;
+    color: var(--text-3);
+    min-height: 16px;
+  }
+  .locate-status.ok { color: var(--ok); }
+  .locate-status.bad { color: var(--bad); }
+
+  @media (min-width: 600px) {
+    .row { padding: 16px 22px; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="title-row">
+      <h1>CrowdRx<span class="dot">.</span></h1>
+      <span class="count-badge" id="countBadge">0 / 0</span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<main>
+  <div class="tour-panel">
+    <div class="tour-grid">
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="tourName">Your Name</label>
+        <input type="text" id="tourName" placeholder="First Last" autocomplete="name" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="tourVenue">Venue</label>
+        <div class="venue-row">
+          <select id="tourVenue">
+            <option value="">— Select venue —</option>
+            <option>Beacon Theater</option>
+            <option>Brooklyn Academy of Music</option>
+            <option>Brooklyn Steel</option>
+            <option>Citi Bank</option>
+            <option>Coney Island Amphitheater</option>
+            <option>MSG Arena</option>
+            <option>MSG Theater</option>
+            <option>Radio City Music Hall</option>
+            <option>Yankee Stadium</option>
+            <option>Palladium Time Square</option>
+            <option>Other</option>
+          </select>
+          <button type="button" class="locate-btn" id="locateBtn" title="Auto-detect from GPS">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            Detect
+          </button>
+        </div>
+        <div class="locate-status" id="locateStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick">
+    <p class="quick-label">Quick Forms</p>
+    <div class="quick-grid">
+      <a href="https://crowdrx.formstack.com/forms/otc_encounter" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        OTC<span class="sub">Encounter</span>
+      </a>
+      <a href="https://crowdrx.formstack.com/forms/special_event_first_aid_encounter_report" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        PCR<span class="sub">First Aid</span>
+      </a>
+      <a href="#" id="endOfTourBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        End of Tour<span class="sub">Prefilled</span>
+      </a>
+    </div>
+    <button type="button" class="quick-ref" id="refBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Show Bag Reference
+    </button>
+  </div>
+
+  <div id="report" hidden></div>
+
+  <button type="button" class="checklist-toggle" id="checklistToggle" aria-expanded="false">
+    <span class="toggle-left">
+      <span class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span class="toggle-text">
+        <span class="toggle-label" id="toggleLabel">Start Bag Check</span>
+        <span class="toggle-sub" id="toggleSub">Tap to count items</span>
+      </span>
+    </span>
+    <span class="toggle-right">
+      <span class="toggle-count" id="toggleCount">0 / 0</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </span>
+  </button>
+
+  <div id="checklistWrap" hidden>
+    <form id="checklist" autocomplete="off"></form>
+  </div>
+</main>
+
+<div class="actions">
+  <button type="button" class="btn-secondary" id="resetBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    Reset
+  </button>
+  <button type="button" class="btn-primary" id="checkBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Check Bag
+  </button>
+</div>
+
+<div class="modal" id="refModal" role="dialog" aria-modal="true">
+  <button class="close" id="refClose" aria-label="Close">&times;</button>
+  <img src="bag-reference.jpg" alt="BLS bag layout reference" />
+</div>
+
+<script>
+const SECTIONS = [
+  { name: "Outside Zipper", items: [
+    { id: "burn_sheet",    label: "Burn Sheet",            qty: 1 },
+    { id: "multi_trauma",  label: "Multi-Trauma Dressing", qty: 1 },
+    { id: "adult_collar",  label: "Adult Collar",          qty: 1 },
+    { id: "ped_collar",    label: "Pediatric Collar",      qty: 1 },
+    { id: "triangular",    label: "Triangular Bandages",   qty: 4 },
+  ]},
+  { name: "Top Flap (Main)", items: [
+    { id: "suction",       label: "Portable Suction",      qty: 1 },
+    { id: "biohazard",     label: "Biohazard Bags",        qty: 2 },
+    { id: "shears",        label: "Trauma Shears",         qty: 1 },
+  ]},
+  { name: "Left Top Flap", items: [
+    { id: "abd_pads",      label: "ABD Pads",              qty: 5 },
+    { id: "fourxfour",     label: "4×4 Gauze",             qty: 5 },
+    { id: "tape_1in",      label: "1\" Tape",              qty: 1 },
+    { id: "tape_23in",     label: "2\" or 3\" Tape",       qty: 1 },
+    { id: "gauze_roll",    label: "Gauze Roll",            qty: 5, sub: "2 different sizes" },
+  ]},
+  { name: "Right Top Flap", items: [
+    { id: "cold_packs",    label: "Cold Packs",            qty: 2 },
+    { id: "sam_splint",    label: "SAM Splint",            qty: 1 },
+    { id: "sterile_water", label: "Sterile Water",         qty: 1 },
+  ]},
+  { name: "Main Compartment", items: [
+    { id: "o2_tank",       label: "Oxygen D-Tank w/ Regulator", qty: 1, sub: "Min. 1000 PSI" },
+    { id: "opa",           label: "Oral Airways (OPAs)",   qty: 6 },
+    { id: "adult_bvm",     label: "Adult BVM",             qty: 1 },
+    { id: "ped_bvm",       label: "Pediatric BVM",         qty: 1 },
+  ]},
+  { name: "Main — Bottom Left", items: [
+    { id: "adult_nrb",     label: "Adult NRB",             qty: 2 },
+    { id: "adult_nc",      label: "Adult NC",              qty: 2 },
+  ]},
+  { name: "Main — Bottom Middle", items: [
+    { id: "ped_nrb",       label: "Pediatric NRB",         qty: 2 },
+    { id: "ped_nc",        label: "Pediatric NC",          qty: 2 },
+  ]},
+  { name: "Main — Bottom Right", items: [
+    { id: "adult_bp",      label: "Adult BP Cuff",         qty: 1 },
+    { id: "ped_bp",        label: "Pediatric BP Cuff",     qty: 1 },
+    { id: "oral_glucose",  label: "Oral Glucose",          qty: 2, sub: "Part of BGL Kit" },
+    { id: "bgl_kit",       label: "BGL Kit complete",      bool: true, sub: "Lancets, bandaids, test strips, prep pads" },
+    { id: "gloves_s",      label: "Gloves — Small",        qty: 3, sub: "3 pairs" },
+    { id: "gloves_m",      label: "Gloves — Medium",       qty: 3, sub: "3 pairs" },
+    { id: "gloves_l",      label: "Gloves — Large",        qty: 3, sub: "3 pairs" },
+  ]},
+  { name: "Left Front Pouch", items: [
+    { id: "nebulizer",     label: "Nebulizer",             qty: 1 },
+    { id: "aspirin",       label: "Aspirin",               qty: 4 },
+    { id: "albuterol",     label: "Albuterol",             qty: 2 },
+    { id: "med_kit",       label: "Med Kit",               qty: 1 },
+    { id: "epi_check",     label: "Epi Check",             bool: true },
+    { id: "epi_inject",    label: "Epi Inject",            bool: true },
+    { id: "nasal_narcan",  label: "Nasal Narcan",          bool: true },
+  ]},
+  { name: "Right Front Pouch", items: [
+    { id: "bandaids",        label: "Bandaids",            qty: 10 },
+    { id: "acetaminophen",   label: "Acetaminophen",       qty: 10 },
+    { id: "ibuprofen",       label: "Ibuprofen",           qty: 10 },
+    { id: "antacids",        label: "Antacids",            qty: 5 },
+    { id: "diphenhydramine", label: "Diphenhydramine",     qty: 5 },
+    { id: "emesis",          label: "Emesis Bags",         qty: 3 },
+  ]},
+];
+
+const STORAGE_KEY = "bls_bag_check_v2";
+const TOUR_KEY = "bls_tour_info_v1";
+const EOT_FORM_URL = "https://app.smartsheet.com/b/form/93aca619fab949a4bdaff1f25e6db0e6";
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function buildForm() {
+  const form = document.getElementById("checklist");
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+  for (const section of SECTIONS) {
+    const wrap = document.createElement("section");
+    wrap.className = "section";
+    wrap.dataset.section = section.name;
+
+    const header = document.createElement("div");
+    header.className = "section-header";
+    header.innerHTML = `
+      <h2 class="section-title">${escapeHtml(section.name)}</h2>
+      <span class="section-progress" data-section-progress>0 / ${section.items.length}</span>
+    `;
+    wrap.appendChild(header);
+
+    for (const it of section.items) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.dataset.itemId = it.id;
+
+      const labelBlock = document.createElement("div");
+      labelBlock.className = "label-block";
+      labelBlock.innerHTML = `
+        <div class="label">${escapeHtml(it.label)}</div>
+        ${it.sub ? `<span class="sub">${escapeHtml(it.sub)}</span>` : ""}
+        <div class="need-tag" data-need-tag>${it.bool ? "Required" : `Need ${it.qty}`}</div>
+      `;
+      row.appendChild(labelBlock);
+
+      if (it.bool) {
+        const toggle = document.createElement("label");
+        toggle.className = "toggle";
+        toggle.innerHTML = `
+          <input type="checkbox" id="${it.id}" />
+          <div class="checkmark">${CHECK_ICON}</div>
+          <span data-toggle-label>Present</span>
+        `;
+        const cb = toggle.querySelector("input");
+        cb.checked = !!saved[it.id];
+        if (cb.checked) toggle.classList.add("on");
+        cb.addEventListener("change", () => {
+          toggle.classList.toggle("on", cb.checked);
+          updateRowState(it, row);
+          persist();
+        });
+        row.appendChild(toggle);
+      } else {
+        const counter = document.createElement("div");
+        counter.className = "counter";
+        counter.innerHTML = `
+          <button type="button" data-step="-1" aria-label="decrease">−</button>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="${it.id}" value="${saved[it.id] !== undefined && saved[it.id] !== "" ? saved[it.id] : ""}" placeholder="0" />
+          <button type="button" data-step="1" aria-label="increase">+</button>
+        `;
+        const input = counter.querySelector("input");
+        const [minus, plus] = counter.querySelectorAll("button");
+        const step = (delta) => {
+          const cur = input.value === "" ? 0 : parseInt(input.value, 10) || 0;
+          const next = Math.max(0, cur + delta);
+          input.value = next;
+          updateRowState(it, row);
+          persist();
+        };
+        minus.addEventListener("click", () => step(-1));
+        plus.addEventListener("click", () => step(1));
+        input.addEventListener("input", () => {
+          input.value = input.value.replace(/[^0-9]/g, "");
+          updateRowState(it, row);
+          persist();
+        });
+        input.addEventListener("focus", () => input.select());
+        row.appendChild(counter);
+      }
+
+      wrap.appendChild(row);
+      updateRowState(it, row);
+    }
+    form.appendChild(wrap);
+  }
+
+  const hint = document.createElement("p");
+  hint.className = "hint";
+  hint.textContent = "Your entries are saved automatically on this device.";
+  form.appendChild(hint);
+
+  updateAllProgress();
+}
+
+function getValue(it) {
+  const el = document.getElementById(it.id);
+  if (!el) return null;
+  if (it.bool) return el.checked;
+  return el.value === "" ? null : Math.max(0, parseInt(el.value, 10) || 0);
+}
+
+function updateRowState(it, row) {
+  const val = getValue(it);
+  row.classList.remove("satisfied", "short");
+  if (it.bool) {
+    if (val) row.classList.add("satisfied");
+  } else {
+    if (val === null) {} // blank
+    else if (val >= it.qty) row.classList.add("satisfied");
+    else if (val < it.qty) row.classList.add("short");
+  }
+  updateAllProgress();
+}
+
+function updateAllProgress() {
+  let total = 0, done = 0;
+  for (const s of SECTIONS) {
+    let sTotal = 0, sDone = 0;
+    for (const it of s.items) {
+      sTotal++; total++;
+      const v = getValue(it);
+      if (it.bool ? v : (v !== null && v >= it.qty)) { sDone++; done++; }
+    }
+    const sec = document.querySelector(`[data-section="${cssEscape(s.name)}"] [data-section-progress]`);
+    if (sec) {
+      sec.textContent = `${sDone} / ${sTotal}`;
+      sec.classList.toggle("complete", sDone === sTotal);
+    }
+  }
+  const badge = document.getElementById("countBadge");
+  badge.textContent = `${done} / ${total}`;
+  badge.classList.toggle("complete", done === total);
+  const fill = document.getElementById("progressFill");
+  const pct = total > 0 ? (done / total) * 100 : 0;
+  fill.style.width = pct + "%";
+  fill.classList.toggle("complete", done === total);
+  const toggleCount = document.getElementById("toggleCount");
+  const toggleBtn = document.getElementById("checklistToggle");
+  if (toggleCount) toggleCount.textContent = `${done} / ${total}`;
+  if (toggleBtn) toggleBtn.classList.toggle("complete", done === total && total > 0);
+}
+
+function cssEscape(s) { return s.replace(/"/g, '\\"'); }
+
+function persist() {
+  const data = {};
+  for (const s of SECTIONS) for (const it of s.items) {
+    const v = getValue(it);
+    data[it.id] = v === null ? "" : v;
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function check() {
+  const missing = [];
+  const extra = [];
+  let okCount = 0, total = 0;
+
+  for (const s of SECTIONS) for (const it of s.items) {
+    total++;
+    const v = getValue(it);
+    if (it.bool) {
+      if (v) okCount++;
+      else missing.push({ label: it.label, have: "missing" });
+    } else {
+      const have = v === null ? 0 : v;
+      if (have < it.qty) missing.push({ label: it.label, need: it.qty, have, short: it.qty - have });
+      else if (have > it.qty) { okCount++; extra.push({ label: it.label, need: it.qty, have }); }
+      else okCount++;
+    }
+  }
+
+  const r = document.getElementById("report");
+  r.hidden = false;
+  const allGood = missing.length === 0;
+
+  let html = "";
+  if (allGood) {
+    html += `
+      <div class="report-hero ok">
+        <div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h2>Bag complete</h2>
+        <div class="stats">All ${total} items accounted for</div>
+      </div>`;
+  } else {
+    html += `
+      <div class="report-hero bad">
+        <div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <h2>${missing.length} item${missing.length === 1 ? "" : "s"} need restocking</h2>
+        <div class="stats">${okCount} of ${total} OK · ${missing.length} to restock</div>
+      </div>`;
+  }
+
+  let body = `<div class="report-body">`;
+
+  if (missing.length) {
+    body += `<div class="report-group"><h3>Restock needed</h3><ul class="report-list">`;
+    for (const m of missing) {
+      if (m.have === "missing") body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Not present</span></li>`;
+      else body += `<li><span class="item-name">${escapeHtml(m.label)}</span><span class="pill bad">Have ${m.have} / ${m.need}</span></li>`;
+    }
+    body += `</ul></div>`;
+  }
+  if (extra.length) {
+    body += `<div class="report-group"><h3>Over-stocked</h3><ul class="report-list">`;
+    for (const e of extra) body += `<li><span class="item-name">${escapeHtml(e.label)}</span><span class="pill muted">${e.have} / ${e.need}</span></li>`;
+    body += `</ul></div>`;
+  }
+  body += `</div>`;
+  html += body;
+
+  const suppliesText = buildSuppliesText(missing);
+  if (suppliesText) {
+    html += `
+      <div class="supplies-block">
+        <h4>Restock list — for End of Tour form</h4>
+        <textarea id="suppliesText" readonly>${escapeHtml(suppliesText)}</textarea>
+        <button type="button" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to Clipboard
+        </button>
+      </div>`;
+  }
+
+  r.innerHTML = html;
+  const copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) copyBtn.addEventListener("click", copySupplies);
+
+  r.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function buildSuppliesText(missing) {
+  return missing.map(m => m.have === "missing" ? m.label : `${m.label} x${m.short}`).join("\n");
+}
+
+async function copySupplies() {
+  const ta = document.getElementById("suppliesText");
+  const btn = document.getElementById("copyBtn");
+  const text = ta.value;
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } else {
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      ok = document.execCommand("copy");
+    }
+  } catch (e) { ok = false; }
+  const orig = btn.innerHTML;
+  if (ok) {
+    btn.classList.add("copied");
+    btn.innerHTML = `${CHECK_ICON} Copied!`;
+  } else {
+    btn.innerHTML = "Press &amp; hold the text to copy";
+  }
+  setTimeout(() => {
+    btn.classList.remove("copied");
+    btn.innerHTML = orig;
+  }, 1800);
+}
+
+function reset() {
+  if (!confirm("Clear all entered counts?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  for (const s of SECTIONS) for (const it of s.items) {
+    const el = document.getElementById(it.id);
+    if (!el) continue;
+    if (it.bool) {
+      el.checked = false;
+      el.closest(".toggle").classList.remove("on");
+    } else {
+      el.value = "";
+    }
+    const row = el.closest(".row");
+    if (row) row.classList.remove("satisfied", "short");
+  }
+  document.getElementById("report").hidden = true;
+  updateAllProgress();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+}
+
+document.getElementById("checkBtn").addEventListener("click", check);
+document.getElementById("resetBtn").addEventListener("click", reset);
+
+const refModal = document.getElementById("refModal");
+document.getElementById("refBtn").addEventListener("click", () => refModal.classList.add("open"));
+document.getElementById("refClose").addEventListener("click", () => refModal.classList.remove("open"));
+refModal.addEventListener("click", (e) => { if (e.target === refModal) refModal.classList.remove("open"); });
+
+// Tour info — persist name + venue, build prefilled End of Tour URL
+const nameInput = document.getElementById("tourName");
+const venueSelect = document.getElementById("tourVenue");
+const tourSaved = JSON.parse(localStorage.getItem(TOUR_KEY) || "{}");
+if (tourSaved.name) nameInput.value = tourSaved.name;
+if (tourSaved.venue) venueSelect.value = tourSaved.venue;
+const persistTour = () => localStorage.setItem(TOUR_KEY, JSON.stringify({ name: nameInput.value, venue: venueSelect.value }));
+nameInput.addEventListener("input", persistTour);
+venueSelect.addEventListener("change", persistTour);
+
+// Geolocation — auto-pick venue from current GPS
+const VENUES = [
+  { name: "Beacon Theater",            lat: 40.7800, lon: -73.9817 },
+  { name: "Brooklyn Academy of Music", lat: 40.6862, lon: -73.9788 },
+  { name: "Brooklyn Steel",            lat: 40.7163, lon: -73.9402 },
+  { name: "Citi Bank",                 lat: 40.7571, lon: -73.8458 }, // Citi Field
+  { name: "Coney Island Amphitheater", lat: 40.5733, lon: -73.9890 },
+  { name: "MSG Arena",                 lat: 40.7505, lon: -73.9934 },
+  { name: "MSG Theater",               lat: 40.7505, lon: -73.9930 },
+  { name: "Radio City Music Hall",     lat: 40.7599, lon: -73.9799 },
+  { name: "Yankee Stadium",            lat: 40.8296, lon: -73.9262 },
+  { name: "Palladium Time Square",     lat: 40.7569, lon: -73.9851 },
+];
+
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function fmtDist(m) {
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(1)} km`;
+}
+
+const locateBtn = document.getElementById("locateBtn");
+const locateStatus = document.getElementById("locateStatus");
+
+locateBtn.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    locateStatus.textContent = "Geolocation not supported on this device.";
+    locateStatus.className = "locate-status bad";
+    return;
+  }
+  if (!window.isSecureContext) {
+    locateStatus.textContent = "Needs HTTPS — use https://maxgoodstein.com";
+    locateStatus.className = "locate-status bad";
+    return;
+  }
+  locateBtn.disabled = true;
+  locateStatus.textContent = "Getting your location…";
+  locateStatus.className = "locate-status";
+
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    const ranked = VENUES
+      .map(v => ({ ...v, dist: haversineMeters(latitude, longitude, v.lat, v.lon) }))
+      .sort((a, b) => a.dist - b.dist);
+    const nearest = ranked[0];
+    locateBtn.disabled = false;
+
+    if (nearest.dist <= 500) {
+      venueSelect.value = nearest.name;
+      persistTour();
+      locateStatus.textContent = `📍 ${nearest.name} (${fmtDist(nearest.dist)} away)`;
+      locateStatus.className = "locate-status ok";
+    } else if (nearest.dist <= 5000) {
+      venueSelect.value = nearest.name;
+      persistTour();
+      locateStatus.textContent = `Best guess: ${nearest.name} (${fmtDist(nearest.dist)} away) — confirm or pick manually`;
+      locateStatus.className = "locate-status";
+    } else {
+      locateStatus.textContent = `Nearest venue (${nearest.name}) is ${fmtDist(nearest.dist)} away — pick manually`;
+      locateStatus.className = "locate-status bad";
+    }
+  }, (err) => {
+    locateBtn.disabled = false;
+    const msg = {
+      1: "Location permission denied — enable it in browser settings",
+      2: "Location unavailable right now",
+      3: "Timed out — try again"
+    }[err.code] || "Couldn't get location";
+    locateStatus.textContent = msg;
+    locateStatus.className = "locate-status bad";
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+});
+
+function hasAnyBagInteraction() {
+  for (const s of SECTIONS) for (const it of s.items) {
+    const v = getValue(it);
+    if (it.bool && v) return true;
+    if (!it.bool && v !== null) return true;
+  }
+  return false;
+}
+
+function buildEndOfTourUrl() {
+  let suppliesText;
+  if (!hasAnyBagInteraction()) {
+    suppliesText = "NONE";
+  } else {
+    const missing = [];
+    for (const s of SECTIONS) for (const it of s.items) {
+      const v = getValue(it);
+      if (it.bool) { if (!v) missing.push({ label: it.label, have: "missing" }); }
+      else {
+        const have = v === null ? 0 : v;
+        if (have < it.qty) missing.push({ label: it.label, short: it.qty - have });
+      }
+    }
+    suppliesText = missing.length ? buildSuppliesText(missing) : "NONE";
+  }
+
+  // mm/dd/yyyy
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const dateStr = `${mm}/${dd}/${d.getFullYear()}`;
+
+  const fields = [];
+  const add = (k, v) => fields.push([k, v]);
+
+  if (nameInput.value.trim()) add("Employee Name", nameInput.value.trim());
+  add("Date", dateStr);
+  if (venueSelect.value) add("Venue", venueSelect.value);
+  add("Supplies Needed", suppliesText);
+  add("Supplies Needed?", suppliesText);
+  add("Ambulance On Site", "None");
+  add("Physician On Site", "No");
+  // Radio Accountability — hedge column-name variants
+  const radioVal = "Start: 1  |  End: 1";
+  ["Radio Accountability","Radios","Radio Count","Radio","Radio Inventory","Radio Tracking","Radio Notes","Radio Check","Radio Status","Radio Information","radio accountability","Radio Accountabilty"].forEach(k => add(k, radioVal));
+  // Tech Bag Medication Pouch — hedge column-name variants
+  const pouchVal = "All Zip Ties Intact";
+  ["Tech Bag Medication Pouch","Tech Bag Med Pouch","Medication Pouch","Med Pouch","Tech Bag","Pouch","Zip Ties","Zip Tie","Zip Tie Status","Tech Bag Pouch","Tech Bag Status","Pouch Status","Medication Bag","Bag Seal","Zip Tie Check","Med Bag","tech bag medication pouch"].forEach(k => add(k, pouchVal));
+  // After Party — hedge spacing variants
+  add("After Party/ Talent Delay", "No");
+  add("After Party/Talent Delay", "No");
+  add("After Party / Talent Delay", "No");
+
+  // Manual encoding with %20 for spaces (URLSearchParams uses + which Smartsheet may not decode)
+  const qs = fields.map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v)).join("&");
+  return EOT_FORM_URL + "?" + qs;
+}
+
+document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
+  e.preventDefault();
+  window.open(buildEndOfTourUrl(), "_blank", "noopener");
+});
+
+buildForm();
+
+// Collapse / expand the checklist
+const checklistToggle = document.getElementById("checklistToggle");
+const checklistWrap = document.getElementById("checklistWrap");
+const actionBar = document.querySelector(".actions");
+const toggleLabel = document.getElementById("toggleLabel");
+const toggleSub = document.getElementById("toggleSub");
+
+function setChecklistExpanded(on) {
+  checklistWrap.hidden = !on;
+  checklistToggle.setAttribute("aria-expanded", on ? "true" : "false");
+  checklistToggle.classList.toggle("expanded", on);
+  actionBar.style.display = on ? "" : "none";
+  document.body.style.paddingBottom = on ? "100px" : "20px";
+  toggleLabel.textContent = on ? "Hide Bag Check" : "Start Bag Check";
+  toggleSub.textContent = on ? "Tap items to count" : "Tap to count items";
+  if (on) {
+    requestAnimationFrame(() => {
+      const firstSection = checklistWrap.querySelector(".section");
+      if (!firstSection) return;
+      const headerH = document.querySelector("header").offsetHeight;
+      const y = firstSection.getBoundingClientRect().top + window.pageYOffset - headerH - 8;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    });
+  }
+}
+
+checklistToggle.addEventListener("click", () => {
+  setChecklistExpanded(checklistWrap.hidden);
+});
+
+setChecklistExpanded(false);
+</script>
+</body>
+</html>
