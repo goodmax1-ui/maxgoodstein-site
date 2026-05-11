@@ -546,6 +546,98 @@
 
   .hint { color: var(--text-3); font-size: 12px; padding: 12px 18px; text-align: center; }
 
+  /* End of Tour reminder modal */
+  .eot-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    padding: 0;
+    animation: fadeIn 0.2s ease;
+  }
+  .eot-modal.open { display: flex; }
+  .eot-card {
+    background: var(--bg-elev);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @media (min-width: 600px) {
+    .eot-modal { align-items: center; padding: 20px; }
+    .eot-card { border-radius: var(--radius); }
+  }
+  .eot-card h3 {
+    margin: 0 0 4px;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .eot-card .eot-sub { margin: 0 0 18px; color: var(--text-2); font-size: 14px; }
+  .eot-item {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .eot-item-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .eot-item-label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  .eot-item-val {
+    font: 600 15px/1.4 ui-monospace, 'SF Mono', Menlo, monospace;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .eot-item-copy {
+    padding: 6px 12px;
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font: 600 12px/1 inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .eot-item-copy:active { transform: scale(0.95); }
+  .eot-item-copy.copied { background: var(--ok); color: white; border-color: var(--ok); }
+  .eot-item-copy svg { width: 12px; height: 12px; }
+  .eot-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .eot-actions button {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font: 700 15px/1 inherit;
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .eot-actions button:active { transform: scale(0.97); }
+  .eot-actions .btn-cancel {
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .eot-actions .btn-open {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+  }
+  .eot-actions svg { width: 16px; height: 16px; }
+
   /* Tour info panel */
   .tour-panel {
     background: var(--bg-elev);
@@ -777,6 +869,36 @@
 <div class="modal" id="refModal" role="dialog" aria-modal="true">
   <button class="close" id="refClose" aria-label="Close">&times;</button>
   <img src="bag-reference.jpg" alt="BLS bag layout reference" />
+</div>
+
+<div class="eot-modal" id="eotModal" role="dialog" aria-modal="true">
+  <div class="eot-card">
+    <h3>Almost there</h3>
+    <p class="eot-sub">Two fields can't auto-fill — set these manually in the form:</p>
+    <div class="eot-item">
+      <div class="eot-item-top">
+        <span class="eot-item-label">Radio Accountability</span>
+        <button type="button" class="eot-item-copy" id="copyRadioBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <div class="eot-item-val" id="radioVal">Start: 1  |  End: 1</div>
+    </div>
+    <div class="eot-item">
+      <div class="eot-item-top">
+        <span class="eot-item-label">Tech Bag Medication Pouch</span>
+      </div>
+      <div class="eot-item-val">All Zip Ties Intact</div>
+    </div>
+    <div class="eot-actions">
+      <button type="button" class="btn-cancel" id="eotCancel">Cancel</button>
+      <button type="button" class="btn-open" id="eotOpen">
+        Open Form
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1291,9 +1413,50 @@ function buildEndOfTourUrl() {
   return EOT_FORM_URL + "?" + qs;
 }
 
+const eotModal = document.getElementById("eotModal");
+const eotOpen = document.getElementById("eotOpen");
+const eotCancel = document.getElementById("eotCancel");
+const copyRadioBtn = document.getElementById("copyRadioBtn");
+const radioVal = document.getElementById("radioVal");
+
 document.getElementById("endOfTourBtn").addEventListener("click", (e) => {
   e.preventDefault();
+  eotModal.classList.add("open");
+});
+
+eotCancel.addEventListener("click", () => eotModal.classList.remove("open"));
+eotModal.addEventListener("click", (e) => { if (e.target === eotModal) eotModal.classList.remove("open"); });
+
+eotOpen.addEventListener("click", async () => {
+  // Auto-copy the Radio value so user just pastes in the form
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(radioVal.textContent.trim());
+    }
+  } catch (e) {}
   window.open(buildEndOfTourUrl(), "_blank", "noopener");
+  eotModal.classList.remove("open");
+});
+
+copyRadioBtn.addEventListener("click", async () => {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(radioVal.textContent.trim());
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = radioVal.textContent.trim();
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    copyRadioBtn.classList.add("copied");
+    copyRadioBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+    setTimeout(() => {
+      copyRadioBtn.classList.remove("copied");
+      copyRadioBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+    }, 1500);
+  } catch (e) {}
 });
 
 buildForm();
