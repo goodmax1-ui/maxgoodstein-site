@@ -1028,6 +1028,7 @@
       <div class="scanner-status" id="scannerStatus">Loading camera…</div>
       <div class="scanner-bottom">
         <button type="button" id="scannerCancel">Cancel</button>
+        <button type="button" id="scannerCapture">Capture Now</button>
       </div>
     </div>
   </div>
@@ -1739,18 +1740,15 @@ async function startScanner() {
     return;
   }
   try {
-    // Prefer dedicated PDF417 reader if available; fall back to multi-format with hints
-    if (ZXing.BrowserPDF417Reader) {
-      codeReader = new ZXing.BrowserPDF417Reader(undefined, 150);
-    } else {
-      const hints = new Map();
-      const fmt = ZXing.BarcodeFormat;
-      if (fmt && fmt.PDF_417 !== undefined) {
-        hints.set(2 /* POSSIBLE_FORMATS */, [fmt.PDF_417]);
-      }
-      hints.set(3 /* TRY_HARDER */, true);
-      codeReader = new ZXing.BrowserMultiFormatReader(hints, 150);
+    // MultiFormat with PDF417 + TRY_HARDER is more permissive than the strict PDF417 reader
+    const hints = new Map();
+    const fmt = ZXing.BarcodeFormat;
+    if (fmt && fmt.PDF_417 !== undefined) {
+      hints.set(2 /* POSSIBLE_FORMATS */, [fmt.PDF_417]);
     }
+    hints.set(3 /* TRY_HARDER */, true);
+    hints.set(8 /* PURE_BARCODE */, false);
+    codeReader = new ZXing.BrowserMultiFormatReader(hints, 150);
 
     scannerStatus.textContent = "Starting scan…";
     // Request rear camera with high-res — PDF417 is dense and needs resolution
@@ -1768,8 +1766,9 @@ async function startScanner() {
       frames++;
       if (err && err.name) errs[err.name] = (errs[err.name] || 0) + 1;
       if (frames === 1 || frames % 15 === 0) {
-        const errInfo = Object.keys(errs).slice(0, 2).map(k => `${k.replace("Exception","")}:${errs[k]}`).join(" ");
-        scannerStatus.textContent = `Scanning… ${frames}f  ${errInfo}`;
+        const res = scannerVideo.videoWidth ? `${scannerVideo.videoWidth}×${scannerVideo.videoHeight}` : "?";
+        const errInfo = Object.keys(errs).slice(0, 1).map(k => `${k.replace("Exception","").slice(0,8)}:${errs[k]}`).join(" ");
+        scannerStatus.textContent = `${res} · ${frames}f · ${errInfo} · tap "Capture Now"`;
       }
       if (result) {
         if (navigator.vibrate) navigator.vibrate(50);
@@ -1818,6 +1817,37 @@ function stopScanner() {
 }
 
 scannerCancel.addEventListener("click", stopScanner);
+
+document.getElementById("scannerCapture").addEventListener("click", async () => {
+  if (!scannerVideo.videoWidth) {
+    scannerStatus.textContent = "Camera not ready yet";
+    return;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = scannerVideo.videoWidth;
+  canvas.height = scannerVideo.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(scannerVideo, 0, 0);
+  scannerStatus.textContent = `Decoding ${canvas.width}×${canvas.height}…`;
+  try {
+    let result;
+    if (codeReader.decodeFromCanvas) {
+      result = codeReader.decodeFromCanvas(canvas);
+    } else if (codeReader.decodeFromImageData) {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      result = codeReader.decodeFromImageData(imageData);
+    }
+    if (result) {
+      if (navigator.vibrate) navigator.vibrate(50);
+      stopScanner();
+      showResult(result.getText ? result.getText() : result.text || result);
+    } else {
+      scannerStatus.textContent = "No barcode found in that frame. Reposition and tap again.";
+    }
+  } catch (e) {
+    scannerStatus.textContent = "No barcode in frame — closer/farther & retry";
+  }
+});
 
 document.getElementById("scanLicenseBtn").addEventListener("click", startScanner);
 resultClose.addEventListener("click", () => resultModal.classList.remove("open"));
