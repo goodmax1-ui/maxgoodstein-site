@@ -1079,36 +1079,36 @@
     <div class="eot-card">
       <h3>Patient Info</h3>
       <p class="eot-sub">Type once — tap any field below to copy it after.</p>
-      <div class="tour-grid">
+      <form class="tour-grid" id="manualForm" autocomplete="on" onsubmit="return false">
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mFirst">First Name</label>
-          <input type="text" id="mFirst" autocomplete="given-name" autocapitalize="words" />
+          <input type="text" id="mFirst" name="given-name" autocomplete="given-name" autocapitalize="words" />
         </div>
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mLast">Last Name</label>
-          <input type="text" id="mLast" autocomplete="family-name" autocapitalize="words" />
+          <input type="text" id="mLast" name="family-name" autocomplete="family-name" autocapitalize="words" />
         </div>
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mDob">Date of Birth (MM/DD/YYYY)</label>
-          <input type="text" id="mDob" inputmode="numeric" placeholder="MM/DD/YYYY" />
+          <input type="text" id="mDob" name="bday" inputmode="numeric" placeholder="MM/DD/YYYY" autocomplete="bday" />
         </div>
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mAddr">Address</label>
-          <input type="text" id="mAddr" autocomplete="street-address" autocapitalize="words" placeholder="123 Main St" />
+          <input type="text" id="mAddr" name="address-line1" autocomplete="address-line1" autocapitalize="words" placeholder="123 Main St" />
         </div>
         <div class="tour-field">
           <label for="mCity">City</label>
-          <input type="text" id="mCity" autocomplete="address-level2" autocapitalize="words" />
+          <input type="text" id="mCity" name="address-level2" autocomplete="address-level2" autocapitalize="words" />
         </div>
         <div class="tour-field">
           <label for="mState">State</label>
-          <input type="text" id="mState" maxlength="2" placeholder="NY" autocapitalize="characters" />
+          <input type="text" id="mState" name="address-level1" autocomplete="address-level1" maxlength="2" placeholder="NY" autocapitalize="characters" />
         </div>
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mZip">ZIP</label>
-          <input type="text" id="mZip" inputmode="numeric" maxlength="10" placeholder="10001" />
+          <input type="text" id="mZip" name="postal-code" autocomplete="postal-code" inputmode="numeric" maxlength="10" placeholder="10001" />
         </div>
-      </div>
+      </form>
       <div class="eot-actions">
         <button type="button" class="btn-cancel" id="manualClear">Clear</button>
         <button type="button" class="btn-cancel" id="manualCancel">Cancel</button>
