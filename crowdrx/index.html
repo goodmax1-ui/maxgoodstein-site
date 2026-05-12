@@ -2290,11 +2290,13 @@ function renderAddressSuggestions(features) {
     </div>`;
   }).join("");
   addrSuggestions.querySelectorAll(".addr-suggestion").forEach((el, i) => {
-    el.addEventListener("click", () => {
+    el.addEventListener("click", async () => {
       const p = usOnly[i].properties;
       const street = [p.housenumber, p.street || p.name].filter(Boolean).join(" ");
       addrInput.value = street;
-      if (p.city) document.getElementById("mCity").value = p.city;
+      // Prefer hamlet > village > town > city (handles places like Katonah in town of Bedford)
+      let city = p.suburb || p.hamlet || p.village || p.town || p.city || p.county || "";
+      document.getElementById("mCity").value = city;
       if (p.state) {
         const abbr = STATE_ABBR[p.state.toLowerCase()];
         document.getElementById("mState").value = abbr || p.state.slice(0, 2).toUpperCase();
@@ -2302,6 +2304,19 @@ function renderAddressSuggestions(features) {
       if (p.postcode) document.getElementById("mZip").value = p.postcode;
       addrSuggestions.innerHTML = "";
       addrLastQuery = street;
+
+      // Override city with USPS-canonical name from the ZIP code (Bedford → Katonah, etc)
+      if (p.postcode) {
+        try {
+          const z = p.postcode.toString().slice(0, 5);
+          const res = await fetch(`https://api.zippopotam.us/us/${z}`);
+          if (res.ok) {
+            const data = await res.json();
+            const uspsCity = data.places?.[0]?.["place name"];
+            if (uspsCity) document.getElementById("mCity").value = uspsCity;
+          }
+        } catch (e) {}
+      }
     });
   });
 }
