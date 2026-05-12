@@ -818,6 +818,50 @@
   .result-actions .btn-rescan {
     background: var(--accent); color: white;
   }
+  .result-actions .btn-new {
+    background: var(--ok); color: white;
+  }
+
+  /* Patient history chips */
+  .pt-history {
+    margin: -6px 0 14px;
+    padding: 0;
+  }
+  .pt-history-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+  .pt-history-scroll {
+    display: flex; gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .pt-chip {
+    flex-shrink: 0;
+    display: flex; flex-direction: column;
+    padding: 8px 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    min-width: max-content;
+  }
+  .pt-chip:active { transform: scale(0.95); background: var(--accent-soft); border-color: var(--accent); }
+  .pt-chip .pt-chip-name { font-weight: 700; color: var(--text); line-height: 1.2; }
+  .pt-chip .pt-chip-meta { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+  .pt-chip-remove {
+    margin-left: 6px;
+    background: none; border: none;
+    color: var(--text-3); font-size: 14px;
+    cursor: pointer; padding: 0 2px;
+  }
+  .pt-chip-remove:hover { color: var(--bad); }
 
   /* Tour info panel */
   .tour-panel {
@@ -1056,8 +1100,9 @@
         </div>
       </div>
       <div class="eot-actions">
+        <button type="button" class="btn-cancel" id="manualClear">Clear</button>
         <button type="button" class="btn-cancel" id="manualCancel">Cancel</button>
-        <button type="button" class="btn-open" id="manualShow">Show Copyable</button>
+        <button type="button" class="btn-open" id="manualShow">Save</button>
       </div>
     </div>
   </div>
@@ -1085,10 +1130,14 @@
     <div class="result-card">
       <h3>Patient Info</h3>
       <p class="result-sub">Tap any field to copy. Long-press to select.</p>
+      <div class="pt-history" id="ptHistorySection" hidden>
+        <div class="pt-history-label">Recent Patients</div>
+        <div class="pt-history-scroll" id="ptHistoryScroll"></div>
+      </div>
       <div id="resultFields"></div>
       <div class="result-actions">
         <button type="button" class="btn-cancel" id="resultClose">Close</button>
-        <button type="button" class="btn-rescan" id="resultRescan">Scan Again</button>
+        <button type="button" class="btn-new" id="resultNewPatient">New Patient</button>
       </div>
     </div>
   </div>
@@ -2084,21 +2133,15 @@ document.getElementById("manualShow").addEventListener("click", () => {
   }
 
   manualModal.classList.remove("open");
+  renderResultRows(rows, true);
+});
 
-  resultFields.innerHTML = rows.map((r, i) =>
-    `<div class="result-row" data-i="${i}">
-      <span class="result-label">${escapeHtml(r.label)}</span>
-      <span class="result-value">${escapeHtml(r.value)}</span>
-    </div>`
-  ).join("");
-  resultFields.querySelectorAll(".result-row").forEach((el, i) => {
-    el.addEventListener("click", () => {
-      copyText(rows[i].value);
-      el.classList.add("copied");
-      setTimeout(() => el.classList.remove("copied"), 1200);
-    });
-  });
-  resultModal.classList.add("open");
+document.getElementById("manualClear").addEventListener("click", () => {
+  if (!confirm("Clear all fields?")) return;
+  for (const k of ["mFirst","mLast","mDob","mAddr","mCity","mState","mZip"]) {
+    const el = document.getElementById(k); if (el) el.value = "";
+  }
+  localStorage.removeItem(MANUAL_KEY);
 });
 
 // Auto-format DOB as user types
@@ -2115,9 +2158,75 @@ document.getElementById("mZip").addEventListener("input", (e) => {
   e.target.value = v;
 });
 resultClose.addEventListener("click", () => resultModal.classList.remove("open"));
-resultRescan.addEventListener("click", () => {
+
+// Patient history
+const PT_HISTORY_KEY = "bls_pt_history_v1";
+const MAX_HISTORY = 10;
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(PT_HISTORY_KEY) || "[]"); } catch (e) { return []; }
+}
+function saveHistory(list) {
+  localStorage.setItem(PT_HISTORY_KEY, JSON.stringify(list.slice(0, MAX_HISTORY)));
+}
+function addPatientToHistory(rows) {
+  const name = rows.find(r => r.label === "Full Name")?.value || rows.find(r => /name/i.test(r.label))?.value || "Patient";
+  const list = loadHistory();
+  // Avoid exact duplicate of the most-recent entry
+  if (list[0] && JSON.stringify(list[0].rows) === JSON.stringify(rows)) return;
+  list.unshift({ name, ts: Date.now(), rows });
+  saveHistory(list);
+}
+
+function renderHistory() {
+  const section = document.getElementById("ptHistorySection");
+  const scroll = document.getElementById("ptHistoryScroll");
+  const list = loadHistory();
+  if (!list.length) { section.hidden = true; return; }
+  section.hidden = false;
+  scroll.innerHTML = list.map((p, i) => {
+    const when = new Date(p.ts);
+    const today = new Date();
+    const isToday = when.toDateString() === today.toDateString();
+    const tStr = isToday
+      ? when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      : when.toLocaleDateString([], { month: "numeric", day: "numeric" });
+    return `<div class="pt-chip" data-i="${i}">
+      <span class="pt-chip-name">${escapeHtml(p.name)}</span>
+      <span class="pt-chip-meta">${tStr}</span>
+    </div>`;
+  }).join("");
+  scroll.querySelectorAll(".pt-chip").forEach((el, i) => {
+    el.addEventListener("click", () => renderResultRows(list[i].rows, false));
+  });
+}
+
+function renderResultRows(rows, saveToHistory) {
+  resultFields.innerHTML = rows.map((r, i) =>
+    `<div class="result-row" data-i="${i}">
+      <span class="result-label">${escapeHtml(r.label)}</span>
+      <span class="result-value">${escapeHtml(r.value)}</span>
+    </div>`
+  ).join("");
+  resultFields.querySelectorAll(".result-row").forEach((el, i) => {
+    el.addEventListener("click", () => {
+      copyText(rows[i].value);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 1200);
+    });
+  });
+  if (saveToHistory) addPatientToHistory(rows);
+  renderHistory();
+  resultModal.classList.add("open");
+}
+
+document.getElementById("resultNewPatient").addEventListener("click", () => {
+  // Clear manual-entry form state so next patient starts blank
+  localStorage.removeItem(MANUAL_KEY);
+  for (const k of ["mFirst","mLast","mDob","mAddr","mCity","mState","mZip"]) {
+    const el = document.getElementById(k); if (el) el.value = "";
+  }
   resultModal.classList.remove("open");
-  startScanner();
 });
 
 // ===== AAMVA parser =====
@@ -2181,22 +2290,7 @@ function showResult(rawText) {
     return;
   }
 
-  resultFields.innerHTML = rows.map((r, i) =>
-    `<div class="result-row" data-i="${i}">
-      <span class="result-label">${escapeHtml(r.label)}</span>
-      <span class="result-value">${escapeHtml(r.value)}</span>
-    </div>`
-  ).join("");
-
-  resultFields.querySelectorAll(".result-row").forEach((el, i) => {
-    el.addEventListener("click", () => {
-      copyText(rows[i].value);
-      el.classList.add("copied");
-      setTimeout(() => el.classList.remove("copied"), 1200);
-    });
-  });
-
-  resultModal.classList.add("open");
+  renderResultRows(rows, true);
 }
 
 // Collapse / expand the checklist
