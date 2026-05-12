@@ -97,29 +97,33 @@
     letter-spacing: -0.02em;
   }
   h1 .dot { color: var(--accent); }
-  .count-badge {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-2);
-    font-variant-numeric: tabular-nums;
-  }
-  .count-badge.complete { color: var(--ok); }
-  .progress {
+  /* Header phase indicator */
+  .phase-indicator {
     margin-top: 10px;
-    height: 6px;
-    background: var(--border);
-    border-radius: 999px;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  .phase-step {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-soft);
+    color: var(--text-2);
     border-radius: 999px;
-    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+    padding: 8px 6px;
+    font: 700 11px/1 inherit;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
+    font-family: inherit;
   }
-  .progress-fill.complete {
-    background: linear-gradient(90deg, var(--ok), #15803d);
+  .phase-step:active { transform: scale(0.96); }
+  .phase-step.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
   }
 
   main { max-width: 720px; margin: 0 auto; padding: 16px; }
@@ -1006,6 +1010,111 @@
   }
   .checklist-toggle.expanded .chevron { transform: rotate(180deg); }
 
+  /* Phase card */
+  .phase-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .phase-card.expanded { border-color: var(--accent); box-shadow: var(--shadow-md); }
+  .phase-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 18px;
+    background: transparent;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    text-align: left;
+  }
+  .phase-card-header:active { background: var(--bg-soft); }
+  .phase-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .phase-card-title::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .phase-card-title-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .phase-card-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .phase-card-count {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 9px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .phase-card-count.complete { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+  .phase-card-chevron {
+    width: 18px; height: 18px;
+    transition: transform 0.2s;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .phase-card.expanded .phase-card-chevron { transform: rotate(180deg); }
+  .phase-card-body {
+    padding: 14px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .phase-card-body[hidden] { display: none; }
+
+  /* Buttons inside phase cards */
+  .phase-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font: 700 15px/1.2 inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .phase-action:active { transform: scale(0.98); background: var(--accent-soft); border-color: var(--accent); }
+  .phase-action svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+  .phase-action .sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-left: auto; }
+  .phase-action.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+  }
+  .phase-action.primary:active { background: var(--accent-2); }
+  .phase-action.primary svg { color: white; }
+  .phase-action.primary .sub { color: rgba(255,255,255,0.8); }
+
   .venue-row { display: flex; gap: 8px; align-items: stretch; }
   .venue-row select { flex: 1; min-width: 0; }
   .locate-btn {
@@ -1045,20 +1154,98 @@
   <div class="header-inner">
     <div class="title-row">
       <h1>CrowdRx<span class="dot">.</span></h1>
-      <span class="count-badge" id="countBadge">0 / 0</span>
     </div>
-    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="phase-indicator" id="phaseIndicator" role="tablist">
+      <button type="button" class="phase-step" id="stepPre" data-phase="pre" role="tab">Pre-shift</button>
+      <button type="button" class="phase-step active" id="stepOn" data-phase="on" role="tab">On shift</button>
+      <button type="button" class="phase-step" id="stepEnd" data-phase="end" role="tab">End of shift</button>
+    </div>
   </div>
 </header>
 
 <main>
-  <div class="tour-panel">
-    <div class="tour-grid">
-      <div class="tour-field" style="grid-column: 1 / -1;">
+  <!-- ============ PRE-SHIFT ============ -->
+  <section class="phase-card" id="preShiftCard" data-phase="pre">
+    <button type="button" class="phase-card-header" aria-expanded="false" aria-controls="preShiftBody">
+      <span class="phase-card-title"><span class="phase-card-title-text">Pre-shift</span></span>
+      <span class="phase-card-right">
+        <span class="phase-card-count" id="preshiftCount">0 / 0</span>
+        <svg class="phase-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </button>
+    <div class="phase-card-body" id="preShiftBody" hidden>
+      <button type="button" class="phase-action" id="refBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Show Bag Reference
+      </button>
+      <button type="button" class="checklist-toggle" id="checklistToggle" aria-expanded="false">
+        <span class="toggle-left">
+          <span class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span class="toggle-text">
+            <span class="toggle-label" id="toggleLabel">Start Bag Check</span>
+            <span class="toggle-sub" id="toggleSub">Tap to count items</span>
+          </span>
+        </span>
+        <span class="toggle-right">
+          <span class="toggle-count" id="toggleCount">0 / 0</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div id="checklistWrap" hidden>
+        <form id="checklist" autocomplete="off"></form>
+      </div>
+      <div id="report" hidden></div>
+    </div>
+  </section>
+
+  <!-- ============ ON SHIFT ============ -->
+  <section class="phase-card expanded" id="onShiftCard" data-phase="on">
+    <button type="button" class="phase-card-header" aria-expanded="true" aria-controls="onShiftBody">
+      <span class="phase-card-title"><span class="phase-card-title-text">On shift</span></span>
+      <span class="phase-card-right">
+        <svg class="phase-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </button>
+    <div class="phase-card-body" id="onShiftBody">
+      <div class="pt-history" id="dashPtHistorySection" hidden>
+        <div class="pt-history-label">Recent Patients</div>
+        <div class="pt-history-scroll" id="dashPtHistoryScroll"></div>
+      </div>
+      <button type="button" class="phase-action primary" id="scanLicenseBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M6 10v6M9 10v6M12 10v6M15 10v6M18 10v6"/><circle cx="12" cy="3" r="0.5" fill="currentColor"/></svg>
+        Scan Driver's License
+      </button>
+      <button type="button" class="phase-action" id="manualEntryBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Manual Patient Entry
+      </button>
+      <a class="phase-action" href="https://crowdrx.formstack.com/forms/otc_encounter" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        OTC Encounter<span class="sub">Formstack</span>
+      </a>
+      <a class="phase-action" href="https://crowdrx.formstack.com/forms/special_event_first_aid_encounter_report" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        PCR<span class="sub">First Aid</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ END OF SHIFT ============ -->
+  <section class="phase-card" id="endShiftCard" data-phase="end">
+    <button type="button" class="phase-card-header" aria-expanded="false" aria-controls="endShiftBody">
+      <span class="phase-card-title"><span class="phase-card-title-text">End of shift</span></span>
+      <span class="phase-card-right">
+        <svg class="phase-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </button>
+    <div class="phase-card-body" id="endShiftBody" hidden>
+      <div class="tour-field">
         <label for="tourName">Your Name</label>
         <input type="text" id="tourName" placeholder="First Last" autocomplete="name" />
       </div>
-      <div class="tour-field" style="grid-column: 1 / -1;">
+      <div class="tour-field">
         <label for="tourVenue">Venue</label>
         <div class="venue-row">
           <select id="tourVenue">
@@ -1082,139 +1269,92 @@
         </div>
         <div class="locate-status" id="locateStatus"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="quick">
-    <p class="quick-label">Quick Forms</p>
-    <div class="quick-grid">
-      <a href="https://crowdrx.formstack.com/forms/otc_encounter" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        OTC<span class="sub">Encounter</span>
-      </a>
-      <a href="https://crowdrx.formstack.com/forms/special_event_first_aid_encounter_report" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        PCR<span class="sub">First Aid</span>
-      </a>
-      <a href="#" id="endOfTourBtn">
+      <a class="phase-action primary" href="#" id="endOfTourBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         End of Tour<span class="sub">Prefilled</span>
       </a>
     </div>
-    <button type="button" class="quick-ref" id="refBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Show Bag Reference
-    </button>
-    <button type="button" class="scan-launch" id="scanLicenseBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M6 10v6M9 10v6M12 10v6M15 10v6M18 10v6"/><circle cx="12" cy="3" r="0.5" fill="currentColor"/></svg>
-      Scan Driver's License
-    </button>
-    <button type="button" class="scan-launch" id="manualEntryBtn" style="background:var(--bg-soft);color:var(--text);border:1px solid var(--border-strong);margin-top:6px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Manual Patient Entry
-    </button>
-  </div>
-
-  <div class="eot-modal" id="manualModal" role="dialog" aria-modal="true">
-    <div class="eot-card">
-      <h3>Patient Info</h3>
-      <p class="eot-sub">Type once — tap any field below to copy it after.</p>
-      <form class="tour-grid" id="manualForm" autocomplete="on" onsubmit="return false">
-        <div class="tour-field" style="grid-column: 1 / -1;">
-          <label for="mFirst">First Name</label>
-          <input type="text" id="mFirst" name="given-name" autocomplete="given-name" autocapitalize="words" />
-        </div>
-        <div class="tour-field" style="grid-column: 1 / -1;">
-          <label for="mLast">Last Name</label>
-          <input type="text" id="mLast" name="family-name" autocomplete="family-name" autocapitalize="words" />
-        </div>
-        <div class="tour-field" style="grid-column: 1 / -1;">
-          <label for="mDob">Date of Birth (MM/DD/YYYY)</label>
-          <input type="text" id="mDob" name="bday" inputmode="numeric" placeholder="MM/DD/YYYY" autocomplete="bday" />
-        </div>
-        <div class="tour-field" style="grid-column: 1 / -1;">
-          <label for="mAddr">Address</label>
-          <input type="text" id="mAddr" name="address-line1" autocomplete="address-line1" autocapitalize="words" placeholder="123 Main St" />
-          <div class="addr-suggestions" id="addrSuggestions"></div>
-        </div>
-        <div class="tour-field">
-          <label for="mCity">City</label>
-          <input type="text" id="mCity" name="address-level2" autocomplete="address-level2" autocapitalize="words" />
-        </div>
-        <div class="tour-field">
-          <label for="mState">State</label>
-          <input type="text" id="mState" name="address-level1" autocomplete="address-level1" maxlength="2" placeholder="NY" autocapitalize="characters" />
-        </div>
-        <div class="tour-field" style="grid-column: 1 / -1;">
-          <label for="mZip">ZIP</label>
-          <input type="text" id="mZip" name="postal-code" autocomplete="postal-code" inputmode="numeric" maxlength="10" placeholder="10001" />
-        </div>
-      </form>
-      <div class="eot-actions">
-        <button type="button" class="btn-cancel" id="manualClear">Clear</button>
-        <button type="button" class="btn-cancel" id="manualCancel">Cancel</button>
-        <button type="button" class="btn-open" id="manualShow">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="scanner-modal" id="scannerModal" role="dialog" aria-modal="true">
-    <video id="scannerVideo" playsinline muted autoplay></video>
-    <div class="scanner-overlay">
-      <div class="scanner-top">
-        <h3>Scan License Barcode</h3>
-        <p>Point at the PDF417 barcode on the BACK of the license</p>
-      </div>
-      <div class="scanner-frame"></div>
-      <div class="scanner-status" id="scannerStatus">Loading camera…</div>
-      <div class="scanner-bottom">
-        <button type="button" id="scannerCancel">Cancel</button>
-        <button type="button" id="scannerCapture">Capture Now</button>
-        <button type="button" id="scannerPhotoBtn">Take Photo</button>
-      </div>
-    </div>
-  </div>
-
-  <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
-
-  <div class="result-modal" id="resultModal" role="dialog" aria-modal="true">
-    <div class="result-card">
-      <h3>Patient Info</h3>
-      <p class="result-sub">Tap any field to copy. Long-press to select.</p>
-      <div class="pt-history" id="ptHistorySection" hidden>
-        <div class="pt-history-label">Recent Patients</div>
-        <div class="pt-history-scroll" id="ptHistoryScroll"></div>
-      </div>
-      <div id="resultFields"></div>
-      <div class="result-actions">
-        <button type="button" class="btn-cancel" id="resultClose">Close</button>
-        <button type="button" class="btn-new" id="resultNewPatient">New Patient</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="report" hidden></div>
-
-  <button type="button" class="checklist-toggle" id="checklistToggle" aria-expanded="false">
-    <span class="toggle-left">
-      <span class="icon-circle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      </span>
-      <span class="toggle-text">
-        <span class="toggle-label" id="toggleLabel">Start Bag Check</span>
-        <span class="toggle-sub" id="toggleSub">Tap to count items</span>
-      </span>
-    </span>
-    <span class="toggle-right">
-      <span class="toggle-count" id="toggleCount">0 / 0</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </span>
-  </button>
-
-  <div id="checklistWrap" hidden>
-    <form id="checklist" autocomplete="off"></form>
-  </div>
+  </section>
 </main>
+
+<!-- ============ MODALS ============ -->
+<div class="eot-modal" id="manualModal" role="dialog" aria-modal="true">
+  <div class="eot-card">
+    <h3>Patient Info</h3>
+    <p class="eot-sub">Type once — tap any field below to copy it after.</p>
+    <form class="tour-grid" id="manualForm" autocomplete="on" onsubmit="return false">
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="mFirst">First Name</label>
+        <input type="text" id="mFirst" name="given-name" autocomplete="given-name" autocapitalize="words" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="mLast">Last Name</label>
+        <input type="text" id="mLast" name="family-name" autocomplete="family-name" autocapitalize="words" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="mDob">Date of Birth (MM/DD/YYYY)</label>
+        <input type="text" id="mDob" name="bday" inputmode="numeric" placeholder="MM/DD/YYYY" autocomplete="bday" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="mAddr">Address</label>
+        <input type="text" id="mAddr" name="address-line1" autocomplete="address-line1" autocapitalize="words" placeholder="123 Main St" />
+        <div class="addr-suggestions" id="addrSuggestions"></div>
+      </div>
+      <div class="tour-field">
+        <label for="mCity">City</label>
+        <input type="text" id="mCity" name="address-level2" autocomplete="address-level2" autocapitalize="words" />
+      </div>
+      <div class="tour-field">
+        <label for="mState">State</label>
+        <input type="text" id="mState" name="address-level1" autocomplete="address-level1" maxlength="2" placeholder="NY" autocapitalize="characters" />
+      </div>
+      <div class="tour-field" style="grid-column: 1 / -1;">
+        <label for="mZip">ZIP</label>
+        <input type="text" id="mZip" name="postal-code" autocomplete="postal-code" inputmode="numeric" maxlength="10" placeholder="10001" />
+      </div>
+    </form>
+    <div class="eot-actions">
+      <button type="button" class="btn-cancel" id="manualClear">Clear</button>
+      <button type="button" class="btn-cancel" id="manualCancel">Cancel</button>
+      <button type="button" class="btn-open" id="manualShow">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="scanner-modal" id="scannerModal" role="dialog" aria-modal="true">
+  <video id="scannerVideo" playsinline muted autoplay></video>
+  <div class="scanner-overlay">
+    <div class="scanner-top">
+      <h3>Scan License Barcode</h3>
+      <p>Point at the PDF417 barcode on the BACK of the license</p>
+    </div>
+    <div class="scanner-frame"></div>
+    <div class="scanner-status" id="scannerStatus">Loading camera…</div>
+    <div class="scanner-bottom">
+      <button type="button" id="scannerCancel">Cancel</button>
+      <button type="button" id="scannerCapture">Capture Now</button>
+      <button type="button" id="scannerPhotoBtn">Take Photo</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
+
+<div class="result-modal" id="resultModal" role="dialog" aria-modal="true">
+  <div class="result-card">
+    <h3>Patient Info</h3>
+    <p class="result-sub">Tap any field to copy. Long-press to select.</p>
+    <div class="pt-history" id="ptHistorySection" hidden>
+      <div class="pt-history-label">Recent Patients</div>
+      <div class="pt-history-scroll" id="ptHistoryScroll"></div>
+    </div>
+    <div id="resultFields"></div>
+    <div class="result-actions">
+      <button type="button" class="btn-cancel" id="resultClose">Close</button>
+      <button type="button" class="btn-new" id="resultNewPatient">New Patient</button>
+    </div>
+  </div>
+</div>
 
 <div class="actions">
   <button type="button" class="btn-secondary" id="resetBtn">
@@ -1460,13 +1600,11 @@ function updateAllProgress() {
       sec.classList.toggle("complete", sDone === sTotal);
     }
   }
-  const badge = document.getElementById("countBadge");
-  badge.textContent = `${done} / ${total}`;
-  badge.classList.toggle("complete", done === total);
-  const fill = document.getElementById("progressFill");
-  const pct = total > 0 ? (done / total) * 100 : 0;
-  fill.style.width = pct + "%";
-  fill.classList.toggle("complete", done === total);
+  const preshiftCount = document.getElementById("preshiftCount");
+  if (preshiftCount) {
+    preshiftCount.textContent = `${done} / ${total}`;
+    preshiftCount.classList.toggle("complete", done === total && total > 0);
+  }
   const toggleCount = document.getElementById("toggleCount");
   const toggleBtn = document.getElementById("checklistToggle");
   if (toggleCount) toggleCount.textContent = `${done} / ${total}`;
@@ -2408,12 +2546,12 @@ function addPatientToHistory(rows) {
 }
 
 function renderHistory() {
-  const section = document.getElementById("ptHistorySection");
-  const scroll = document.getElementById("ptHistoryScroll");
   const list = loadHistory();
-  if (!list.length) { section.hidden = true; return; }
-  section.hidden = false;
-  scroll.innerHTML = list.map((p, i) => {
+  const targets = [
+    { section: document.getElementById("ptHistorySection"), scroll: document.getElementById("ptHistoryScroll") },
+    { section: document.getElementById("dashPtHistorySection"), scroll: document.getElementById("dashPtHistoryScroll") },
+  ];
+  const html = list.map((p, i) => {
     const when = new Date(p.ts);
     const today = new Date();
     const isToday = when.toDateString() === today.toDateString();
@@ -2425,9 +2563,15 @@ function renderHistory() {
       <span class="pt-chip-meta">${tStr}</span>
     </div>`;
   }).join("");
-  scroll.querySelectorAll(".pt-chip").forEach((el, i) => {
-    el.addEventListener("click", () => renderResultRows(list[i].rows, false));
-  });
+  for (const t of targets) {
+    if (!t.section || !t.scroll) continue;
+    if (!list.length) { t.section.hidden = true; continue; }
+    t.section.hidden = false;
+    t.scroll.innerHTML = html;
+    t.scroll.querySelectorAll(".pt-chip").forEach((el, i) => {
+      el.addEventListener("click", () => renderResultRows(list[i].rows, false));
+    });
+  }
 }
 
 function renderResultRows(rows, saveToHistory) {
@@ -2552,7 +2696,54 @@ checklistToggle.addEventListener("click", () => {
   setChecklistExpanded(checklistWrap.hidden);
 });
 
+// Phase cards — tap header to toggle, sync header step indicator
+function setPhaseExpanded(cardEl, on) {
+  if (!cardEl) return;
+  const body = cardEl.querySelector(".phase-card-body");
+  const header = cardEl.querySelector(".phase-card-header");
+  cardEl.classList.toggle("expanded", on);
+  if (body) body.hidden = !on;
+  if (header) header.setAttribute("aria-expanded", on ? "true" : "false");
+  const phase = cardEl.dataset.phase;
+  const step = document.querySelector(`.phase-step[data-phase="${phase}"]`);
+  if (step) step.classList.toggle("active", on);
+  // Collapsing pre-shift forces the inner checklist closed so the fixed bottom bar hides too
+  if (phase === "pre" && !on && checklistWrap && !checklistWrap.hidden) {
+    setChecklistExpanded(false);
+  }
+}
+
+function scrollPhaseIntoView(cardEl) {
+  if (!cardEl) return;
+  requestAnimationFrame(() => {
+    const headerH = document.querySelector("header").offsetHeight;
+    const y = cardEl.getBoundingClientRect().top + window.pageYOffset - headerH - 8;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  });
+}
+
+document.querySelectorAll(".phase-card").forEach(card => {
+  const header = card.querySelector(".phase-card-header");
+  if (!header) return;
+  header.addEventListener("click", () => {
+    const willExpand = !card.classList.contains("expanded");
+    setPhaseExpanded(card, willExpand);
+    if (willExpand) scrollPhaseIntoView(card);
+  });
+});
+
+document.querySelectorAll(".phase-step").forEach(step => {
+  step.addEventListener("click", () => {
+    const phase = step.dataset.phase;
+    const card = document.querySelector(`.phase-card[data-phase="${phase}"]`);
+    if (!card) return;
+    setPhaseExpanded(card, true);
+    scrollPhaseIntoView(card);
+  });
+});
+
 setChecklistExpanded(false);
+renderHistory();
 </script>
 </body>
 </html>
