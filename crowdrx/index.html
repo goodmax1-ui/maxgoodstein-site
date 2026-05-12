@@ -895,6 +895,23 @@
   .addr-suggestion-street { font-size: 14px; font-weight: 600; color: var(--text); }
   .addr-suggestion-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
   .addr-loading { padding: 12px 14px; font-size: 13px; color: var(--text-3); font-style: italic; }
+  .usps-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    margin-left: 6px;
+    background: var(--ok-soft);
+    color: var(--ok);
+    border-radius: 999px;
+    vertical-align: middle;
+    letter-spacing: 0.04em;
+  }
+  .addr-was {
+    color: var(--text-3);
+    text-decoration: line-through;
+    margin-right: 4px;
+  }
 
   /* Tour info panel */
   .tour-panel {
@@ -2270,6 +2287,25 @@ addrInput.addEventListener("input", () => {
   }, 280);
 });
 
+const zipCityCache = new Map();
+async function getUspsCity(zip) {
+  if (!zip) return null;
+  const z = zip.toString().slice(0, 5);
+  if (zipCityCache.has(z)) return zipCityCache.get(z);
+  try {
+    const res = await fetch(`https://api.zippopotam.us/us/${z}`);
+    if (!res.ok) { zipCityCache.set(z, null); return null; }
+    const data = await res.json();
+    const city = data.places?.[0]?.["place name"] || null;
+    zipCityCache.set(z, city);
+    return city;
+  } catch (e) { return null; }
+}
+
+function getPhotonCity(p) {
+  return p.suburb || p.hamlet || p.village || p.town || p.city || p.county || "";
+}
+
 function renderAddressSuggestions(features) {
   // Filter to US addresses with at least a street name
   const usOnly = features.filter(f => {
@@ -2280,23 +2316,25 @@ function renderAddressSuggestions(features) {
     addrSuggestions.innerHTML = "";
     return;
   }
-  addrSuggestions.innerHTML = usOnly.slice(0, 6).map((f, i) => {
+  const shown = usOnly.slice(0, 6);
+  addrSuggestions.innerHTML = shown.map((f, i) => {
     const p = f.properties;
     const street = [p.housenumber, p.street || p.name].filter(Boolean).join(" ");
-    const cityState = [p.city || p.county, p.state, p.postcode].filter(Boolean).join(", ");
-    return `<div class="addr-suggestion" data-i="${i}">
+    const photonCity = getPhotonCity(p);
+    const cityState = [photonCity, p.state, p.postcode].filter(Boolean).join(", ");
+    return `<div class="addr-suggestion" data-i="${i}" data-photon-city="${escapeHtml(photonCity)}">
       <div class="addr-suggestion-street">${escapeHtml(street)}</div>
       <div class="addr-suggestion-meta">${escapeHtml(cityState)}</div>
     </div>`;
   }).join("");
+
   addrSuggestions.querySelectorAll(".addr-suggestion").forEach((el, i) => {
     el.addEventListener("click", async () => {
-      const p = usOnly[i].properties;
+      const p = shown[i].properties;
       const street = [p.housenumber, p.street || p.name].filter(Boolean).join(" ");
       addrInput.value = street;
-      // Prefer hamlet > village > town > city (handles places like Katonah in town of Bedford)
-      let city = p.suburb || p.hamlet || p.village || p.town || p.city || p.county || "";
-      document.getElementById("mCity").value = city;
+      const cityToUse = el.dataset.uspsCity || getPhotonCity(p);
+      document.getElementById("mCity").value = cityToUse;
       if (p.state) {
         const abbr = STATE_ABBR[p.state.toLowerCase()];
         document.getElementById("mState").value = abbr || p.state.slice(0, 2).toUpperCase();
@@ -2305,19 +2343,35 @@ function renderAddressSuggestions(features) {
       addrSuggestions.innerHTML = "";
       addrLastQuery = street;
 
-      // Override city with USPS-canonical name from the ZIP code (Bedford → Katonah, etc)
-      if (p.postcode) {
-        try {
-          const z = p.postcode.toString().slice(0, 5);
-          const res = await fetch(`https://api.zippopotam.us/us/${z}`);
-          if (res.ok) {
-            const data = await res.json();
-            const uspsCity = data.places?.[0]?.["place name"];
-            if (uspsCity) document.getElementById("mCity").value = uspsCity;
-          }
-        } catch (e) {}
+      // If USPS city wasn't pre-fetched in time, fetch now and patch
+      if (!el.dataset.uspsCity && p.postcode) {
+        const uspsCity = await getUspsCity(p.postcode);
+        if (uspsCity) document.getElementById("mCity").value = uspsCity;
       }
     });
+  });
+
+  // Pre-fetch USPS city for each suggestion in parallel and update the visible display
+  shown.forEach(async (f, i) => {
+    const p = f.properties;
+    if (!p.postcode) return;
+    const uspsCity = await getUspsCity(p.postcode);
+    if (!uspsCity) return;
+    const el = addrSuggestions.querySelector(`.addr-suggestion[data-i="${i}"]`);
+    if (!el) return;
+    el.dataset.uspsCity = uspsCity;
+    const photonCity = el.dataset.photonCity || getPhotonCity(p);
+    const meta = el.querySelector(".addr-suggestion-meta");
+    if (!meta) return;
+    if (uspsCity.toLowerCase() === photonCity.toLowerCase()) {
+      // No correction needed — show normally
+      const cityState = [uspsCity, p.state, p.postcode].filter(Boolean).join(", ");
+      meta.innerHTML = `${escapeHtml(cityState)}<span class="usps-tag">USPS</span>`;
+    } else {
+      // Correction — show old crossed out, new emphasized
+      const tail = [p.state, p.postcode].filter(Boolean).join(", ");
+      meta.innerHTML = `<span class="addr-was">${escapeHtml(photonCity)}</span>${escapeHtml(uspsCity)}, ${escapeHtml(tail)}<span class="usps-tag">USPS</span>`;
+    }
   });
 }
 
