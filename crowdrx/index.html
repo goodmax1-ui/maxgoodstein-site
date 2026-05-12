@@ -1739,10 +1739,26 @@ async function startScanner() {
     return;
   }
   try {
-    codeReader = new ZXing.BrowserMultiFormatReader();
-    scannerStatus.textContent = "Point at the back-of-license barcode";
-    // null deviceId = let the library pick the default (back camera on mobile)
-    codeReader.decodeFromVideoDevice(null, scannerVideo, (result, err) => {
+    // Build decode hints — focus on PDF417 (driver's license barcode), enable TRY_HARDER
+    const hints = new Map();
+    const fmt = ZXing.BarcodeFormat;
+    if (fmt && fmt.PDF_417 !== undefined) {
+      hints.set(2 /* POSSIBLE_FORMATS */, [fmt.PDF_417]);
+    }
+    hints.set(3 /* TRY_HARDER */, true);
+    codeReader = new ZXing.BrowserMultiFormatReader(hints, 250);
+
+    scannerStatus.textContent = "Hold license steady, barcode side up";
+    // Request rear camera with high-res — PDF417 is dense and needs resolution
+    const constraints = {
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    };
+    codeReader.decodeFromConstraints(constraints, scannerVideo, (result, err) => {
       if (result) {
         if (navigator.vibrate) navigator.vibrate(50);
         stopScanner();
