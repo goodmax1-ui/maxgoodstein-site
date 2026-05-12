@@ -1689,7 +1689,7 @@ radioVal.addEventListener("click", () => {
 buildForm();
 
 // ===== License scanner =====
-const ZXING_URL = "https://unpkg.com/@zxing/library@0.21.0/umd/index.min.js";
+const ZXING_URL = "https://unpkg.com/@zxing/library@0.19.3/umd/index.min.js";
 let zxingLoaded = false, codeReader = null, scanStream = null;
 
 function loadZXing() {
@@ -1730,16 +1730,19 @@ async function startScanner() {
     return;
   }
   scannerStatus.textContent = "Starting camera…";
+  if (!window.ZXing) {
+    scannerStatus.textContent = "Scanner library not loaded.";
+    return;
+  }
+  if (!ZXing.BrowserMultiFormatReader) {
+    scannerStatus.textContent = "Scanner API not found in library — available: " + Object.keys(ZXing).filter(k => k.startsWith("Browser")).join(", ");
+    return;
+  }
   try {
-    const hints = new Map();
-    hints.set(2 /* POSSIBLE_FORMATS */, [ZXing.BarcodeFormat.PDF_417]);
-    codeReader = new ZXing.BrowserMultiFormatReader(hints, 300);
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-    // Prefer back camera
-    const rear = devices.find(d => /back|rear|environment/i.test(d.label));
-    const deviceId = rear?.deviceId || devices[0]?.deviceId;
+    codeReader = new ZXing.BrowserMultiFormatReader();
     scannerStatus.textContent = "Point at the back-of-license barcode";
-    codeReader.decodeFromVideoDevice(deviceId, scannerVideo, (result, err) => {
+    // null deviceId = let the library pick the default (back camera on mobile)
+    codeReader.decodeFromVideoDevice(null, scannerVideo, (result, err) => {
       if (result) {
         if (navigator.vibrate) navigator.vibrate(50);
         stopScanner();
@@ -1769,7 +1772,7 @@ async function startScanner() {
         msg = "Page must be loaded over https:// (or via the chat preview, camera is blocked in iframes).";
         break;
       default:
-        msg = "Camera error: " + (e.name || e.message || "unknown");
+        msg = (e.name || "Error") + ": " + (e.message || "unknown").slice(0, 120);
     }
     scannerStatus.textContent = msg;
   }
