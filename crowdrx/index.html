@@ -569,6 +569,16 @@
     max-width: 520px;
     box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 92vh;
+    max-height: 92dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .eot-card input:focus,
+  .eot-card select:focus,
+  .eot-card textarea:focus {
+    scroll-margin-bottom: 80px;
+    scroll-margin-top: 20px;
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   @media (min-width: 600px) {
@@ -2142,6 +2152,15 @@ document.getElementById("manualClear").addEventListener("click", () => {
     const el = document.getElementById(k); if (el) el.value = "";
   }
   localStorage.removeItem(MANUAL_KEY);
+});
+
+// On iOS Safari, when an input is focused inside the manual modal, scroll it into view above the keyboard
+manualModal.querySelectorAll("input").forEach(inp => {
+  inp.addEventListener("focus", () => {
+    setTimeout(() => {
+      inp.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  });
 });
 
 // Auto-format DOB as user types
