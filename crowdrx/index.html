@@ -2163,6 +2163,43 @@ manualModal.querySelectorAll("input").forEach(inp => {
   });
 });
 
+// Auto-split a full address ("123 Main St, Brooklyn, NY 11201") into street/city/state/zip
+// Fires when iOS Safari autofills the Address field with a complete address from Contacts
+function parseFullAddress(full) {
+  if (!full) return null;
+  let s = full.trim().replace(/,\s*(USA|United States|US)\.?$/i, "");
+  // Format 1: "Street, City, STATE ZIP" (with full comma separators)
+  let m = s.match(/^(.+),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/i);
+  if (m) return { street: m[1].trim(), city: m[2].trim(), state: m[3].toUpperCase(), zip: m[4] };
+  // Format 2: "Street, City STATE ZIP" (no comma before state)
+  m = s.match(/^(.+),\s*(.+?)\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/i);
+  if (m) return { street: m[1].trim(), city: m[2].trim(), state: m[3].toUpperCase(), zip: m[4] };
+  // Format 3: "Street City STATE ZIP" (no commas at all — uncommon but possible)
+  m = s.match(/^(.+?)\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/i);
+  if (m) {
+    // Heuristic: assume last 1–2 words before state are the city
+    const beforeState = m[1].trim().split(/\s+/);
+    if (beforeState.length >= 3) {
+      const city = beforeState.slice(-1).join(" ");
+      const street = beforeState.slice(0, -1).join(" ");
+      return { street, city, state: m[2].toUpperCase(), zip: m[3] };
+    }
+  }
+  return null;
+}
+
+document.getElementById("mAddr").addEventListener("input", (e) => {
+  const value = e.target.value;
+  // Only auto-split if it looks like a full address (contains state+zip pattern)
+  if (!/[A-Z]{2}\s+\d{5}/i.test(value)) return;
+  const parsed = parseFullAddress(value);
+  if (!parsed) return;
+  document.getElementById("mAddr").value = parsed.street;
+  if (parsed.city) document.getElementById("mCity").value = parsed.city;
+  if (parsed.state) document.getElementById("mState").value = parsed.state;
+  if (parsed.zip) document.getElementById("mZip").value = parsed.zip;
+});
+
 // Auto-format DOB as user types
 document.getElementById("mDob").addEventListener("input", (e) => {
   let v = e.target.value.replace(/\D/g, "").slice(0, 8);
