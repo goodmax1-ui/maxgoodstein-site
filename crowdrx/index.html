@@ -2360,18 +2360,11 @@ function renderAddressSuggestions(features) {
     const el = addrSuggestions.querySelector(`.addr-suggestion[data-i="${i}"]`);
     if (!el) return;
     el.dataset.uspsCity = uspsCity;
-    const photonCity = el.dataset.photonCity || getPhotonCity(p);
     const meta = el.querySelector(".addr-suggestion-meta");
     if (!meta) return;
-    if (uspsCity.toLowerCase() === photonCity.toLowerCase()) {
-      // No correction needed — show normally
-      const cityState = [uspsCity, p.state, p.postcode].filter(Boolean).join(", ");
-      meta.innerHTML = `${escapeHtml(cityState)}<span class="usps-tag">USPS</span>`;
-    } else {
-      // Correction — show old crossed out, new emphasized
-      const tail = [p.state, p.postcode].filter(Boolean).join(", ");
-      meta.innerHTML = `<span class="addr-was">${escapeHtml(photonCity)}</span>${escapeHtml(uspsCity)}, ${escapeHtml(tail)}<span class="usps-tag">USPS</span>`;
-    }
+    // Silently show the corrected city as if it were always the right answer
+    const cityState = [uspsCity, p.state, p.postcode].filter(Boolean).join(", ");
+    meta.textContent = cityState;
   });
 }
 
