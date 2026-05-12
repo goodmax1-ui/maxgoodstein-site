@@ -1844,6 +1844,67 @@ function stopScanner() {
 
 scannerCancel.addEventListener("click", stopScanner);
 
+function rotateCanvas(srcCanvas, deg) {
+  if (deg === 0) return srcCanvas;
+  const w = srcCanvas.width, h = srcCanvas.height;
+  const c = document.createElement("canvas");
+  if (deg === 90 || deg === 270) { c.width = h; c.height = w; }
+  else { c.width = w; c.height = h; }
+  const cx = c.getContext("2d");
+  cx.translate(c.width / 2, c.height / 2);
+  cx.rotate(deg * Math.PI / 180);
+  cx.drawImage(srcCanvas, -w / 2, -h / 2);
+  return c;
+}
+
+function binarize(canvas) {
+  const out = document.createElement("canvas");
+  out.width = canvas.width; out.height = canvas.height;
+  const cx = out.getContext("2d");
+  cx.drawImage(canvas, 0, 0);
+  const imgData = cx.getImageData(0, 0, out.width, out.height);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    const v = gray > 128 ? 255 : 0;
+    d[i] = d[i + 1] = d[i + 2] = v;
+  }
+  cx.putImageData(imgData, 0, 0);
+  return out;
+}
+
+async function tryDecodeCanvas(canvas) {
+  // Try native BarcodeDetector first
+  if ("BarcodeDetector" in window) {
+    try {
+      const detector = new BarcodeDetector({ formats: ["pdf417"] });
+      const barcodes = await detector.detect(canvas);
+      if (barcodes.length > 0) return barcodes[0].rawValue;
+    } catch (e) {}
+  }
+  // Then ZXing
+  try {
+    if (codeReader && codeReader.decodeFromCanvas) {
+      const result = codeReader.decodeFromCanvas(canvas);
+      if (result) return result.getText();
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function decodeAllRotations(canvas) {
+  // Try every rotation, raw then binarized
+  const rotations = [0, 90, 180, 270];
+  for (const r of rotations) {
+    const rotated = rotateCanvas(canvas, r);
+    let text = await tryDecodeCanvas(rotated);
+    if (text) return text;
+    text = await tryDecodeCanvas(binarize(rotated));
+    if (text) return text;
+  }
+  return null;
+}
+
 async function decodeCapturedFrame() {
   if (!scannerVideo.videoWidth) {
     scannerStatus.textContent = "Camera not ready yet";
@@ -1854,43 +1915,16 @@ async function decodeCapturedFrame() {
   canvas.height = scannerVideo.videoHeight;
   const ctx = canvas.getContext("2d");
   ctx.drawImage(scannerVideo, 0, 0);
-  scannerStatus.textContent = `Decoding ${canvas.width}×${canvas.height}…`;
+  scannerStatus.textContent = `Decoding ${canvas.width}×${canvas.height} (trying rotations)…`;
 
-  // Try native iOS/Chrome BarcodeDetector first (hardware-accelerated, way better)
-  if ("BarcodeDetector" in window) {
-    try {
-      const detector = new BarcodeDetector({ formats: ["pdf417"] });
-      const barcodes = await detector.detect(canvas);
-      if (barcodes.length > 0) {
-        if (navigator.vibrate) navigator.vibrate(50);
-        stopScanner();
-        showResult(barcodes[0].rawValue);
-        return;
-      }
-    } catch (e) { console.log("Native detector miss:", e.message); }
+  const text = await decodeAllRotations(canvas);
+  if (text) {
+    if (navigator.vibrate) navigator.vibrate(50);
+    stopScanner();
+    showResult(text);
+    return;
   }
-
-  // Try high-contrast preprocessing + ZXing
-  try {
-    // Boost contrast — binarize the image which helps ZXing on hologram-laden licenses
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-      const v = gray > 128 ? 255 : 0;
-      d[i] = d[i + 1] = d[i + 2] = v;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    const result = codeReader.decodeFromCanvas ? codeReader.decodeFromCanvas(canvas) : null;
-    if (result) {
-      if (navigator.vibrate) navigator.vibrate(50);
-      stopScanner();
-      showResult(result.getText());
-      return;
-    }
-  } catch (e) {}
-
-  scannerStatus.textContent = "No barcode found. Hold steadier, fill the frame, retry.";
+  scannerStatus.textContent = "No barcode found. Try: hold landscape, fill the frame, more light.";
 }
 
 document.getElementById("scannerCapture").addEventListener("click", decodeCapturedFrame);
@@ -1922,54 +1956,27 @@ photoInput.addEventListener("change", async (e) => {
   ctx.drawImage(img, 0, 0);
   URL.revokeObjectURL(url);
 
-  // Try native BarcodeDetector
-  if ("BarcodeDetector" in window) {
-    try {
-      const detector = new BarcodeDetector({ formats: ["pdf417"] });
-      const barcodes = await detector.detect(canvas);
-      if (barcodes.length > 0) {
-        if (navigator.vibrate) navigator.vibrate(50);
-        stopScanner();
-        showResult(barcodes[0].rawValue);
-        return;
-      }
-    } catch (err) { console.log("Native detector miss:", err.message); }
-  }
-
-  // Try ZXing with high-contrast preprocessing
+  // Make sure ZXing is loaded for fallback
   if (!zxingLoaded) {
-    try { await loadZXing(); } catch (err) {
-      scannerStatus.textContent = "Couldn't load decoder library";
-      return;
-    }
+    try { await loadZXing(); } catch (err) {}
   }
-  try {
-    if (!codeReader) {
-      const hints = new Map();
-      const fmt = ZXing.BarcodeFormat;
-      if (fmt && fmt.PDF_417 !== undefined) hints.set(2, [fmt.PDF_417]);
-      hints.set(3, true);
-      codeReader = new ZXing.BrowserMultiFormatReader(hints);
-    }
-    // Boost contrast
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-      const v = gray > 128 ? 255 : 0;
-      d[i] = d[i + 1] = d[i + 2] = v;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    const result = codeReader.decodeFromCanvas(canvas);
-    if (result) {
-      if (navigator.vibrate) navigator.vibrate(50);
-      stopScanner();
-      showResult(result.getText());
-      return;
-    }
-  } catch (err) {}
+  if (!codeReader && window.ZXing) {
+    const hints = new Map();
+    const fmt = ZXing.BarcodeFormat;
+    if (fmt && fmt.PDF_417 !== undefined) hints.set(2, [fmt.PDF_417]);
+    hints.set(3, true);
+    codeReader = new ZXing.BrowserMultiFormatReader(hints);
+  }
 
-  scannerStatus.textContent = "Couldn't decode that photo. Get closer to the barcode and retry.";
+  const text = await decodeAllRotations(canvas);
+  if (text) {
+    if (navigator.vibrate) navigator.vibrate(50);
+    stopScanner();
+    showResult(text);
+    return;
+  }
+
+  scannerStatus.textContent = "Couldn't decode that photo. Try cropping tighter to the barcode.";
 });
 
 document.getElementById("scanLicenseBtn").addEventListener("click", startScanner);
