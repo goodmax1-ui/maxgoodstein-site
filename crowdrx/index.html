@@ -1015,6 +1015,51 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M6 10v6M9 10v6M12 10v6M15 10v6M18 10v6"/><circle cx="12" cy="3" r="0.5" fill="currentColor"/></svg>
       Scan Driver's License
     </button>
+    <button type="button" class="scan-launch" id="manualEntryBtn" style="background:var(--bg-soft);color:var(--text);border:1px solid var(--border-strong);margin-top:6px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Manual Patient Entry
+    </button>
+  </div>
+
+  <div class="eot-modal" id="manualModal" role="dialog" aria-modal="true">
+    <div class="eot-card">
+      <h3>Patient Info</h3>
+      <p class="eot-sub">Type once — tap any field below to copy it after.</p>
+      <div class="tour-grid">
+        <div class="tour-field" style="grid-column: 1 / -1;">
+          <label for="mFirst">First Name</label>
+          <input type="text" id="mFirst" autocomplete="given-name" autocapitalize="words" />
+        </div>
+        <div class="tour-field" style="grid-column: 1 / -1;">
+          <label for="mLast">Last Name</label>
+          <input type="text" id="mLast" autocomplete="family-name" autocapitalize="words" />
+        </div>
+        <div class="tour-field" style="grid-column: 1 / -1;">
+          <label for="mDob">Date of Birth (MM/DD/YYYY)</label>
+          <input type="text" id="mDob" inputmode="numeric" placeholder="MM/DD/YYYY" />
+        </div>
+        <div class="tour-field" style="grid-column: 1 / -1;">
+          <label for="mAddr">Address</label>
+          <input type="text" id="mAddr" autocomplete="street-address" autocapitalize="words" placeholder="123 Main St" />
+        </div>
+        <div class="tour-field">
+          <label for="mCity">City</label>
+          <input type="text" id="mCity" autocomplete="address-level2" autocapitalize="words" />
+        </div>
+        <div class="tour-field">
+          <label for="mState">State</label>
+          <input type="text" id="mState" maxlength="2" placeholder="NY" autocapitalize="characters" />
+        </div>
+        <div class="tour-field" style="grid-column: 1 / -1;">
+          <label for="mZip">ZIP</label>
+          <input type="text" id="mZip" inputmode="numeric" maxlength="10" placeholder="10001" />
+        </div>
+      </div>
+      <div class="eot-actions">
+        <button type="button" class="btn-cancel" id="manualCancel">Cancel</button>
+        <button type="button" class="btn-open" id="manualShow">Show Copyable</button>
+      </div>
+    </div>
   </div>
 
   <div class="scanner-modal" id="scannerModal" role="dialog" aria-modal="true">
@@ -1874,7 +1919,7 @@ function binarize(canvas) {
 }
 
 async function tryDecodeCanvas(canvas) {
-  // Try native BarcodeDetector first
+  // 1. Native BarcodeDetector (best when available — iOS 17+, Chrome)
   if ("BarcodeDetector" in window) {
     try {
       const detector = new BarcodeDetector({ formats: ["pdf417"] });
@@ -1882,16 +1927,28 @@ async function tryDecodeCanvas(canvas) {
       if (barcodes.length > 0) return barcodes[0].rawValue;
     } catch (e) {}
   }
-  // Then ZXing — convert canvas to data URL and decode the image
+  // 2. Low-level ZXing core (more reliable than the BrowserMultiFormatReader wrapper)
+  if (window.ZXing && ZXing.MultiFormatReader && ZXing.HTMLCanvasElementLuminanceSource) {
+    try {
+      const ls = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+      const bb = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(ls));
+      const reader = new ZXing.MultiFormatReader();
+      const hints = new Map();
+      if (ZXing.BarcodeFormat?.PDF_417 !== undefined) {
+        hints.set(2, [ZXing.BarcodeFormat.PDF_417]);
+      }
+      hints.set(3, true);
+      reader.setHints(hints);
+      const result = reader.decode(bb);
+      if (result) return result.getText();
+    } catch (e) {}
+  }
+  // 3. Higher-level decodeFromImageUrl as last resort
   if (codeReader) {
     try {
-      const dataUrl = canvas.toDataURL("image/png");
-      // decodeFromImageUrl is the real public method (decodeFromCanvas doesn't exist in this version)
-      const result = await codeReader.decodeFromImageUrl(dataUrl);
+      const result = await codeReader.decodeFromImageUrl(canvas.toDataURL("image/png"));
       if (result) return result.getText();
-    } catch (e) {
-      // NotFoundException is expected if no barcode in image
-    }
+    } catch (e) {}
   }
   return null;
 }
@@ -1984,6 +2041,79 @@ photoInput.addEventListener("change", async (e) => {
 });
 
 document.getElementById("scanLicenseBtn").addEventListener("click", startScanner);
+
+// Manual entry — guaranteed-working alternative
+const manualModal = document.getElementById("manualModal");
+const MANUAL_KEY = "bls_manual_patient_v1";
+document.getElementById("manualEntryBtn").addEventListener("click", () => {
+  const saved = JSON.parse(localStorage.getItem(MANUAL_KEY) || "{}");
+  for (const k of ["mFirst","mLast","mDob","mAddr","mCity","mState","mZip"]) {
+    const el = document.getElementById(k);
+    if (el) el.value = saved[k] || "";
+  }
+  manualModal.classList.add("open");
+});
+document.getElementById("manualCancel").addEventListener("click", () => manualModal.classList.remove("open"));
+manualModal.addEventListener("click", (e) => { if (e.target === manualModal) manualModal.classList.remove("open"); });
+
+document.getElementById("manualShow").addEventListener("click", () => {
+  const v = {};
+  for (const k of ["mFirst","mLast","mDob","mAddr","mCity","mState","mZip"]) {
+    v[k] = document.getElementById(k).value.trim();
+  }
+  localStorage.setItem(MANUAL_KEY, JSON.stringify(v));
+
+  const fullName = [v.mFirst, v.mLast].filter(Boolean).join(" ");
+  const fullAddress = [v.mAddr, v.mCity, v.mState && v.mState + (v.mZip ? " " + v.mZip : "")].filter(Boolean).join(", ");
+
+  const rows = [
+    { label: "Full Name", value: fullName },
+    { label: "First Name", value: v.mFirst },
+    { label: "Last Name", value: v.mLast },
+    { label: "Date of Birth", value: v.mDob },
+    { label: "Address", value: fullAddress },
+    { label: "Street", value: v.mAddr },
+    { label: "City", value: v.mCity },
+    { label: "State", value: v.mState },
+    { label: "ZIP", value: v.mZip },
+  ].filter(r => r.value);
+
+  if (!rows.length) {
+    alert("Fill in at least one field.");
+    return;
+  }
+
+  manualModal.classList.remove("open");
+
+  resultFields.innerHTML = rows.map((r, i) =>
+    `<div class="result-row" data-i="${i}">
+      <span class="result-label">${escapeHtml(r.label)}</span>
+      <span class="result-value">${escapeHtml(r.value)}</span>
+    </div>`
+  ).join("");
+  resultFields.querySelectorAll(".result-row").forEach((el, i) => {
+    el.addEventListener("click", () => {
+      copyText(rows[i].value);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 1200);
+    });
+  });
+  resultModal.classList.add("open");
+});
+
+// Auto-format DOB as user types
+document.getElementById("mDob").addEventListener("input", (e) => {
+  let v = e.target.value.replace(/\D/g, "").slice(0, 8);
+  if (v.length >= 5) v = v.slice(0, 2) + "/" + v.slice(2, 4) + "/" + v.slice(4);
+  else if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
+  e.target.value = v;
+});
+// Auto-format ZIP
+document.getElementById("mZip").addEventListener("input", (e) => {
+  let v = e.target.value.replace(/\D/g, "").slice(0, 9);
+  if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+  e.target.value = v;
+});
 resultClose.addEventListener("click", () => resultModal.classList.remove("open"));
 resultRescan.addEventListener("click", () => {
   resultModal.classList.remove("open");
