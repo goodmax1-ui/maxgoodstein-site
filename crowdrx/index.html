@@ -1882,13 +1882,17 @@ async function tryDecodeCanvas(canvas) {
       if (barcodes.length > 0) return barcodes[0].rawValue;
     } catch (e) {}
   }
-  // Then ZXing
-  try {
-    if (codeReader && codeReader.decodeFromCanvas) {
-      const result = codeReader.decodeFromCanvas(canvas);
+  // Then ZXing — convert canvas to data URL and decode the image
+  if (codeReader) {
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      // decodeFromImageUrl is the real public method (decodeFromCanvas doesn't exist in this version)
+      const result = await codeReader.decodeFromImageUrl(dataUrl);
       if (result) return result.getText();
+    } catch (e) {
+      // NotFoundException is expected if no barcode in image
     }
-  } catch (e) {}
+  }
   return null;
 }
 
