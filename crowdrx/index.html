@@ -873,6 +873,29 @@
   }
   .pt-chip-remove:hover { color: var(--bad); }
 
+  /* Address autocomplete dropdown */
+  .addr-suggestions {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+  }
+  .addr-suggestions:empty { display: none; }
+  .addr-suggestion {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .addr-suggestion:first-child { border-top: none; }
+  .addr-suggestion:active { background: var(--accent-soft); }
+  .addr-suggestion-street { font-size: 14px; font-weight: 600; color: var(--text); }
+  .addr-suggestion-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .addr-loading { padding: 12px 14px; font-size: 13px; color: var(--text-3); font-style: italic; }
+
   /* Tour info panel */
   .tour-panel {
     background: var(--bg-elev);
@@ -1095,6 +1118,7 @@
         <div class="tour-field" style="grid-column: 1 / -1;">
           <label for="mAddr">Address</label>
           <input type="text" id="mAddr" name="address-line1" autocomplete="address-line1" autocapitalize="words" placeholder="123 Main St" />
+          <div class="addr-suggestions" id="addrSuggestions"></div>
         </div>
         <div class="tour-field">
           <label for="mCity">City</label>
@@ -2188,16 +2212,103 @@ function parseFullAddress(full) {
   return null;
 }
 
-document.getElementById("mAddr").addEventListener("input", (e) => {
-  const value = e.target.value;
-  // Only auto-split if it looks like a full address (contains state+zip pattern)
-  if (!/[A-Z]{2}\s+\d{5}/i.test(value)) return;
-  const parsed = parseFullAddress(value);
-  if (!parsed) return;
-  document.getElementById("mAddr").value = parsed.street;
-  if (parsed.city) document.getElementById("mCity").value = parsed.city;
-  if (parsed.state) document.getElementById("mState").value = parsed.state;
-  if (parsed.zip) document.getElementById("mZip").value = parsed.zip;
+// Real-world address autocomplete via Photon (free, no API key)
+const STATE_ABBR = {
+  "alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA",
+  "colorado":"CO","connecticut":"CT","delaware":"DE","florida":"FL","georgia":"GA",
+  "hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS",
+  "kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA",
+  "michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT",
+  "nebraska":"NE","nevada":"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM",
+  "new york":"NY","north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK",
+  "oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC",
+  "south dakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT",
+  "virginia":"VA","washington":"WA","west virginia":"WV","wisconsin":"WI","wyoming":"WY",
+  "district of columbia":"DC","puerto rico":"PR"
+};
+
+const addrInput = document.getElementById("mAddr");
+const addrSuggestions = document.getElementById("addrSuggestions");
+let addrDebounce = null;
+let addrAbortController = null;
+let addrLastQuery = "";
+
+addrInput.addEventListener("input", () => {
+  const query = addrInput.value.trim();
+
+  // Existing full-address auto-split (kicks in if iOS pastes a complete address)
+  if (/[A-Z]{2}\s+\d{5}/i.test(query)) {
+    const parsed = parseFullAddress(query);
+    if (parsed) {
+      addrInput.value = parsed.street;
+      if (parsed.city) document.getElementById("mCity").value = parsed.city;
+      if (parsed.state) document.getElementById("mState").value = parsed.state;
+      if (parsed.zip) document.getElementById("mZip").value = parsed.zip;
+      addrSuggestions.innerHTML = "";
+      return;
+    }
+  }
+
+  clearTimeout(addrDebounce);
+  if (query.length < 4) { addrSuggestions.innerHTML = ""; return; }
+  if (query === addrLastQuery) return;
+
+  addrDebounce = setTimeout(async () => {
+    addrLastQuery = query;
+    addrSuggestions.innerHTML = '<div class="addr-loading">Searching…</div>';
+    // Cancel previous in-flight request
+    if (addrAbortController) addrAbortController.abort();
+    addrAbortController = new AbortController();
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8&lang=en`;
+      const res = await fetch(url, { signal: addrAbortController.signal });
+      const data = await res.json();
+      renderAddressSuggestions(data.features || []);
+    } catch (e) {
+      if (e.name !== "AbortError") addrSuggestions.innerHTML = "";
+    }
+  }, 280);
+});
+
+function renderAddressSuggestions(features) {
+  // Filter to US addresses with at least a street name
+  const usOnly = features.filter(f => {
+    const p = f.properties || {};
+    return (p.countrycode === "US" || p.country === "United States") && (p.street || p.name);
+  });
+  if (!usOnly.length) {
+    addrSuggestions.innerHTML = "";
+    return;
+  }
+  addrSuggestions.innerHTML = usOnly.slice(0, 6).map((f, i) => {
+    const p = f.properties;
+    const street = [p.housenumber, p.street || p.name].filter(Boolean).join(" ");
+    const cityState = [p.city || p.county, p.state, p.postcode].filter(Boolean).join(", ");
+    return `<div class="addr-suggestion" data-i="${i}">
+      <div class="addr-suggestion-street">${escapeHtml(street)}</div>
+      <div class="addr-suggestion-meta">${escapeHtml(cityState)}</div>
+    </div>`;
+  }).join("");
+  addrSuggestions.querySelectorAll(".addr-suggestion").forEach((el, i) => {
+    el.addEventListener("click", () => {
+      const p = usOnly[i].properties;
+      const street = [p.housenumber, p.street || p.name].filter(Boolean).join(" ");
+      addrInput.value = street;
+      if (p.city) document.getElementById("mCity").value = p.city;
+      if (p.state) {
+        const abbr = STATE_ABBR[p.state.toLowerCase()];
+        document.getElementById("mState").value = abbr || p.state.slice(0, 2).toUpperCase();
+      }
+      if (p.postcode) document.getElementById("mZip").value = p.postcode;
+      addrSuggestions.innerHTML = "";
+      addrLastQuery = street;
+    });
+  });
+}
+
+// Hide suggestions when address field loses focus (with delay so taps register)
+addrInput.addEventListener("blur", () => {
+  setTimeout(() => { addrSuggestions.innerHTML = ""; }, 200);
 });
 
 // Auto-format DOB as user types
