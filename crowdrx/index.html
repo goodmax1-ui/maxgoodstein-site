@@ -1776,6 +1776,29 @@ async function startScanner() {
         showResult(result.getText());
       }
     });
+
+    // Run native BarcodeDetector loop in parallel — way better on small/glossy barcodes
+    if ("BarcodeDetector" in window) {
+      try {
+        const nativeDetector = new BarcodeDetector({ formats: ["pdf417"] });
+        const nativeLoop = async () => {
+          if (!codeReader) return;
+          if (scannerVideo.videoWidth) {
+            try {
+              const found = await nativeDetector.detect(scannerVideo);
+              if (found.length > 0) {
+                if (navigator.vibrate) navigator.vibrate(50);
+                stopScanner();
+                showResult(found[0].rawValue);
+                return;
+              }
+            } catch (e) {}
+          }
+          setTimeout(nativeLoop, 200);
+        };
+        nativeLoop();
+      } catch (e) { console.log("Native BarcodeDetector unavailable:", e); }
+    }
     if (decodePromise && decodePromise.catch) {
       decodePromise.catch(e => {
         scannerStatus.textContent = `Setup failed: ${e.name || ""} ${(e.message || "").slice(0, 80)}`;
@@ -1818,7 +1841,7 @@ function stopScanner() {
 
 scannerCancel.addEventListener("click", stopScanner);
 
-document.getElementById("scannerCapture").addEventListener("click", async () => {
+async function decodeCapturedFrame() {
   if (!scannerVideo.videoWidth) {
     scannerStatus.textContent = "Camera not ready yet";
     return;
@@ -1829,25 +1852,45 @@ document.getElementById("scannerCapture").addEventListener("click", async () => 
   const ctx = canvas.getContext("2d");
   ctx.drawImage(scannerVideo, 0, 0);
   scannerStatus.textContent = `Decoding ${canvas.width}×${canvas.height}…`;
+
+  // Try native iOS/Chrome BarcodeDetector first (hardware-accelerated, way better)
+  if ("BarcodeDetector" in window) {
+    try {
+      const detector = new BarcodeDetector({ formats: ["pdf417"] });
+      const barcodes = await detector.detect(canvas);
+      if (barcodes.length > 0) {
+        if (navigator.vibrate) navigator.vibrate(50);
+        stopScanner();
+        showResult(barcodes[0].rawValue);
+        return;
+      }
+    } catch (e) { console.log("Native detector miss:", e.message); }
+  }
+
+  // Try high-contrast preprocessing + ZXing
   try {
-    let result;
-    if (codeReader.decodeFromCanvas) {
-      result = codeReader.decodeFromCanvas(canvas);
-    } else if (codeReader.decodeFromImageData) {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      result = codeReader.decodeFromImageData(imageData);
+    // Boost contrast — binarize the image which helps ZXing on hologram-laden licenses
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+      const v = gray > 128 ? 255 : 0;
+      d[i] = d[i + 1] = d[i + 2] = v;
     }
+    ctx.putImageData(imgData, 0, 0);
+    const result = codeReader.decodeFromCanvas ? codeReader.decodeFromCanvas(canvas) : null;
     if (result) {
       if (navigator.vibrate) navigator.vibrate(50);
       stopScanner();
-      showResult(result.getText ? result.getText() : result.text || result);
-    } else {
-      scannerStatus.textContent = "No barcode found in that frame. Reposition and tap again.";
+      showResult(result.getText());
+      return;
     }
-  } catch (e) {
-    scannerStatus.textContent = "No barcode in frame — closer/farther & retry";
-  }
-});
+  } catch (e) {}
+
+  scannerStatus.textContent = "No barcode found. Hold steadier, fill the frame, retry.";
+}
+
+document.getElementById("scannerCapture").addEventListener("click", decodeCapturedFrame);
 
 document.getElementById("scanLicenseBtn").addEventListener("click", startScanner);
 resultClose.addEventListener("click", () => resultModal.classList.remove("open"));
