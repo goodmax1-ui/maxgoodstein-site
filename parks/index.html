@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#2d6a4f" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0a0c11" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Parks" />
+<title>Parks Lookup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://data.cityofnewyork.us">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --bg-elev: #ffffff;
+    --bg-soft: #fafbfc;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --accent: #2d6a4f;
+    --accent-2: #40916c;
+    --accent-soft: #d8eee2;
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+    --info: #2563eb;
+    --info-soft: #dbeafe;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
+    --shadow-md: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 40px rgba(15,23,42,0.12);
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11;
+      --bg-elev: #15181f;
+      --bg-soft: #1a1e26;
+      --text: #f1f5f9;
+      --text-2: #cbd5e1;
+      --text-3: #64748b;
+      --border: #232832;
+      --border-strong: #2f3540;
+      --accent: #40916c;
+      --accent-2: #52b788;
+      --accent-soft: rgba(64,145,108,0.18);
+      --ok: #22c55e;
+      --ok-soft: rgba(34,197,94,0.15);
+      --warn: #f59e0b;
+      --warn-soft: rgba(245,158,11,0.15);
+      --bad: #f87171;
+      --bad-soft: rgba(248,113,113,0.15);
+      --info: #60a5fa;
+      --info-soft: rgba(96,165,250,0.15);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html, body { margin: 0; padding: 0; touch-action: manipulation; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: env(safe-area-inset-top) 0 0;
+  }
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    flex: 1;
+  }
+  h1 .dot { color: var(--accent); }
+  .back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    color: var(--text);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .back-btn:active { transform: scale(0.93); background: var(--accent-soft); }
+  .back-btn svg { width: 18px; height: 18px; }
+  body.detail .back-btn { display: inline-flex; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* Search */
+  .search-wrap { position: relative; margin-bottom: 18px; }
+  .search-input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    font: 500 16px/1.4 inherit;
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    -webkit-appearance: none;
+  }
+  .search-input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    border-color: var(--accent);
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: none;
+    background: var(--bg-soft);
+    color: var(--text-2);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .search-clear.show { display: inline-flex; }
+  .search-clear svg { width: 14px; height: 14px; }
+
+  .results {
+    margin-top: 8px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    display: none;
+  }
+  .results.show { display: block; }
+  .result-row {
+    display: block;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .result-row:first-child { border-top: none; }
+  .result-row:active { background: var(--accent-soft); }
+  .result-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .result-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .result-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+
+  /* Recent chips */
+  .recent { margin-bottom: 18px; }
+  .recent-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .chip:active { transform: scale(0.96); border-color: var(--accent); background: var(--accent-soft); }
+  .chip .chip-bor {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  /* Detail view */
+  .park-header {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .park-name {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .park-name311 {
+    font-size: 13px;
+    color: var(--text-3);
+    margin: 0 0 12px;
+  }
+  .park-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+  .meta-pill.accent { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .park-address {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .section {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .section-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Officials rows */
+  .official {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .official:first-child { border-top: none; }
+  .official:active { background: var(--accent-soft); }
+  .official.no-link { cursor: default; }
+  .official.no-link:active { background: transparent; }
+  .official-role {
+    flex: 0 0 110px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .official-body { flex: 1; min-width: 0; }
+  .official-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .official-sub {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+  .official-arrow {
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .official-arrow svg { width: 14px; height: 14px; }
+  .official.no-link .official-arrow { display: none; }
+  .skeleton {
+    display: inline-block;
+    height: 14px;
+    width: 120px;
+    background: linear-gradient(90deg, var(--bg-soft), var(--border), var(--bg-soft));
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Capital project cards */
+  .project {
+    border-top: 1px solid var(--border);
+    padding: 14px 18px;
+  }
+  .project:first-child { border-top: none; }
+  .project-title {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .phase-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .phase-pill.design { background: var(--info-soft); color: var(--info); }
+  .phase-pill.procurement { background: var(--warn-soft); color: var(--warn); }
+  .phase-pill.construction { background: var(--ok-soft); color: var(--ok); }
+  .phase-pill.completed { background: var(--bg-soft); color: var(--text-3); border: 1px solid var(--border); }
+  .phase-pill.other { background: var(--accent-soft); color: var(--accent); }
+  .project-funding {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+  .project-summary {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+    margin: 0 0 8px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .progress-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+    min-width: 36px;
+    text-align: right;
+  }
+  .project-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .project-foot strong { color: var(--text-2); font-weight: 600; }
+
+  .empty {
+    padding: 22px 18px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-3);
+  }
+  .empty a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .empty a:hover { text-decoration: underline; }
+
+  /* Links grid */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 14px;
+  }
+  .link-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    min-height: 56px;
+  }
+  .link-btn:active { transform: scale(0.97); background: var(--accent-soft); border-color: var(--accent); }
+  .link-btn svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+  .link-btn-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .link-btn-sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
+
+  .hidden { display: none !important; }
+  .error {
+    padding: 14px 18px;
+    color: var(--bad);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <button class="back-btn" id="backBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1><span class="dot">·</span> Parks Lookup</h1>
+  </div>
+</header>
+
+<main>
+  <!-- Search view -->
+  <div id="searchView">
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input id="searchInput" class="search-input" type="search" placeholder="Search any NYC park" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      <button class="search-clear" id="searchClear" aria-label="Clear">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+      <div class="results" id="results"></div>
+    </div>
+    <div class="recent hidden" id="recentBlock">
+      <p class="recent-label">Recent</p>
+      <div class="chips" id="recentChips"></div>
+    </div>
+  </div>
+
+  <!-- Detail view -->
+  <div id="detailView" class="hidden">
+    <div class="park-header" id="parkHeader"></div>
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Elected Officials</h2>
+      </div>
+      <div id="officials"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Capital Projects</h2>
+        <span class="section-count" id="projectsCount"></span>
+      </div>
+      <div id="projects"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Links</h2>
+      </div>
+      <div class="links-grid" id="links"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+'use strict';
+
+// Register a free token at https://dev.socrata.com/foundry/data.cityofnewyork.us/enfh-gkve
+// and paste it here. Optional — app works without, just rate-limited.
+const SOCRATA_APP_TOKEN = '';
+
+const SOCRATA = 'https://data.cityofnewyork.us/resource';
+const ENDPOINT_PARKS = SOCRATA + '/enfh-gkve.json';
+const ENDPOINT_COUNCIL = SOCRATA + '/uvw5-9znb.json';
+const ENDPOINT_CAPITAL = SOCRATA + '/4hcv-tc5r.json';
+
+const BOROUGHS = { M: 'Manhattan', B: 'Bronx', X: 'Bronx', Q: 'Queens', K: 'Brooklyn', R: 'Staten Island' };
+// communityboard field uses borough digit: 1=M, 2=Bx, 3=Bk, 4=Q, 5=SI
+const CB_BOROUGH_PREFIX = { '1': 'M', '2': 'X', '3': 'K', '4': 'Q', '5': 'R' };
+const CB_BOROUGH_SLUG = { M: 'manhattancb', X: 'bronxcb', K: 'brooklyncb', Q: 'queenscb', R: 'statenislandcb' };
+const CB_BOROUGH_NAME = { M: 'Manhattan', X: 'Bronx', K: 'Brooklyn', Q: 'Queens', R: 'Staten Island' };
+
+const BOROUGH_PRESIDENTS = {
+  M: { name: 'Mark Levine', url: 'https://www.manhattanbp.nyc.gov/' },
+  X: { name: 'Vanessa L. Gibson', url: 'https://bronxboropres.nyc.gov/' },
+  B: { name: 'Vanessa L. Gibson', url: 'https://bronxboropres.nyc.gov/' },
+  K: { name: 'Antonio Reynoso', url: 'https://www.brooklynbp.nyc.gov/' },
+  Q: { name: 'Donovan Richards', url: 'https://www.queensbp.org/' },
+  R: { name: 'Vito Fossella', url: 'https://www.statenislandusa.com/' },
+};
+
+const PARKS_BOROUGH_COMMISSIONERS = {
+  M: { name: 'Manhattan Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  X: { name: 'Bronx Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  B: { name: 'Bronx Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  K: { name: 'Brooklyn Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  Q: { name: 'Queens Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  R: { name: 'Staten Island Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+};
+
+const RECENT_KEY = 'parks.recent';
+const RECENT_MAX = 10;
+
+// Module state
+let reps = null;            // loaded from reps.json once
+let councilCache = null;    // map of district -> {name, url}
+let searchAbort = null;
+let searchTimer = null;
+
+// Utilities
+function fetchJSON(url, opts = {}) {
+  const headers = Object.assign({}, opts.headers || {});
+  if (SOCRATA_APP_TOKEN && /data\.cityofnewyork\.us/.test(url)) {
+    headers['X-App-Token'] = SOCRATA_APP_TOKEN;
+  }
+  return fetch(url, Object.assign({}, opts, { headers })).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+function escSoql(s) {
+  return String(s).replace(/'/g, "''");
+}
+
+function $(id) { return document.getElementById(id); }
+
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
+}
+function pushRecent(park) {
+  const list = getRecent().filter(p => p.gispropnum !== park.gispropnum);
+  list.unshift({
+    gispropnum: park.gispropnum,
+    signname: park.signname,
+    borough: park.borough,
+  });
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX)));
+  renderRecent();
+}
+
+function renderRecent() {
+  const list = getRecent();
+  const block = $('recentBlock');
+  const chips = $('recentChips');
+  if (!list.length) { block.classList.add('hidden'); return; }
+  block.classList.remove('hidden');
+  chips.innerHTML = '';
+  list.forEach(p => {
+    const el = document.createElement('button');
+    el.className = 'chip';
+    el.innerHTML = `<span>${escapeHTML(p.signname)}</span><span class="chip-bor">${BOROUGHS[p.borough] || p.borough || ''}</span>`;
+    el.addEventListener('click', () => loadDetailByGispropnum(p.gispropnum));
+    chips.appendChild(el);
+  });
+}
+
+function escapeHTML(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// View switching
+function showSearch() {
+  document.body.classList.remove('detail');
+  $('searchView').classList.remove('hidden');
+  $('detailView').classList.add('hidden');
+  renderRecent();
+}
+function showDetail() {
+  document.body.classList.add('detail');
+  $('searchView').classList.add('hidden');
+  $('detailView').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// Search
+async function runSearch(q) {
+  if (searchAbort) searchAbort.abort();
+  const results = $('results');
+  if (!q || q.trim().length < 2) { results.classList.remove('show'); results.innerHTML = ''; return; }
+  searchAbort = new AbortController();
+  const where = `upper(signname) like upper('%${escSoql(q.trim())}%')`;
+  const url = `${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,name311,borough,location,zipcode&$order=signname&$limit=20`;
+  try {
+    const rows = await fetchJSON(url, { signal: searchAbort.signal });
+    renderResults(rows);
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    results.classList.add('show');
+    results.innerHTML = `<div class="result-empty">Search failed: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+function renderResults(rows) {
+  const results = $('results');
+  results.classList.add('show');
+  if (!rows.length) {
+    results.innerHTML = `<div class="result-empty">No parks match that name.</div>`;
+    return;
+  }
+  results.innerHTML = '';
+  rows.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    const bor = BOROUGHS[p.borough] || p.borough || '';
+    const sub = [bor, p.location].filter(Boolean).join(' · ');
+    row.innerHTML = `
+      <div class="result-name">${escapeHTML(p.signname || p.name311 || '(unnamed)')}</div>
+      <div class="result-sub">${escapeHTML(sub)}</div>`;
+    row.addEventListener('click', () => loadDetail(p));
+    results.appendChild(row);
+  });
+}
+
+function clearSearch() {
+  $('searchInput').value = '';
+  $('searchClear').classList.remove('show');
+  $('results').classList.remove('show');
+  $('results').innerHTML = '';
+}
+
+// Detail loading
+async function loadDetailByGispropnum(id) {
+  try {
+    const rows = await fetchJSON(`${ENDPOINT_PARKS}?gispropnum=${encodeURIComponent(id)}&$limit=1`);
+    if (!rows.length) throw new Error('Park not found');
+    loadDetail(rows[0]);
+  } catch (e) {
+    alert('Could not load park: ' + e.message);
+  }
+}
+
+async function loadDetail(stub) {
+  // stub from search may have fewer fields; refetch full row to be safe
+  let full = stub;
+  if (!stub.councildistrict || !stub.multipolygon) {
+    try {
+      const rows = await fetchJSON(`${ENDPOINT_PARKS}?gispropnum=${encodeURIComponent(stub.gispropnum)}&$limit=1`);
+      if (rows.length) full = rows[0];
+    } catch { /* fall through with stub */ }
+  }
+  pushRecent(full);
+  clearSearch();
+  renderDetail(full);
+  showDetail();
+  fillCouncilMember(full);
+  loadCapitalProjects(full);
+}
+
+function renderDetail(p) {
+  const bor = BOROUGHS[p.borough] || p.borough || '';
+  const acres = p.acres ? `${Number(p.acres).toFixed(2)} ac` : null;
+  const cls = [p.typecategory, p.subcategory].filter(Boolean).join(' · ');
+  const addr = [p.location, p.zipcode].filter(Boolean).join(' · ');
+
+  const metaPills = [];
+  if (bor) metaPills.push(`<span class="meta-pill accent">${escapeHTML(bor)}</span>`);
+  if (p.gispropnum) metaPills.push(`<span class="meta-pill">${escapeHTML(p.gispropnum)}</span>`);
+  if (acres) metaPills.push(`<span class="meta-pill">${acres}</span>`);
+  if (cls) metaPills.push(`<span class="meta-pill">${escapeHTML(cls)}</span>`);
+
+  const name311line = p.name311 && p.name311 !== p.signname
+    ? `<p class="park-name311">311 name: ${escapeHTML(p.name311)}</p>` : '';
+
+  $('parkHeader').innerHTML = `
+    <h2 class="park-name">${escapeHTML(p.signname || p.name311 || '(unnamed park)')}</h2>
+    ${name311line}
+    <div class="park-meta">${metaPills.join('')}</div>
+    ${addr ? `<p class="park-address">${escapeHTML(addr)}</p>` : ''}
+  `;
+
+  renderOfficials(p);
+  renderLinks(p);
+}
+
+function chunkDistricts(s, width) {
+  if (!s) return [];
+  const str = String(s);
+  if (str.length <= width) return [str];
+  const out = [];
+  for (let i = 0; i < str.length; i += width) out.push(str.slice(i, i + width));
+  return out;
+}
+
+function renderOfficials(p) {
+  const rows = [];
+  const bor = p.borough;
+  const borChar = bor === 'B' ? 'X' : bor; // dataset uses X for Bronx
+
+  // Council district (1-2 digits, rarely multi)
+  if (p.councildistrict) {
+    const cd = String(p.councildistrict);
+    rows.push(officialRow('Council', `District ${cd}`, 'NYC City Council', 'council-' + cd, null, true));
+  }
+
+  // State Senate — chunk by 2
+  const senateDistricts = chunkDistricts(p.nys_senate, 2);
+  if (senateDistricts.length) {
+    const names = [];
+    let firstUrl = null;
+    senateDistricts.forEach(d => {
+      const n = String(parseInt(d, 10));
+      const rep = reps && reps.senate && reps.senate[n];
+      names.push(rep ? rep.name : `District ${n}`);
+      if (!firstUrl) firstUrl = rep ? rep.url : `https://www.nysenate.gov/senators/find?district=${n}`;
+    });
+    const subLabel = senateDistricts.length > 1
+      ? `Districts ${senateDistricts.map(d => parseInt(d, 10)).join(', ')}`
+      : `District ${parseInt(senateDistricts[0], 10)}`;
+    rows.push(officialRow('State Senate', names.join(', '), subLabel, null, firstUrl));
+  }
+
+  // State Assembly — chunk by 2
+  const asmDistricts = chunkDistricts(p.nys_assembly, 2);
+  if (asmDistricts.length) {
+    const names = [];
+    let firstUrl = null;
+    asmDistricts.forEach(d => {
+      const n = String(parseInt(d, 10));
+      const rep = reps && reps.assembly && reps.assembly[n];
+      names.push(rep ? rep.name : `District ${n}`);
+      if (!firstUrl) firstUrl = rep ? rep.url : `https://nyassembly.gov/mem/?ad=${n}`;
+    });
+    const subLabel = asmDistricts.length > 1
+      ? `Districts ${asmDistricts.map(d => parseInt(d, 10)).join(', ')}`
+      : `District ${parseInt(asmDistricts[0], 10)}`;
+    rows.push(officialRow('State Assembly', names.join(', '), subLabel, null, firstUrl));
+  }
+
+  // US Congress (1-2 digits, rarely multi)
+  if (p.us_congress) {
+    const cg = String(p.us_congress);
+    const rep = reps && reps.congress && reps.congress[cg];
+    rows.push(officialRow(
+      'US Congress',
+      rep ? rep.name : `District ${cg}`,
+      rep ? `NY-${cg}${rep.party ? ' · ' + rep.party : ''}` : `NY-${cg}`,
+      null,
+      rep ? rep.url : `https://www.house.gov/representatives`
+    ));
+  }
+
+  // Community Board — chunk by 3 (borough digit + 2-digit number)
+  const cbCodes = chunkDistricts(p.communityboard, 3);
+  if (cbCodes.length) {
+    const labels = [];
+    let firstUrl = null;
+    cbCodes.forEach(code => {
+      if (!/^\d{3}$/.test(code)) return;
+      const borDigit = code[0];
+      const cbNum = parseInt(code.slice(1), 10);
+      const borCode = CB_BOROUGH_PREFIX[borDigit];
+      const borName = CB_BOROUGH_NAME[borCode] || '';
+      const slug = (CB_BOROUGH_SLUG[borCode] || 'communityboard') + cbNum;
+      labels.push(`${borName} CB ${cbNum}`);
+      if (!firstUrl) firstUrl = `https://www.nyc.gov/site/${slug}/index.page`;
+    });
+    if (labels.length) {
+      rows.push(officialRow(
+        'Community Board',
+        labels.join(', '),
+        labels.length > 1 ? `${labels.length} boards` : 'NYC Community Board',
+        null,
+        firstUrl
+      ));
+    }
+  }
+
+  // Borough President
+  const bp = BOROUGH_PRESIDENTS[borChar] || BOROUGH_PRESIDENTS[bor];
+  if (bp) {
+    rows.push(officialRow('Borough Pres', bp.name, `${BOROUGHS[bor] || bor} Borough President`, null, bp.url));
+  }
+
+  // Parks Borough Commissioner
+  const pc = PARKS_BOROUGH_COMMISSIONERS[borChar] || PARKS_BOROUGH_COMMISSIONERS[bor];
+  if (pc) {
+    rows.push(officialRow('Parks Boro', pc.name, 'NYC Parks borough management', null, pc.url));
+  }
+
+  // Precinct
+  if (p.precinct) {
+    rows.push(officialRow('NYPD', `Precinct ${p.precinct}`, 'Local police precinct', null, `https://www.nyc.gov/site/nypd/bureaus/patrol/precincts/${p.precinct}-precinct.page`));
+  }
+
+  $('officials').innerHTML = rows.join('') || `<div class="empty">No district info on file.</div>`;
+}
+
+function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
+  const slot = slotId ? ` id="${slotId}"` : '';
+  const arrow = `<span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>`;
+  const inner = `
+    <div class="official-role">${escapeHTML(role)}</div>
+    <div class="official-body"${slot}>
+      <div class="official-name">${withSkeleton ? '<span class="skeleton"></span>' : escapeHTML(name)}</div>
+      <div class="official-sub">${escapeHTML(sub)}</div>
+    </div>
+    ${arrow}`;
+  if (url) {
+    return `<a class="official" href="${escapeHTML(url)}" target="_blank" rel="noopener">${inner}</a>`;
+  }
+  return `<div class="official no-link">${inner}</div>`;
+}
+
+async function fillCouncilMember(p) {
+  const cd = p.councildistrict;
+  if (!cd) return;
+  if (!councilCache) {
+    try {
+      const today = new Date().toISOString().slice(0, 10) + 'T00:00:00';
+      const where = `term_start <= '${today}' AND term_end >= '${today}'`;
+      const rows = await fetchJSON(`${ENDPOINT_COUNCIL}?$where=${encodeURIComponent(where)}&$limit=100`);
+      councilCache = {};
+      rows.forEach(r => {
+        const d = r.district;
+        if (d) councilCache[String(parseInt(d, 10))] = r;
+      });
+    } catch {
+      councilCache = {};
+    }
+  }
+  const member = councilCache[String(parseInt(cd, 10))];
+  const slot = document.querySelector('#council-' + cd);
+  if (!slot) return;
+  const districtUrl = `https://council.nyc.gov/district-${cd}/`;
+  if (member && member.name) {
+    slot.parentElement.outerHTML = `
+      <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
+        <div class="official-role">Council</div>
+        <div class="official-body">
+          <div class="official-name">${escapeHTML(member.name)}</div>
+          <div class="official-sub">District ${cd} · NYC City Council</div>
+        </div>
+        <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>`;
+  } else {
+    slot.parentElement.outerHTML = `
+      <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
+        <div class="official-role">Council</div>
+        <div class="official-body">
+          <div class="official-name">District ${cd}</div>
+          <div class="official-sub">NYC City Council</div>
+        </div>
+        <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>`;
+  }
+}
+
+async function loadCapitalProjects(p) {
+  const root = $('projects');
+  const countEl = $('projectsCount');
+  root.innerHTML = '<div class="empty"><span class="skeleton" style="width:140px"></span></div>';
+  countEl.textContent = '';
+  try {
+    const rows = await fetchJSON(`${ENDPOINT_CAPITAL}?parkid=${encodeURIComponent(p.gispropnum)}&$order=lastupdated DESC&$limit=50`);
+    if (!rows.length) {
+      root.innerHTML = `<div class="empty">No capital projects on record.<br><a href="https://www.nycgovparks.org/planning-and-building/capital-project-tracker" target="_blank" rel="noopener">Open Capital Project Tracker</a></div>`;
+      countEl.textContent = '0';
+      return;
+    }
+    countEl.textContent = String(rows.length);
+    root.innerHTML = rows.map(renderProject).join('');
+  } catch (e) {
+    root.innerHTML = `<div class="error">Could not load capital projects: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+function renderProject(prj) {
+  const phaseRaw = (prj.currentphase || '').trim();
+  const phase = phaseRaw.toLowerCase();
+  let phaseClass = 'other';
+  if (/design/.test(phase)) phaseClass = 'design';
+  else if (/procure/.test(phase)) phaseClass = 'procurement';
+  else if (/construct/.test(phase)) phaseClass = 'construction';
+  else if (/complete|closed/.test(phase)) phaseClass = 'completed';
+
+  let pct = null;
+  if (/design/.test(phase) && prj.designpercentcomplete) pct = prj.designpercentcomplete;
+  else if (/procure/.test(phase) && prj.procurementpercentcomplete) pct = prj.procurementpercentcomplete;
+  else if (/construct/.test(phase) && prj.constructionpercentcomplete) pct = prj.constructionpercentcomplete;
+  if (pct != null) pct = Math.max(0, Math.min(100, parseFloat(pct)));
+
+  const completion = prj.constructionprojectedcompletion || prj.procurementprojectedcompletion || prj.designprojectedcompletion || prj.constructionactualcompletion;
+  const completionDate = completion ? new Date(completion).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
+
+  const foot = [];
+  if (completionDate) foot.push(`<span><strong>Target:</strong> ${escapeHTML(completionDate)}</span>`);
+  if (prj.projectliaison) foot.push(`<span><strong>Liaison:</strong> ${escapeHTML(prj.projectliaison)}</span>`);
+  if (prj.fundingsource) foot.push(`<span><strong>Funding:</strong> ${escapeHTML(prj.fundingsource)}</span>`);
+  if (prj.fmsid) foot.push(`<span><strong>FMS:</strong> ${escapeHTML(prj.fmsid)}</span>`);
+
+  const fundingPill = prj.totalfunding ? `<span class="project-funding">${escapeHTML(prj.totalfunding)}</span>` : '';
+
+  return `
+    <div class="project">
+      <h3 class="project-title">${escapeHTML(prj.title || 'Untitled project')}</h3>
+      <div class="project-meta">
+        ${phaseRaw ? `<span class="phase-pill ${phaseClass}">${escapeHTML(phaseRaw)}</span>` : ''}
+        ${fundingPill}
+      </div>
+      ${pct != null ? `
+        <div class="progress-row">
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-pct">${Math.round(pct)}%</div>
+        </div>` : ''}
+      ${prj.summary ? `<p class="project-summary">${escapeHTML(prj.summary)}</p>` : ''}
+      ${foot.length ? `<div class="project-foot">${foot.join('')}</div>` : ''}
+    </div>`;
+}
+
+function centroidFromMultipolygon(geo) {
+  try {
+    const coords = geo && geo.coordinates;
+    if (!coords) return null;
+    let sx = 0, sy = 0, n = 0;
+    const visit = arr => {
+      if (typeof arr[0] === 'number') { sx += arr[0]; sy += arr[1]; n++; return; }
+      arr.forEach(visit);
+    };
+    visit(coords);
+    return n ? { lng: sx / n, lat: sy / n } : null;
+  } catch { return null; }
+}
+
+function renderLinks(p) {
+  const id = encodeURIComponent(p.gispropnum || '');
+  const q = encodeURIComponent('"' + (p.signname || '') + '" NYC parks');
+  const c = centroidFromMultipolygon(p.multipolygon);
+  const mapUrl = c
+    ? `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((p.signname || '') + ' ' + (p.location || '') + ' New York')}`;
+
+  const links = [
+    { href: `https://www.nycgovparks.org/parks/${id}`, label: 'Official park page', sub: 'nycgovparks.org', icon: 'page' },
+    { href: `https://www.nycgovparks.org/parks/${id}/history`, label: 'History', sub: 'Site history', icon: 'history' },
+    { href: `https://news.google.com/search?q=${q}`, label: 'Recent news', sub: 'Google News search', icon: 'news' },
+    { href: mapUrl, label: 'Map / directions', sub: 'Google Maps', icon: 'map' },
+    { href: `https://www.nycgovparks.org/planning-and-building/capital-project-tracker?selected_parkid=${id}`, label: 'Capital tracker', sub: 'All projects', icon: 'tracker' },
+    { href: 'https://www.nycgovparks.org/contact', label: 'Contact Parks', sub: '311 + agency', icon: 'contact' },
+  ];
+
+  const icons = {
+    page: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/><polyline points="12 7 12 12 15 14"/></svg>',
+    news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+    map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    tracker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="14 5 21 12 14 19"/></svg>',
+    contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92V21a1 1 0 0 1-1.1 1 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 3.19 4.1 1 1 0 0 1 4.18 3h4.09a1 1 0 0 1 1 .75 12.84 12.84 0 0 0 .7 2.81 1 1 0 0 1-.23 1L8.09 9.91a16 16 0 0 0 6 6l2.35-1.65a1 1 0 0 1 1-.23 12.84 12.84 0 0 0 2.81.7 1 1 0 0 1 .75 1z"/></svg>',
+  };
+
+  $('links').innerHTML = links.map(l => `
+    <a class="link-btn" href="${escapeHTML(l.href)}" target="_blank" rel="noopener">
+      ${icons[l.icon]}
+      <span class="link-btn-text">
+        <span>${escapeHTML(l.label)}</span>
+        <span class="link-btn-sub">${escapeHTML(l.sub)}</span>
+      </span>
+    </a>`).join('');
+}
+
+// Init
+async function init() {
+  // Load reps.json (best-effort, app still works without)
+  try {
+    const r = await fetch('reps.json');
+    if (r.ok) reps = await r.json();
+  } catch { reps = null; }
+
+  const input = $('searchInput');
+  const clear = $('searchClear');
+  input.addEventListener('input', () => {
+    const v = input.value;
+    clear.classList.toggle('show', v.length > 0);
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(v), 250);
+  });
+  input.addEventListener('focus', () => {
+    if (input.value && $('results').innerHTML) $('results').classList.add('show');
+  });
+  clear.addEventListener('click', () => {
+    clearSearch();
+    input.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) $('results').classList.remove('show');
+  });
+  $('backBtn').addEventListener('click', showSearch);
+
+  renderRecent();
+}
+
+init();
+</script>
+</body>
+</html>
