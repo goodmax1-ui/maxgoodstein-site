@@ -662,13 +662,28 @@ function showDetail() {
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
+// Normalize text for forgiving comparison: lowercase, strip apostrophes/periods/commas,
+// replace dashes with spaces, collapse whitespace.
+function normalize(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/['’`.,]/g, '')
+    .replace(/[-_/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Search
 async function runSearch(q) {
   if (searchAbort) searchAbort.abort();
   const results = $('results');
   if (!q || q.trim().length < 2) { results.classList.remove('show'); results.innerHTML = ''; return; }
   searchAbort = new AbortController();
-  const where = `upper(signname) like upper('%${escSoql(q.trim())}%')`;
+  const term = normalize(q);
+  // Strip the same chars on the column side so apostrophes/periods don't break the match.
+  // SoQL escapes single quotes by doubling them, so '''' = literal '.
+  const stripped = "replace(replace(replace(signname, '''', ''), '.', ''), ',', '')";
+  const where = `upper(${stripped}) like upper('%${escSoql(term)}%')`;
   const url = `${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,name311,borough,location,zipcode&$order=signname&$limit=20`;
   try {
     const rows = await fetchJSON(url, { signal: searchAbort.signal });
