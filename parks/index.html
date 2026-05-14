@@ -317,6 +317,56 @@
     color: var(--text-3);
     font-variant-numeric: tabular-nums;
   }
+  .section-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .section-link:hover { text-decoration: underline; }
+
+  /* Inline article body (history) */
+  .article-body {
+    padding: 14px 18px 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .article-body p { margin: 0 0 10px; }
+  .article-body p:last-child { margin-bottom: 0; }
+
+  /* News / resolutions list */
+  .feed-item {
+    display: block;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .feed-item:first-child { border-top: none; }
+  .feed-item:active { background: var(--accent-soft); }
+  .feed-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+  }
+  .feed-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .feed-meta .src { color: var(--accent); font-weight: 600; }
+  .feed-snippet {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.4;
+  }
 
   /* Officials rows */
   .official {
@@ -542,6 +592,27 @@
     </div>
     <div class="section">
       <div class="section-header">
+        <h2 class="section-title">Site History</h2>
+        <a class="section-link" id="historyOpen" target="_blank" rel="noopener">Open</a>
+      </div>
+      <div id="history"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Recent News</h2>
+        <a class="section-link" id="newsOpen" target="_blank" rel="noopener">More</a>
+      </div>
+      <div id="news"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Community Board Resolutions</h2>
+        <a class="section-link" id="resolutionsOpen" target="_blank" rel="noopener">More</a>
+      </div>
+      <div id="resolutions"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
         <h2 class="section-title">Links</h2>
       </div>
       <div class="links-grid" id="links"></div>
@@ -555,6 +626,13 @@
 // Register a free token at https://dev.socrata.com/foundry/data.cityofnewyork.us/enfh-gkve
 // and paste it here. Optional — app works without, just rate-limited.
 const SOCRATA_APP_TOKEN = '';
+
+// CORS-relay Worker for fetching NYC Parks history pages, Google News RSS,
+// and DuckDuckGo HTML search results. Deploy parks/worker.js to Cloudflare
+// Workers and paste the resulting URL here (e.g. https://parks-proxy.<account>.workers.dev).
+// If left blank, history / news / resolutions sections gracefully fall back
+// to deep-links.
+const WORKER_URL = '';
 
 const SOCRATA = 'https://data.cityofnewyork.us/resource';
 const ENDPOINT_PARKS = SOCRATA + '/enfh-gkve.json';
@@ -779,6 +857,9 @@ async function loadDetail(stub) {
   clearSearch();
   renderDetail(full);
   showDetail();
+  loadHistory(full);
+  loadNews(full);
+  loadResolutions(full);
   fillCouncilMember(full);
   loadCapitalProjects(full);
 }
@@ -1042,6 +1123,169 @@ function renderProject(prj) {
       ${prj.summary ? `<p class="project-summary">${escapeHTML(prj.summary)}</p>` : ''}
       ${foot.length ? `<div class="project-foot">${foot.join('')}</div>` : ''}
     </div>`;
+}
+
+function proxyURL(target) {
+  if (!WORKER_URL) return null;
+  return WORKER_URL.replace(/\/$/, '') + '/?url=' + encodeURIComponent(target);
+}
+
+async function fetchViaProxy(target, signal) {
+  const u = proxyURL(target);
+  if (!u) throw new Error('Worker not configured');
+  const r = await fetch(u, { signal });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.text();
+}
+
+// --- History (nycgovparks.org/parks/<id>/history) ---
+async function loadHistory(p) {
+  const root = $('history');
+  const open = $('historyOpen');
+  const directUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(p.gispropnum)}/history`;
+  open.href = directUrl;
+  if (!WORKER_URL) {
+    root.innerHTML = `<div class="empty">Configure WORKER_URL to inline. <a href="${escapeHTML(directUrl)}" target="_blank" rel="noopener">Open history page</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="article-body"><span class="skeleton" style="width:80%"></span></div>`;
+  try {
+    const html = await fetchViaProxy(directUrl);
+    const text = extractHistoryText(html);
+    if (!text) {
+      root.innerHTML = `<div class="empty">No history posted for this site. <a href="${escapeHTML(directUrl)}" target="_blank" rel="noopener">Open page</a></div>`;
+      return;
+    }
+    const paragraphs = text.split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+    root.innerHTML = `<div class="article-body">${paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}</div>`;
+  } catch (e) {
+    root.innerHTML = `<div class="error">Could not load history: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+function extractHistoryText(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('script, style, nav, header, footer, .breadcrumb, .nav, .navigation, .navbar, .sidebar, form').forEach(n => n.remove());
+  const candidates = [
+    '.historicalSign',
+    '#historicalSign',
+    'div.history',
+    'article',
+    '#contentText',
+    '#main',
+    'main',
+  ];
+  let node = null;
+  for (const sel of candidates) {
+    node = doc.querySelector(sel);
+    if (node && node.textContent.trim().length > 80) break;
+    node = null;
+  }
+  if (!node) node = doc.body;
+  if (!node) return '';
+  // Convert <p> breaks into double-newlines so we can preserve paragraph structure.
+  node.querySelectorAll('p').forEach(p => p.insertAdjacentText('afterend', '\n\n'));
+  node.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+  return node.textContent.replace(/ /g, ' ').replace(/[ \t]+/g, ' ').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+// --- News (Google News RSS) ---
+async function loadNews(p) {
+  const root = $('news');
+  const open = $('newsOpen');
+  const query = `"${p.signname || ''}" NYC parks`;
+  const searchUrl = `https://news.google.com/search?q=${encodeURIComponent(query)}`;
+  open.href = searchUrl;
+  if (!WORKER_URL) {
+    root.innerHTML = `<div class="empty">Configure WORKER_URL to inline. <a href="${escapeHTML(searchUrl)}" target="_blank" rel="noopener">Search news</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="feed-item"><span class="skeleton" style="width:60%"></span></div>`;
+  try {
+    const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
+    const xml = await fetchViaProxy(rssUrl);
+    const items = parseRSS(xml).slice(0, 10);
+    if (!items.length) {
+      root.innerHTML = `<div class="empty">No recent news matched. <a href="${escapeHTML(searchUrl)}" target="_blank" rel="noopener">Search news</a></div>`;
+      return;
+    }
+    root.innerHTML = items.map(it => {
+      const date = it.pubDate ? new Date(it.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      return `<a class="feed-item" href="${escapeHTML(it.link)}" target="_blank" rel="noopener">
+        <div class="feed-title">${escapeHTML(it.title)}</div>
+        <div class="feed-meta">${it.source ? `<span class="src">${escapeHTML(it.source)}</span>` : ''}${date ? `<span>${escapeHTML(date)}</span>` : ''}</div>
+      </a>`;
+    }).join('');
+  } catch (e) {
+    root.innerHTML = `<div class="error">Could not load news: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+function parseRSS(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  return Array.from(doc.querySelectorAll('item')).map(it => ({
+    title: it.querySelector('title')?.textContent || '',
+    link: it.querySelector('link')?.textContent || '',
+    pubDate: it.querySelector('pubDate')?.textContent || '',
+    source: it.querySelector('source')?.textContent || '',
+  }));
+}
+
+// --- Community Board resolutions (DuckDuckGo HTML search) ---
+async function loadResolutions(p) {
+  const root = $('resolutions');
+  const open = $('resolutionsOpen');
+  const cbCodes = chunkDistricts(p.communityboard, 3);
+  const cbLabels = cbCodes.map(code => {
+    if (!/^\d{3}$/.test(code)) return null;
+    const borCode = CB_BOROUGH_PREFIX[code[0]];
+    const num = parseInt(code.slice(1), 10);
+    return borCode ? `${CB_BOROUGH_NAME[borCode]} Community Board ${num}` : null;
+  }).filter(Boolean);
+  const cbClause = cbLabels.length ? ` (${cbLabels.map(l => `"${l}"`).join(' OR ')})` : '';
+  const query = `"${p.signname || ''}" resolution${cbClause} site:nyc.gov`;
+  const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+  open.href = searchUrl;
+  if (!WORKER_URL) {
+    root.innerHTML = `<div class="empty">Configure WORKER_URL to inline. <a href="${escapeHTML(searchUrl)}" target="_blank" rel="noopener">Search resolutions</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="feed-item"><span class="skeleton" style="width:60%"></span></div>`;
+  try {
+    const html = await fetchViaProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
+    const items = parseDDG(html).slice(0, 8);
+    if (!items.length) {
+      root.innerHTML = `<div class="empty">No CB resolutions found. <a href="${escapeHTML(searchUrl)}" target="_blank" rel="noopener">Search DuckDuckGo</a></div>`;
+      return;
+    }
+    root.innerHTML = items.map(it => {
+      const host = (() => { try { return new URL(it.link).host.replace(/^www\./, ''); } catch { return ''; } })();
+      return `<a class="feed-item" href="${escapeHTML(it.link)}" target="_blank" rel="noopener">
+        <div class="feed-title">${escapeHTML(it.title)}</div>
+        ${it.snippet ? `<div class="feed-snippet">${escapeHTML(it.snippet)}</div>` : ''}
+        ${host ? `<div class="feed-meta"><span class="src">${escapeHTML(host)}</span></div>` : ''}
+      </a>`;
+    }).join('');
+  } catch (e) {
+    root.innerHTML = `<div class="error">Could not load resolutions: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+function parseDDG(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return Array.from(doc.querySelectorAll('.result, .web-result')).map(r => {
+    const a = r.querySelector('a.result__a, a.result-link, .result__title a');
+    if (!a) return null;
+    let link = a.getAttribute('href') || '';
+    // DDG wraps real URLs in /l/?uddg=...
+    try {
+      const url = new URL(link, 'https://duckduckgo.com');
+      const real = url.searchParams.get('uddg');
+      if (real) link = decodeURIComponent(real);
+    } catch { /* keep as is */ }
+    const snippet = r.querySelector('.result__snippet, .result-snippet')?.textContent?.trim() || '';
+    return { title: a.textContent.trim(), link, snippet };
+  }).filter(Boolean);
 }
 
 function centroidFromMultipolygon(geo) {
