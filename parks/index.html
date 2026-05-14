@@ -663,7 +663,7 @@ function showDetail() {
 }
 
 // Normalize text for forgiving comparison: lowercase, strip apostrophes/periods/commas,
-// replace dashes with spaces, collapse whitespace.
+// replace dashes/slashes with spaces, collapse whitespace.
 function normalize(s) {
   return String(s || '')
     .toLowerCase()
@@ -673,6 +673,25 @@ function normalize(s) {
     .trim();
 }
 
+const NUM_ONES = ['', 'one','two','three','four','five','six','seven','eight','nine'];
+const NUM_TEENS = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const NUM_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+
+// Convert a non-negative integer up to 999 into spelled-out words ("twenty four").
+function numberToWords(n) {
+  n = parseInt(n, 10);
+  if (!Number.isFinite(n) || n < 0 || n > 999) return null;
+  if (n === 0) return 'zero';
+  if (n < 10) return NUM_ONES[n];
+  if (n < 20) return NUM_TEENS[n - 10];
+  if (n < 100) {
+    const t = Math.floor(n / 10), o = n % 10;
+    return o ? `${NUM_TENS[t]} ${NUM_ONES[o]}` : NUM_TENS[t];
+  }
+  const h = Math.floor(n / 100), rest = n % 100;
+  return rest ? `${NUM_ONES[h]} hundred ${numberToWords(rest)}` : `${NUM_ONES[h]} hundred`;
+}
+
 // Search
 async function runSearch(q) {
   if (searchAbort) searchAbort.abort();
@@ -680,10 +699,23 @@ async function runSearch(q) {
   if (!q || q.trim().length < 2) { results.classList.remove('show'); results.innerHTML = ''; return; }
   searchAbort = new AbortController();
   const term = normalize(q);
-  // Strip the same chars on the column side so apostrophes/periods don't break the match.
-  // SoQL escapes single quotes by doubling them, so '''' = literal '.
-  const stripped = "replace(replace(replace(signname, '''', ''), '.', ''), ',', '')";
-  const where = `upper(${stripped}) like upper('%${escSoql(term)}%')`;
+  const tokens = term.split(/\s+/).filter(Boolean);
+  if (!tokens.length) { results.classList.remove('show'); return; }
+
+  // Normalize the signname column to match: lowercase, strip apostrophes/periods/commas,
+  // replace hyphens with spaces. SoQL escapes a single quote by doubling it.
+  const col = "lower(replace(replace(replace(replace(signname, '''', ''), '.', ''), ',', ''), '-', ' '))";
+
+  // Per-token clause: each token must appear; bare digit tokens also match their spelled form.
+  const clauses = tokens.map(tok => {
+    const variants = [tok];
+    if (/^\d+$/.test(tok)) {
+      const w = numberToWords(parseInt(tok, 10));
+      if (w) variants.push(w);
+    }
+    return '(' + variants.map(v => `${col} like '%${escSoql(v)}%'`).join(' OR ') + ')';
+  });
+  const where = clauses.join(' AND ');
   const url = `${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,name311,borough,location,zipcode&$order=signname&$limit=20`;
   try {
     const rows = await fetchJSON(url, { signal: searchAbort.signal });
