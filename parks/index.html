@@ -3420,6 +3420,14 @@ document.addEventListener('click', (e) => {
     revealActiveProjects();
     return;
   }
+  const evChip = e.target.closest('[data-evcat]');
+  if (evChip) {
+    if (eventState) {
+      eventState.filter = evChip.dataset.evcat;
+      renderEventsView();
+    }
+    return;
+  }
 });
 
 function revealActiveProjects() {
@@ -4204,9 +4212,28 @@ function parseParksEventsHTML(html) {
   }).filter(e => e.title && e.startDate);
 }
 
-// "Inwood Hill Park" should match "Inwood Hill Park: …" / "Inwood Hill Park - …" etc.
-// We also match parent locations like "Central Park" against "Central Park" rooms.
-function eventMatchesPark(event, parkName) {
+// Famous parks whose events on nycgovparks.org/events are labeled by venue name
+// instead of park name (e.g. "Belvedere Castle" rather than "Central Park: Belvedere
+// Castle"). Mapping is conservative — only landmark names that unambiguously belong
+// to one park. Common shared names ("Dance Room", "Multipurpose Room") are excluded
+// because multiple rec centers across the city use them.
+const PARK_VENUE_ALIASES = {
+  M010: ['Belvedere Castle', 'Bow Bridge', 'Bethesda Terrace', 'Delacorte Theater', 'Great Lawn', 'Sheep Meadow', 'Conservatory Garden', 'North Meadow', 'Wollman Rink', 'Strawberry Fields', 'Heckscher Playground', 'The Mall', 'Loeb Boathouse', 'Bowling Green Lawn', 'Cop Cot'],
+  B073: ['Lakeside', 'Litchfield Villa', 'Audubon Center', 'Concert Grove', 'Long Meadow', 'Nethermead', 'Prospect Park Bandshell', 'Picnic House'],
+  M042: ['Muscota Marsh', 'Inwood Hill Trails', "Pat's Lawn", 'Dyckman Picnic A', 'Dyckman Picnic B', 'Anne Loftus Playground', 'Payson Playground'],
+  M003: ['Hippo Playground', 'Cherry Walk', 'Riverside Park'],
+  M008: ['Bryant Park'],
+  B040: ['Brooklyn Bridge Park'],
+  X039: ['Pelham Bay Park', 'Orchard Beach'],
+  X092: ['Van Cortlandt Park'],
+  Q001: ['Alley Pond Park'],
+  R001: ['Conference House Park'],
+  M063: ['Battery Park', 'The Battery'],
+  M014: ['Washington Square Park'],
+  M020: ['Tompkins Square Park'],
+};
+
+function eventMatchesPark(event, parkName, parkId) {
   if (!parkName) return false;
   const loc = (event.location || '').toLowerCase();
   const name = parkName.toLowerCase();
@@ -4215,9 +4242,16 @@ function eventMatchesPark(event, parkName) {
   if (loc.startsWith(name + ':')) return true;
   if (loc.startsWith(name + ',')) return true;
   if (loc.startsWith(name + '-')) return true;
-  // Address sometimes carries the park name when location is a room or feature.
+  // Address text sometimes carries the park name when the location is a room or feature.
   const addr = (event.address || '').toLowerCase();
   if (addr.includes(name)) return true;
+  // Famous-park alias list — landmarks whose location text doesn't carry the park name.
+  if (parkId && PARK_VENUE_ALIASES[parkId]) {
+    for (const alias of PARK_VENUE_ALIASES[parkId]) {
+      const a = alias.toLowerCase();
+      if (loc === a || loc.startsWith(a + ' ') || loc.startsWith(a + ',') || loc.startsWith(a + ':')) return true;
+    }
+  }
   return false;
 }
 
@@ -4245,18 +4279,111 @@ async function loadParkEvents(p, gen) {
   sec.hidden = true;
   root.innerHTML = '';
   setNavCount('sec-events', null);
+  eventState = null;
   const name = (p.signname || '').trim();
   if (!name) return;
   try {
-    const all = await fetchParksEvents();
+    const [parksList, permits] = await Promise.all([
+      fetchParksEvents().then(all => all.filter(e => eventMatchesPark(e, name, p.gispropnum))).catch(() => []),
+      fetchPermittedEventsForPark(p).catch(() => []),
+    ]);
     if (gen !== undefined && gen !== loadGen) return;
-    const events = all.filter(e => eventMatchesPark(e, name));
-    if (!events.length) return;
+    if (!parksList.length && !permits.length) return;
+    const parkUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(p.gispropnum)}`;
+    // Unify into one record shape with category + source + link.
+    const merged = [
+      ...parksList.map(e => ({
+        title: e.title,
+        startDate: e.startDate,
+        location: e.location,
+        url: e.url,
+        categories: e.categories,
+        _cat: 'Special',
+        _source: 'parks',
+      })),
+      ...permits.map(e => {
+        const isSport = (e.event_type || '').toLowerCase().startsWith('sport');
+        // Strip the "<Park Name>: " prefix from the permit's location text since
+        // we already know the user is looking at this park.
+        const cleanLoc = (e.event_location || '').replace(new RegExp('^' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[:,\\-\\s]*', 'i'), '');
+        return {
+          title: e.event_name,
+          startDate: e.start_date_time,
+          location: cleanLoc,
+          // Sports/closures are field/lawn reservations — link to the park page so the
+          // user can check facilities. Special-event permits are usually programs we
+          // can search for; fall back to the park page too if there's no better target.
+          url: parkUrl,
+          categories: [isSport ? 'Field reservation' : 'Permitted event'],
+          _cat: isSport ? 'Sports' : 'Special',
+          _source: 'permit',
+        };
+      }),
+    ];
+    merged.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    const specialCount = merged.filter(e => e._cat === 'Special').length;
+    eventState = {
+      rows: merged,
+      parkName: name,
+      filter: specialCount > 0 ? 'Special' : 'Sports',
+    };
     sec.hidden = false;
-    countEl.textContent = String(events.length);
-    setNavCount('sec-events', events.length);
-    renderEventsList(root, events, name);
-  } catch { /* silent — leave section hidden */ }
+    countEl.textContent = String(merged.length);
+    setNavCount('sec-events', merged.length);
+    renderEventsView();
+  } catch { /* silent */ }
+}
+
+async function fetchPermittedEventsForPark(p) {
+  const name = (p.signname || '').trim();
+  if (!name) return [];
+  const safeName = name.replace(/'/g, "''");
+  const now = new Date();
+  const end = new Date(now.getTime() + 28 * 86400000);
+  const where = `event_agency='Parks Department' AND starts_with(event_location, '${safeName}') AND start_date_time >= '${now.toISOString().slice(0, 19)}' AND start_date_time < '${end.toISOString().slice(0, 19)}'`;
+  try {
+    return await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=300`);
+  } catch { return []; }
+}
+
+function renderEventsView() {
+  if (!eventState) return;
+  const { rows, parkName, filter } = eventState;
+  const counts = {
+    All: rows.length,
+    Special: rows.filter(r => r._cat === 'Special').length,
+    Sports: rows.filter(r => r._cat === 'Sports').length,
+  };
+  const filtered = filter === 'All' ? rows : rows.filter(r => r._cat === filter);
+  const chipDefs = [];
+  if (counts.Special > 0) chipDefs.push({ id: 'Special', label: 'Special' });
+  if (counts.Sports > 0) chipDefs.push({ id: 'Sports', label: 'Sports' });
+  if (counts.Special + counts.Sports > 0) chipDefs.push({ id: 'All', label: 'All' });
+  const chips = chipDefs.map(c =>
+    `<button class="sort-pill${c.id === filter ? ' active' : ''}" data-evcat="${c.id}">${escapeHTML(c.label)} <span class="scope-count">${counts[c.id]}</span></button>`
+  ).join('');
+  const root = $('events');
+  const buckets = new Map(EVENT_BUCKET_ORDER.map(k => [k, []]));
+  for (const ev of filtered) {
+    const d = new Date(ev.startDate);
+    if (!Number.isFinite(d.getTime())) continue;
+    const key = eventBucketKey(d);
+    if (key && buckets.has(key)) buckets.get(key).push(ev);
+  }
+  let html = chipDefs.length > 1 ? `<div class="sort-row scope-row">${chips}</div>` : '';
+  for (const bucket of EVENT_BUCKET_ORDER) {
+    const items = buckets.get(bucket);
+    if (!items.length) continue;
+    html += `<div class="event-bucket-header">${escapeHTML(bucket)} <span class="bucket-count">${items.length}</span></div>`;
+    html += items.map(e => renderEventItem(e, parkName)).join('');
+  }
+  if (!filtered.length) {
+    html += `<div class="empty">Nothing in this category in the next 4 weeks.</div>`;
+  }
+  html += `<a class="show-more-btn" href="https://www.nycgovparks.org/events" target="_blank" rel="noopener" style="text-decoration:none"><span>See the full NYC Parks calendar</span><span class="show-more-arrow" style="transform:rotate(-45deg)">↗</span></a>`;
+  root.innerHTML = html;
+  root.classList.remove('expanded');
+  makeExpandableEvents(root, 6);
 }
 
 function makeExpandableEvents(root, limit) {
