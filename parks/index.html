@@ -552,6 +552,19 @@
     color: var(--accent);
     border-color: transparent;
   }
+  .sort-arrow { display: none; font-weight: 700; }
+  .sort-pill.active .sort-arrow { display: inline; margin-left: 2px; }
+  .scope-row { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .scope-row .sort-pill {
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+  .scope-count {
+    margin-left: 4px;
+    font-weight: 700;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+  }
   .project-summary {
     font-size: 13px;
     color: var(--text-2);
@@ -683,11 +696,11 @@
       </div>
       <div class="sort-row" id="projectsSort" hidden>
         <span class="sort-label">Sort</span>
-        <button class="sort-pill active" data-sort="phase">Phase</button>
-        <button class="sort-pill" data-sort="date">Date</button>
-        <button class="sort-pill" data-sort="dollar">$</button>
-        <button class="sort-pill" data-sort="scope">Scope</button>
+        <button class="sort-pill active" data-sort="phase" data-dir="asc">Phase <span class="sort-arrow">↑</span></button>
+        <button class="sort-pill" data-sort="date" data-dir="desc">Date <span class="sort-arrow">↓</span></button>
+        <button class="sort-pill" data-sort="dollar" data-dir="desc">$ <span class="sort-arrow">↓</span></button>
       </div>
+      <div class="sort-row scope-row" id="projectsScope" hidden></div>
       <div id="projects"></div>
     </div>
     <div class="section">
@@ -1204,36 +1217,103 @@ function parseFundingToNumber(raw) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function scopeRank(title, park) {
-  const t = (title || '').toLowerCase();
-  const parkName = (park?.signname || park?.name311 || '').toLowerCase();
-  const parkRoot = parkName.replace(/\b(park|playground|playgrounds|garden|gardens|square|plaza|field|fields|green|commons|triangle|mall)\b/g, '').trim();
-  if (parkRoot && parkRoot.length >= 4 && t.includes(parkRoot)) return 0;
-  if (/^(citywide|multi-borough|multiborough|borough-wide)/.test(t)) return 2;
-  return 1;
+const SCOPE_RULES = [
+  ['Walls',      /\b(retaining|seawall|sea wall|wall|bulkhead)\b/i],
+  ['Paths',      /\b(path|pathway|walkway|sidewalk|trail|ramp|stair)\b/i],
+  ['Fields',     /\b(ballfield|baseball|soccer|football|softball|cricket|diamond|field)\b/i],
+  ['Courts',     /\b(basketball|tennis|handball|pickleball|court)\b/i],
+  ['Playground', /\b(playground|play\s?area|fitness equipment|spray|swing)\b/i],
+  ['Pool',       /\b(\bpool|aquatic|swim)\b/i],
+  ['Lighting',   /\b(light|lighting|lamp)\b/i],
+  ['Sewer/Water',/\b(sewer|stormwater|drainage|water main|catch basin|sanitary|plumbing|hvac)\b/i],
+  ['Buildings',  /\b(building|parkhouse|nature center|restroom|comfort station|office|garage|roof|facade|exhibit|theater|museum|center)\b/i],
+  ['Zoo',        /\b(zoo|aquarium|sea lion|wildlife|animal)\b/i],
+  ['Forestry',   /\b(forestry|tree|reforest|nursery|landscap|greening)\b/i],
+  ['Bridges',    /\b(bridge|viaduct)\b/i],
+  ['Security',   /\b(security|fence|alarm|surveillance)\b/i],
+  ['Memorials',  /\b(memorial|monument|statue|fountain|sculpture)\b/i],
+];
+
+function computeScopes(text) {
+  const s = String(text || '');
+  const out = [];
+  for (const [label, re] of SCOPE_RULES) {
+    if (re.test(s)) out.push(label);
+  }
+  if (!out.length) out.push('Other');
+  return out;
 }
 
 let capState = null;
 
+const DEFAULT_DIR = { phase: 'asc', date: 'desc', dollar: 'desc' };
+
 function applyCapSort() {
   if (!capState) return;
-  const { tracker, historical, sort, park } = capState;
-  const cmpDate = (a, b) => (b._sortDate || 0) - (a._sortDate || 0);
-  const cmpDollar = (a, b) => (b._sortDollar || 0) - (a._sortDollar || 0);
-  const cmpPhase = (a, b) => {
-    if (a._sortPhase !== b._sortPhase) return a._sortPhase - b._sortPhase;
-    return cmpDate(a, b);
-  };
-  const cmpScope = (a, b) => {
-    if (a._sortScope !== b._sortScope) return a._sortScope - b._sortScope;
-    return cmpDollar(a, b);
-  };
-  let cmp = cmpPhase;
-  if (sort === 'date') cmp = cmpDate;
-  else if (sort === 'dollar') cmp = cmpDollar;
-  else if (sort === 'scope') cmp = cmpScope;
+  const { tracker, historical, sort, dir } = capState;
+  const sign = dir === 'asc' ? 1 : -1;
+  const tieDate = (a, b) => (b._sortDate || 0) - (a._sortDate || 0);
+  let cmp;
+  if (sort === 'date') {
+    cmp = (a, b) => sign * ((a._sortDate || 0) - (b._sortDate || 0));
+  } else if (sort === 'dollar') {
+    cmp = (a, b) => {
+      const d = (a._sortDollar || 0) - (b._sortDollar || 0);
+      return d !== 0 ? sign * d : tieDate(a, b);
+    };
+  } else {
+    cmp = (a, b) => {
+      const d = a._sortPhase - b._sortPhase;
+      return d !== 0 ? sign * d : tieDate(a, b);
+    };
+  }
   tracker.sort(cmp);
   historical.sort(cmp);
+}
+
+function projectMatchesScopeFilter(prj) {
+  if (!capState?.scopes || capState.scopes.size === 0) return true;
+  const scopes = prj._scopes || [];
+  for (const s of scopes) if (capState.scopes.has(s)) return true;
+  return false;
+}
+
+function buildScopeRow() {
+  const row = $('projectsScope');
+  if (!row || !capState) return;
+  const counts = new Map();
+  const allProjects = [...capState.tracker, ...capState.historical];
+  for (const p of allProjects) {
+    for (const s of (p._scopes || [])) counts.set(s, (counts.get(s) || 0) + 1);
+  }
+  // Preserve SCOPE_RULES order, with "Other" last.
+  const order = SCOPE_RULES.map(r => r[0]).concat(['Other']);
+  const entries = order
+    .map(label => [label, counts.get(label) || 0])
+    .filter(([, c]) => c > 0);
+  if (!entries.length) { row.hidden = true; return; }
+  row.hidden = false;
+  const allActive = !capState.scopes || capState.scopes.size === 0;
+  const pills = [
+    `<button class="sort-pill${allActive ? ' active' : ''}" data-scope="">All <span class="scope-count">${allProjects.length}</span></button>`,
+    ...entries.map(([label, count]) => {
+      const active = capState.scopes?.has(label);
+      return `<button class="sort-pill${active ? ' active' : ''}" data-scope="${escapeHTML(label)}">${escapeHTML(label)} <span class="scope-count">${count}</span></button>`;
+    })
+  ];
+  row.innerHTML = `<span class="sort-label">Scope</span>${pills.join('')}`;
+}
+
+function updateSortPills() {
+  document.querySelectorAll('#projectsSort .sort-pill').forEach(el => {
+    const active = el.dataset.sort === capState.sort;
+    el.classList.toggle('active', active);
+    if (active) {
+      el.dataset.dir = capState.dir;
+      const arrow = el.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = capState.dir === 'asc' ? '↑' : '↓';
+    }
+  });
 }
 
 function renderCapState() {
@@ -1243,18 +1323,26 @@ function renderCapState() {
   const { tracker, historical, cpdbByKey, powerBI } = capState;
   if (!tracker.length && !historical.length) {
     if (sortRow) sortRow.hidden = true;
+    $('projectsScope').hidden = true;
     return;
   }
   if (sortRow) sortRow.hidden = false;
-  const trackerHtml = tracker.map(prj => renderProject(prj, cpdbByKey.get(normalizeFmsKey(prj.fmsid)))).join('');
-  const historicalHtml = historical.length
-    ? `<div class="project-section-header">Capital Plan (additional) <span class="project-section-count">${historical.length}</span></div>` +
-      historical.map(renderHistoricalProject).join('')
+  buildScopeRow();
+  updateSortPills();
+  const visibleTracker = tracker.filter(projectMatchesScopeFilter);
+  const visibleHistorical = historical.filter(projectMatchesScopeFilter);
+  const trackerHtml = visibleTracker.map(prj => renderProject(prj, cpdbByKey.get(normalizeFmsKey(prj.fmsid)))).join('');
+  const historicalHtml = visibleHistorical.length
+    ? `<div class="project-section-header">Capital Plan (additional) <span class="project-section-count">${visibleHistorical.length}</span></div>` +
+      visibleHistorical.map(renderHistoricalProject).join('')
     : '';
+  if (!trackerHtml && !historicalHtml) {
+    root.innerHTML = `<div class="empty">No projects match the selected scope filters.</div>`;
+    return;
+  }
   root.innerHTML = trackerHtml + historicalHtml;
-  // Re-apply cached Power BI overlays after re-render.
   if (powerBI) {
-    for (const prj of tracker) {
+    for (const prj of visibleTracker) {
       const detail = powerBI.get(prj.fmsid);
       if (detail) applyPowerBIDetail(prj, detail);
     }
@@ -1263,17 +1351,34 @@ function renderCapState() {
 
 function setCapSort(sort) {
   if (!capState) return;
-  capState.sort = sort;
+  if (capState.sort === sort) {
+    capState.dir = capState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    capState.sort = sort;
+    capState.dir = DEFAULT_DIR[sort] || 'desc';
+  }
   applyCapSort();
   renderCapState();
-  document.querySelectorAll('#projectsSort .sort-pill').forEach(el => {
-    el.classList.toggle('active', el.dataset.sort === sort);
-  });
+}
+
+function toggleCapScope(label) {
+  if (!capState) return;
+  if (!capState.scopes) capState.scopes = new Set();
+  if (label === '') {
+    capState.scopes.clear();
+  } else if (capState.scopes.has(label)) {
+    capState.scopes.delete(label);
+  } else {
+    capState.scopes.add(label);
+  }
+  renderCapState();
 }
 
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('#projectsSort .sort-pill');
-  if (btn) setCapSort(btn.dataset.sort);
+  const sortBtn = e.target.closest('#projectsSort .sort-pill');
+  if (sortBtn) { setCapSort(sortBtn.dataset.sort); return; }
+  const scopeBtn = e.target.closest('#projectsScope .sort-pill');
+  if (scopeBtn) { toggleCapScope(scopeBtn.dataset.scope || ''); return; }
 });
 
 function historicalPhaseRank(cpdb) {
@@ -1293,9 +1398,11 @@ async function loadCapitalProjects(p) {
   const root = $('projects');
   const countEl = $('projectsCount');
   const sortRow = $('projectsSort');
+  const scopeRow = $('projectsScope');
   root.innerHTML = '<div class="empty"><span class="skeleton" style="width:140px"></span></div>';
   countEl.textContent = '';
   if (sortRow) sortRow.hidden = true;
+  if (scopeRow) scopeRow.hidden = true;
   capState = null;
   try {
     const [trackerRows, cpdbRows] = await Promise.all([
@@ -1323,18 +1430,18 @@ async function loadCapitalProjects(p) {
       return true;
     });
 
-    // Compute sort keys once.
+    // Compute sort keys + scope tags once.
     for (const r of trackerRows) {
       r._sortPhase = phaseRank(r.currentphase);
       r._sortDate = projectActivityDate(r);
       r._sortDollar = parseFundingToNumber(r.totalfunding);
-      r._sortScope = scopeRank(r.title, p);
+      r._scopes = computeScopes((r.title || '') + ' ' + (r.summary || ''));
     }
     for (const c of historical) {
       c._sortPhase = historicalPhaseRank(c);
       c._sortDate = new Date(c.mindate || 0).getTime();
       c._sortDollar = parseFloat(c.adopt_total) || 0;
-      c._sortScope = scopeRank(c.description, p);
+      c._scopes = computeScopes(c.description || '');
     }
 
     const totalCount = trackerRows.length + historical.length;
@@ -1345,7 +1452,16 @@ async function loadCapitalProjects(p) {
     }
     countEl.textContent = String(totalCount);
 
-    capState = { park: p, tracker: trackerRows, historical, cpdbByKey, sort: capState?.sort || 'phase', powerBI: new Map() };
+    capState = {
+      park: p,
+      tracker: trackerRows,
+      historical,
+      cpdbByKey,
+      sort: capState?.sort || 'phase',
+      dir: capState?.dir || DEFAULT_DIR[capState?.sort || 'phase'],
+      scopes: new Set(),
+      powerBI: new Map(),
+    };
     applyCapSort();
     renderCapState();
     upgradeFundingViaPowerBI(trackerRows);
