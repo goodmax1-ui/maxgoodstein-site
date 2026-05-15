@@ -516,6 +516,42 @@
   .project-historical .project-title {
     color: var(--text-2);
   }
+  .sort-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+  .sort-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-right: 4px;
+  }
+  .sort-pill {
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .sort-pill:hover {
+    color: var(--text);
+  }
+  .sort-pill.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: transparent;
+  }
   .project-summary {
     font-size: 13px;
     color: var(--text-2);
@@ -644,6 +680,13 @@
       <div class="section-header">
         <h2 class="section-title">Capital Projects</h2>
         <span class="section-count" id="projectsCount"></span>
+      </div>
+      <div class="sort-row" id="projectsSort" hidden>
+        <span class="sort-label">Sort</span>
+        <button class="sort-pill active" data-sort="phase">Phase</button>
+        <button class="sort-pill" data-sort="date">Date</button>
+        <button class="sort-pill" data-sort="dollar">$</button>
+        <button class="sort-pill" data-sort="scope">Scope</button>
       </div>
       <div id="projects"></div>
     </div>
@@ -1133,26 +1176,132 @@ function phaseRank(phase) {
 }
 
 function projectActivityDate(prj) {
-  // Most relevant date for sorting: completed → actual completion, else → last updated.
   return new Date(prj.constructionactualcompletion || prj.lastupdated || 0).getTime();
+}
+
+function parseFundingToNumber(raw) {
+  if (raw == null) return 0;
+  const s = String(raw).trim();
+  if (!s) return 0;
+  const betweenMatch = s.match(/Between \$?([\d.]+)\s*(million|thousand)?\s*and\s*\$?([\d.]+)\s*(million|thousand)?/i);
+  const greaterMatch = s.match(/Greater than \$?([\d.]+)\s*(million|thousand)?/i);
+  const lessMatch = s.match(/Less than \$?([\d.]+)\s*(million|thousand)?/i);
+  const mult = (unit) => {
+    const u = (unit || '').toLowerCase();
+    if (u === 'million') return 1e6;
+    if (u === 'thousand') return 1e3;
+    return 1;
+  };
+  if (betweenMatch) {
+    const a = parseFloat(betweenMatch[1]) * mult(betweenMatch[2]);
+    const b = parseFloat(betweenMatch[3]) * mult(betweenMatch[4]);
+    return (a + b) / 2;
+  }
+  if (greaterMatch) return parseFloat(greaterMatch[1]) * mult(greaterMatch[2]) * 1.5;
+  if (lessMatch) return parseFloat(lessMatch[1]) * mult(lessMatch[2]) * 0.5;
+  const cleaned = s.replace(/[$,]/g, '');
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function scopeRank(title, park) {
+  const t = (title || '').toLowerCase();
+  const parkName = (park?.signname || park?.name311 || '').toLowerCase();
+  const parkRoot = parkName.replace(/\b(park|playground|playgrounds|garden|gardens|square|plaza|field|fields|green|commons|triangle|mall)\b/g, '').trim();
+  if (parkRoot && parkRoot.length >= 4 && t.includes(parkRoot)) return 0;
+  if (/^(citywide|multi-borough|multiborough|borough-wide)/.test(t)) return 2;
+  return 1;
+}
+
+let capState = null;
+
+function applyCapSort() {
+  if (!capState) return;
+  const { tracker, historical, sort, park } = capState;
+  const cmpDate = (a, b) => (b._sortDate || 0) - (a._sortDate || 0);
+  const cmpDollar = (a, b) => (b._sortDollar || 0) - (a._sortDollar || 0);
+  const cmpPhase = (a, b) => {
+    if (a._sortPhase !== b._sortPhase) return a._sortPhase - b._sortPhase;
+    return cmpDate(a, b);
+  };
+  const cmpScope = (a, b) => {
+    if (a._sortScope !== b._sortScope) return a._sortScope - b._sortScope;
+    return cmpDollar(a, b);
+  };
+  let cmp = cmpPhase;
+  if (sort === 'date') cmp = cmpDate;
+  else if (sort === 'dollar') cmp = cmpDollar;
+  else if (sort === 'scope') cmp = cmpScope;
+  tracker.sort(cmp);
+  historical.sort(cmp);
+}
+
+function renderCapState() {
+  if (!capState) return;
+  const root = $('projects');
+  const sortRow = $('projectsSort');
+  const { tracker, historical, cpdbByKey, powerBI } = capState;
+  if (!tracker.length && !historical.length) {
+    if (sortRow) sortRow.hidden = true;
+    return;
+  }
+  if (sortRow) sortRow.hidden = false;
+  const trackerHtml = tracker.map(prj => renderProject(prj, cpdbByKey.get(normalizeFmsKey(prj.fmsid)))).join('');
+  const historicalHtml = historical.length
+    ? `<div class="project-section-header">Capital Plan (additional) <span class="project-section-count">${historical.length}</span></div>` +
+      historical.map(renderHistoricalProject).join('')
+    : '';
+  root.innerHTML = trackerHtml + historicalHtml;
+  // Re-apply cached Power BI overlays after re-render.
+  if (powerBI) {
+    for (const prj of tracker) {
+      const detail = powerBI.get(prj.fmsid);
+      if (detail) applyPowerBIDetail(prj, detail);
+    }
+  }
+}
+
+function setCapSort(sort) {
+  if (!capState) return;
+  capState.sort = sort;
+  applyCapSort();
+  renderCapState();
+  document.querySelectorAll('#projectsSort .sort-pill').forEach(el => {
+    el.classList.toggle('active', el.dataset.sort === sort);
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#projectsSort .sort-pill');
+  if (btn) setCapSort(btn.dataset.sort);
+});
+
+function historicalPhaseRank(cpdb) {
+  const adopt = parseFloat(cpdb.adopt_total) || 0;
+  const spent = parseFloat(cpdb.spent_total) || 0;
+  const endYear = cpdb.maxdate ? new Date(cpdb.maxdate).getFullYear() : null;
+  const startYear = cpdb.mindate ? new Date(cpdb.mindate).getFullYear() : null;
+  const now = new Date().getFullYear();
+  if (adopt > 0 && spent / adopt >= 0.95) return 6; // Completed
+  if (endYear && endYear < now) return 6;             // Past
+  if (spent > 0 && adopt > 0) return 1;               // In progress
+  if (startYear && startYear > now) return 4;         // Planned
+  return 4;                                            // In plan
 }
 
 async function loadCapitalProjects(p) {
   const root = $('projects');
   const countEl = $('projectsCount');
+  const sortRow = $('projectsSort');
   root.innerHTML = '<div class="empty"><span class="skeleton" style="width:140px"></span></div>';
   countEl.textContent = '';
+  if (sortRow) sortRow.hidden = true;
+  capState = null;
   try {
     const [trackerRows, cpdbRows] = await Promise.all([
       fetchJSON(`${ENDPOINT_CAPITAL}?parkid=${encodeURIComponent(p.gispropnum)}&$order=lastupdated DESC&$limit=50`),
       loadCPDBForPark(p).catch(() => []),
     ]);
-
-    trackerRows.sort((a, b) => {
-      const ra = phaseRank(a.currentphase), rb = phaseRank(b.currentphase);
-      if (ra !== rb) return ra - rb;
-      return projectActivityDate(b) - projectActivityDate(a);
-    });
 
     const trackerKeys = new Set(
       trackerRows.map(r => normalizeFmsKey(r.fmsid)).filter(Boolean)
@@ -1165,16 +1314,28 @@ async function loadCapitalProjects(p) {
       const k = normalizeFmsKey(c.maprojid);
       if (k) cpdbByKey.set(k, c);
     }
-    const historical = cpdbRows
-      .filter(c => {
-        const k = normalizeFmsKey(c.maprojid);
-        if (!k) return false;
-        if (trackerKeys.has(k)) return false;
-        const t = normalizeTitle(c.description);
-        if (t && trackerTitles.has(t)) return false;
-        return true;
-      })
-      .sort((a, b) => new Date(b.mindate || 0) - new Date(a.mindate || 0));
+    const historical = cpdbRows.filter(c => {
+      const k = normalizeFmsKey(c.maprojid);
+      if (!k) return false;
+      if (trackerKeys.has(k)) return false;
+      const t = normalizeTitle(c.description);
+      if (t && trackerTitles.has(t)) return false;
+      return true;
+    });
+
+    // Compute sort keys once.
+    for (const r of trackerRows) {
+      r._sortPhase = phaseRank(r.currentphase);
+      r._sortDate = projectActivityDate(r);
+      r._sortDollar = parseFundingToNumber(r.totalfunding);
+      r._sortScope = scopeRank(r.title, p);
+    }
+    for (const c of historical) {
+      c._sortPhase = historicalPhaseRank(c);
+      c._sortDate = new Date(c.mindate || 0).getTime();
+      c._sortDollar = parseFloat(c.adopt_total) || 0;
+      c._sortScope = scopeRank(c.description, p);
+    }
 
     const totalCount = trackerRows.length + historical.length;
     if (totalCount === 0) {
@@ -1184,12 +1345,9 @@ async function loadCapitalProjects(p) {
     }
     countEl.textContent = String(totalCount);
 
-    const trackerHtml = trackerRows.map(r => renderProject(r, cpdbByKey.get(normalizeFmsKey(r.fmsid)))).join('');
-    const historicalHtml = historical.length
-      ? `<div class="project-section-header">Capital Plan (additional) <span class="project-section-count">${historical.length}</span></div>` +
-        historical.map(renderHistoricalProject).join('')
-      : '';
-    root.innerHTML = trackerHtml + historicalHtml;
+    capState = { park: p, tracker: trackerRows, historical, cpdbByKey, sort: capState?.sort || 'phase', powerBI: new Map() };
+    applyCapSort();
+    renderCapState();
     upgradeFundingViaPowerBI(trackerRows);
   } catch (e) {
     root.innerHTML = `<div class="error">Could not load capital projects: ${escapeHTML(e.message)}</div>`;
@@ -1248,6 +1406,7 @@ async function upgradeFundingViaPowerBI(rows) {
         const url = `${WORKER_URL.replace(/\/$/, '')}/?mode=powerbi&fmsid=${encodeURIComponent(dashId)}`;
         const detail = await fetchJSON(url);
         if (!detail || detail.error) continue;
+        if (capState?.powerBI) capState.powerBI.set(prj.fmsid, detail);
         applyPowerBIDetail(prj, detail);
       } catch (_) {
         // silent — keep dataset value
@@ -1255,6 +1414,11 @@ async function upgradeFundingViaPowerBI(rows) {
     }
   });
   await Promise.all(workers);
+  // After all Power BI values land, if the user is sorting by $, re-render so order reflects authoritative values.
+  if (capState && capState.sort === 'dollar') {
+    applyCapSort();
+    renderCapState();
+  }
 }
 
 function applyPowerBIDetail(prj, detail) {
@@ -1262,6 +1426,11 @@ function applyPowerBIDetail(prj, detail) {
   if (!node) return;
   const total = detail.totalBudget;
   if (typeof total !== 'number' || total <= 0) return;
+  // Update sort key so a future $ resort uses Power BI's authoritative value.
+  if (capState && capState.tracker) {
+    const target = capState.tracker.find(r => r.fmsid === prj.fmsid);
+    if (target) target._sortDollar = total;
+  }
   const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   const fmt = usd.format(total);
   const titleBits = [`Power BI: ${fmt}`];
