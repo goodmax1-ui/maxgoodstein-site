@@ -487,6 +487,35 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
+  .project-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+  }
+  .project-section-count {
+    background: var(--bg-soft);
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .project-historical {
+    opacity: 0.85;
+  }
+  .project-historical .project-title {
+    color: var(--text-2);
+  }
   .project-summary {
     font-size: 13px;
     color: var(--text-2);
@@ -666,6 +695,7 @@ const SOCRATA = 'https://data.cityofnewyork.us/resource';
 const ENDPOINT_PARKS = SOCRATA + '/enfh-gkve.json';
 const ENDPOINT_COUNCIL = SOCRATA + '/uvw5-9znb.json';
 const ENDPOINT_CAPITAL = SOCRATA + '/4hcv-tc5r.json';
+const ENDPOINT_CPDB = SOCRATA + '/fi59-268w.json';
 
 const BOROUGHS = { M: 'Manhattan', B: 'Bronx', X: 'Bronx', Q: 'Queens', K: 'Brooklyn', R: 'Staten Island' };
 // communityboard field uses borough digit: 1=M, 2=Bx, 3=Bk, 4=Q, 5=SI
@@ -1091,24 +1121,110 @@ async function fillCouncilMember(p) {
   }
 }
 
+function phaseRank(phase) {
+  const p = (phase || '').toLowerCase();
+  if (/construct/.test(p)) return 1;
+  if (/procure/.test(p)) return 2;
+  if (/design/.test(p)) return 3;
+  if (/propose|planned/.test(p)) return 4;
+  if (/hold/.test(p)) return 5;
+  if (/complete|closed/.test(p)) return 6;
+  return 7;
+}
+
+function projectActivityDate(prj) {
+  // Most relevant date for sorting: completed → actual completion, else → last updated.
+  return new Date(prj.constructionactualcompletion || prj.lastupdated || 0).getTime();
+}
+
 async function loadCapitalProjects(p) {
   const root = $('projects');
   const countEl = $('projectsCount');
   root.innerHTML = '<div class="empty"><span class="skeleton" style="width:140px"></span></div>';
   countEl.textContent = '';
   try {
-    const rows = await fetchJSON(`${ENDPOINT_CAPITAL}?parkid=${encodeURIComponent(p.gispropnum)}&$order=lastupdated DESC&$limit=50`);
-    if (!rows.length) {
+    const [trackerRows, cpdbRows] = await Promise.all([
+      fetchJSON(`${ENDPOINT_CAPITAL}?parkid=${encodeURIComponent(p.gispropnum)}&$order=lastupdated DESC&$limit=50`),
+      loadCPDBForPark(p).catch(() => []),
+    ]);
+
+    trackerRows.sort((a, b) => {
+      const ra = phaseRank(a.currentphase), rb = phaseRank(b.currentphase);
+      if (ra !== rb) return ra - rb;
+      return projectActivityDate(b) - projectActivityDate(a);
+    });
+
+    const trackerKeys = new Set(
+      trackerRows.map(r => normalizeFmsKey(r.fmsid)).filter(Boolean)
+    );
+    const trackerTitles = new Set(
+      trackerRows.map(r => normalizeTitle(r.title)).filter(Boolean)
+    );
+    const cpdbByKey = new Map();
+    for (const c of cpdbRows) {
+      const k = normalizeFmsKey(c.maprojid);
+      if (k) cpdbByKey.set(k, c);
+    }
+    const historical = cpdbRows
+      .filter(c => {
+        const k = normalizeFmsKey(c.maprojid);
+        if (!k) return false;
+        if (trackerKeys.has(k)) return false;
+        const t = normalizeTitle(c.description);
+        if (t && trackerTitles.has(t)) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.mindate || 0) - new Date(a.mindate || 0));
+
+    const totalCount = trackerRows.length + historical.length;
+    if (totalCount === 0) {
       root.innerHTML = `<div class="empty">No capital projects on record.<br><a href="https://www.nycgovparks.org/planning-and-building/capital-project-tracker" target="_blank" rel="noopener">Open Capital Project Tracker</a></div>`;
       countEl.textContent = '0';
       return;
     }
-    countEl.textContent = String(rows.length);
-    root.innerHTML = rows.map(renderProject).join('');
-    upgradeFundingViaPowerBI(rows);
+    countEl.textContent = String(totalCount);
+
+    const trackerHtml = trackerRows.map(r => renderProject(r, cpdbByKey.get(normalizeFmsKey(r.fmsid)))).join('');
+    const historicalHtml = historical.length
+      ? `<div class="project-section-header">Capital Plan (additional) <span class="project-section-count">${historical.length}</span></div>` +
+        historical.map(renderHistoricalProject).join('')
+      : '';
+    root.innerHTML = trackerHtml + historicalHtml;
+    upgradeFundingViaPowerBI(trackerRows);
   } catch (e) {
     root.innerHTML = `<div class="error">Could not load capital projects: ${escapeHTML(e.message)}</div>`;
   }
+}
+
+function normalizeFmsKey(s) {
+  if (!s) return null;
+  return String(s).replace(/\s+/g, '').toUpperCase();
+}
+
+function normalizeTitle(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function cpdbSearchNeedle(name) {
+  // Strip common park-name suffixes so CPDB descriptions like "INWOOD HILL PK" or
+  // "INWOOD HILL & FT TRYON" still match a park named "Inwood Hill Park".
+  return name
+    .toLowerCase()
+    .replace(/\b(park|playground|playgrounds|garden|gardens|square|plaza|field|fields|green|commons|triangle|mall)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function loadCPDBForPark(p) {
+  const name = (p.signname || p.name311 || '').trim();
+  if (!name) return [];
+  let needle = cpdbSearchNeedle(name).replace(/'/g, "''");
+  // If stripping suffixes leaves a too-short or too-generic needle, fall back to original.
+  if (needle.length < 4) needle = name.toLowerCase().replace(/'/g, "''");
+  needle = needle.slice(0, 80);
+  const where = `magencyacro='DPR' AND lower(description) like '%${needle}%'`;
+  const url = `${ENDPOINT_CPDB}?$where=${encodeURIComponent(where)}&$order=mindate DESC&$limit=60`;
+  return await fetchJSON(url);
 }
 
 function fmsToDashboardId(rawFmsid) {
@@ -1152,8 +1268,10 @@ function applyPowerBIDetail(prj, detail) {
   if (prj.totalfunding) titleBits.push(`Dataset: ${prj.totalfunding}`);
   if (typeof detail.spendToDate === 'number') titleBits.push(`Spent: ${usd.format(detail.spendToDate)}`);
   if (typeof detail.spendPercent === 'number') titleBits.push(`${Math.round(detail.spendPercent * 100)}% spent`);
-  const title = titleBits.join(' · ');
   let pill = node.querySelector('.project-funding');
+  const cpdbExtra = pill?.getAttribute('data-cpdb');
+  if (cpdbExtra) titleBits.push(cpdbExtra);
+  const title = titleBits.join(' · ');
   if (pill) {
     pill.classList.remove('estimate');
     pill.classList.add('exact');
@@ -1225,7 +1343,25 @@ function formatFunding(raw) {
   return { specific: true, display: s };
 }
 
-function renderProject(prj) {
+function formatCPDBFunding(cpdb) {
+  if (!cpdb) return null;
+  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const num = (v) => v == null ? 0 : parseFloat(v) || 0;
+  const parts = [];
+  const mayoral = num(cpdb.adopt_ccnonexempt);
+  const council = num(cpdb.adopt_ccexempt);
+  const state = num(cpdb.adopt_nccstate);
+  const federal = num(cpdb.adopt_nccfederal);
+  const other = num(cpdb.adopt_nccother);
+  if (mayoral) parts.push(`City: ${usd.format(mayoral)}`);
+  if (council) parts.push(`Council discr: ${usd.format(council)}`);
+  if (state) parts.push(`State: ${usd.format(state)}`);
+  if (federal) parts.push(`Federal: ${usd.format(federal)}`);
+  if (other) parts.push(`Other: ${usd.format(other)}`);
+  return parts.length ? parts.join(' · ') : null;
+}
+
+function renderProject(prj, cpdb) {
   const phaseRaw = (prj.currentphase || '').trim();
   const phase = phaseRaw.toLowerCase();
   let phaseClass = 'other';
@@ -1249,8 +1385,12 @@ function renderProject(prj) {
   if (prj.fmsid) foot.push(`<span><strong>FMS:</strong> ${escapeHTML(prj.fmsid)}</span>`);
 
   const funding = formatFunding(prj.totalfunding);
+  const cpdbBreakdown = formatCPDBFunding(cpdb);
+  const baseTitle = prj.totalfunding || '';
+  const fullTitle = cpdbBreakdown ? `${baseTitle}${baseTitle ? ' · ' : ''}${cpdbBreakdown}` : baseTitle;
+  const cpdbAttr = cpdbBreakdown ? ` data-cpdb="${escapeHTML(cpdbBreakdown)}"` : '';
   const fundingPill = funding
-    ? `<span class="project-funding${funding.specific ? '' : ' estimate'}" title="${escapeHTML(prj.totalfunding)}">${funding.specific ? '' : 'Est: '}${escapeHTML(funding.display)}</span>`
+    ? `<span class="project-funding${funding.specific ? '' : ' estimate'}" title="${escapeHTML(fullTitle)}"${cpdbAttr}>${funding.specific ? '' : 'Est: '}${escapeHTML(funding.display)}</span>`
     : '';
 
   const sources = splitFundingSources(prj.fundingsource);
@@ -1272,6 +1412,48 @@ function renderProject(prj) {
           <div class="progress-pct">${Math.round(pct)}%</div>
         </div>` : ''}
       ${prj.summary ? `<p class="project-summary">${escapeHTML(prj.summary)}</p>` : ''}
+      ${foot.length ? `<div class="project-foot">${foot.join('')}</div>` : ''}
+    </div>`;
+}
+
+function renderHistoricalProject(cpdb) {
+  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const num = (v) => v == null ? 0 : parseFloat(v) || 0;
+  const adoptTotal = num(cpdb.adopt_total);
+  const spentTotal = num(cpdb.spent_total);
+  const startYear = cpdb.mindate ? new Date(cpdb.mindate).getFullYear() : null;
+  const endYear = cpdb.maxdate ? new Date(cpdb.maxdate).getFullYear() : null;
+  const dateRange = startYear && endYear && startYear !== endYear
+    ? `${startYear}–${endYear}`
+    : (startYear ? String(startYear) : '');
+  const now = new Date().getFullYear();
+  const isCompleted = adoptTotal > 0 && spentTotal / adoptTotal >= 0.95;
+  const isPast = endYear && endYear < now;
+  const isFuture = startYear && startYear > now;
+  const inProgress = spentTotal > 0 && adoptTotal > 0 && spentTotal / adoptTotal < 0.95;
+  let label = 'In plan';
+  let labelClass = 'other';
+  if (isCompleted) { label = 'Completed'; labelClass = 'completed'; }
+  else if (isPast) { label = 'Past'; labelClass = 'completed'; }
+  else if (isFuture) { label = 'Planned'; labelClass = 'other'; }
+  else if (inProgress) { label = 'In progress'; labelClass = 'construction'; }
+
+  const fundingPill = adoptTotal > 0
+    ? `<span class="project-funding exact" title="${escapeHTML(formatCPDBFunding(cpdb) || usd.format(adoptTotal))}">${escapeHTML(usd.format(adoptTotal))}</span>`
+    : '';
+
+  const foot = [];
+  if (dateRange) foot.push(`<span><strong>Years:</strong> ${escapeHTML(dateRange)}</span>`);
+  if (spentTotal > 0) foot.push(`<span><strong>Spent:</strong> ${escapeHTML(usd.format(spentTotal))}</span>`);
+  if (cpdb.maprojid) foot.push(`<span><strong>FMS:</strong> ${escapeHTML(cpdb.maprojid)}</span>`);
+
+  return `
+    <div class="project project-historical">
+      <h3 class="project-title">${escapeHTML(cpdb.description || 'Untitled historical project')}</h3>
+      <div class="project-meta">
+        <span class="phase-pill ${labelClass}">${escapeHTML(label)}</span>
+        ${fundingPill}
+      </div>
       ${foot.length ? `<div class="project-foot">${foot.join('')}</div>` : ''}
     </div>`;
 }
