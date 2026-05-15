@@ -9,19 +9,19 @@
     ]
   },
   "congress": {
-    "3": { "name": "Tom Suozzi", "party": "D", "url": "https://suozzi.house.gov" },
-    "5": { "name": "Gregory Meeks", "party": "D", "url": "https://meeks.house.gov" },
-    "6": { "name": "Grace Meng", "party": "D", "url": "https://meng.house.gov" },
-    "7": { "name": "Nydia Velázquez", "party": "D", "url": "https://velazquez.house.gov" },
-    "8": { "name": "Hakeem Jeffries", "party": "D", "url": "https://jeffries.house.gov" },
-    "9": { "name": "Yvette Clarke", "party": "D", "url": "https://clarke.house.gov" },
-    "10": { "name": "Dan Goldman", "party": "D", "url": "https://goldman.house.gov" },
-    "11": { "name": "Nicole Malliotakis", "party": "R", "url": "https://malliotakis.house.gov" },
-    "12": { "name": "Jerrold Nadler", "party": "D", "url": "https://nadler.house.gov" },
-    "13": { "name": "Adriano Espaillat", "party": "D", "url": "https://espaillat.house.gov" },
-    "14": { "name": "Alexandria Ocasio-Cortez", "party": "D", "url": "https://ocasio-cortez.house.gov" },
-    "15": { "name": "Ritchie Torres", "party": "D", "url": "https://ritchietorres.house.gov" },
-    "16": { "name": "George Latimer", "party": "D", "url": "https://latimer.house.gov" }
+    "3": { "name": "Tom Suozzi", "party": "D", "url": "https://suozzi.house.gov", "bioguide": "S001201" },
+    "5": { "name": "Gregory Meeks", "party": "D", "url": "https://meeks.house.gov", "bioguide": "M001137" },
+    "6": { "name": "Grace Meng", "party": "D", "url": "https://meng.house.gov", "bioguide": "M001188" },
+    "7": { "name": "Nydia Velázquez", "party": "D", "url": "https://velazquez.house.gov", "bioguide": "V000081" },
+    "8": { "name": "Hakeem Jeffries", "party": "D", "url": "https://jeffries.house.gov", "bioguide": "J000294" },
+    "9": { "name": "Yvette Clarke", "party": "D", "url": "https://clarke.house.gov", "bioguide": "C001067" },
+    "10": { "name": "Dan Goldman", "party": "D", "url": "https://goldman.house.gov", "bioguide": "G000599" },
+    "11": { "name": "Nicole Malliotakis", "party": "R", "url": "https://malliotakis.house.gov", "bioguide": "M000317" },
+    "12": { "name": "Jerrold Nadler", "party": "D", "url": "https://nadler.house.gov", "bioguide": "N000002" },
+    "13": { "name": "Adriano Espaillat", "party": "D", "url": "https://espaillat.house.gov", "bioguide": "E000297" },
+    "14": { "name": "Alexandria Ocasio-Cortez", "party": "D", "url": "https://ocasio-cortez.house.gov", "bioguide": "O000172" },
+    "15": { "name": "Ritchie Torres", "party": "D", "url": "https://ritchietorres.house.gov", "bioguide": "T000486" },
+    "16": { "name": "George Latimer", "party": "D", "url": "https://latimer.house.gov", "bioguide": "L000606" }
   },
   "senate": {
     "10": { "name": "James Sanders Jr.", "party": "D", "url": "https://www.nysenate.gov/senators/james-sanders-jr" },

@@ -374,6 +374,250 @@
     font-weight: 800;
   }
 
+  /* Home cards */
+  .home-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .home-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(to bottom, var(--bg-soft), var(--bg-elev));
+    border-bottom: 1px solid var(--border);
+  }
+  .home-card-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .home-card-title::before {
+    content: "";
+    width: 4px;
+    height: 12px;
+    background: var(--accent-grad);
+    border-radius: 2px;
+  }
+  .near-me-prompt {
+    padding: 24px 20px 22px;
+    text-align: center;
+  }
+  .near-me-prompt p {
+    margin: 0 0 14px;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .locate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: var(--accent-grad);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font: 700 14px 'Inter', inherit;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s var(--ease-spring), box-shadow 0.2s;
+    box-shadow: 0 6px 20px -6px var(--accent-glow);
+    letter-spacing: -0.005em;
+  }
+  .locate-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -8px var(--accent-glow); }
+  .locate-btn:active { transform: scale(0.97); }
+  .locate-btn svg { width: 16px; height: 16px; }
+  .near-me-result { display: flex; flex-direction: column; }
+  .nm-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    align-items: center;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s, padding-left 0.18s var(--ease-out);
+    cursor: pointer;
+  }
+  .nm-item:first-child { border-top: none; }
+  .nm-item:hover { background: var(--bg-soft); padding-left: 22px; }
+  .nm-item.no-click { cursor: default; }
+  .nm-item.no-click:hover { background: var(--bg-elev); padding-left: 16px; }
+  .nm-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid var(--bg-elev);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .nm-icon svg { width: 20px; height: 20px; }
+  .nm-icon.tree { background: rgba(34,197,94,0.18); color: var(--ok); }
+  .nm-body { flex: 1; min-width: 0; }
+  .nm-kind {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .nm-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+    letter-spacing: -0.005em;
+  }
+  .nm-sub {
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 1px;
+    font-weight: 500;
+  }
+  .nm-dist {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    background: var(--accent-soft);
+    padding: 3px 9px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  /* Featured park card */
+  .featured-card {
+    position: relative;
+    height: 220px;
+    background: var(--accent-grad);
+    overflow: hidden;
+    cursor: pointer;
+    isolation: isolate;
+    transition: transform 0.25s var(--ease-out);
+  }
+  .featured-card:hover { transform: scale(1.005); }
+  .featured-card:active { transform: scale(0.99); }
+  .featured-photo {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.7s var(--ease-out);
+  }
+  .featured-card.has-photo .featured-photo { opacity: 1; }
+  .featured-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+  }
+  .featured-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px;
+    color: #fff;
+    z-index: 2;
+  }
+  .featured-badge {
+    display: inline-flex;
+    align-self: flex-start;
+    background: rgba(0,0,0,0.32);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.95);
+  }
+  .featured-name {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .featured-sub {
+    margin: 6px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+  }
+  .featured-skeleton {
+    position: absolute;
+    inset: 0;
+    background: var(--accent-grad);
+  }
+
+  /* Borough chip grid */
+  .borough-chips {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+  .borough-chip {
+    background: var(--bg-elev);
+    padding: 14px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font: inherit;
+    border: none;
+    color: var(--text);
+    transition: background 0.15s, color 0.15s;
+  }
+  .borough-chip:hover { background: var(--accent-soft); color: var(--accent); }
+  .borough-chip:active { background: var(--accent); color: #fff; }
+  .borough-chip-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+  .borough-chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1.1;
+  }
+
   /* Hero */
   .hero {
     position: relative;
@@ -822,6 +1066,13 @@
     animation: fadeIn 0.35s var(--ease-out);
   }
   .official-avatar.has-photo { background: var(--bg-soft); }
+  .official-avatar.inst-icon {
+    background: var(--bg-soft);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+  .official-avatar.inst-icon svg { width: 18px; height: 18px; }
   .official-role {
     display: block;
     font-size: 9px;
@@ -1603,8 +1854,8 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <h1>
-      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg></span>
-      <span class="header-title">Parks Lookup</span>
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M5 8c0-3 3-6 7-6s7 3 7 6c0 4-3 6-7 6S5 12 5 8z"/></svg></span>
+      <span class="header-title">Parks</span>
       <span class="header-park-name" id="headerParkName"></span>
     </h1>
   </div>
@@ -1625,9 +1876,36 @@
       </div>
       <div class="results" id="results"></div>
     </div>
+
+    <div class="home-card reveal" id="nearMeCard">
+      <div class="home-card-header">
+        <h3 class="home-card-title">Near Me</h3>
+      </div>
+      <div id="nearMeContent">
+        <div class="near-me-prompt" id="nearMePrompt">
+          <p>Find the closest park and the closest street tree from where you are right now.</p>
+          <button class="locate-btn" id="locateBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+            Use my location
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-card reveal d1" id="featuredCardWrap">
+      <div class="featured-card" id="featuredCard"></div>
+    </div>
+
     <div class="recent hidden" id="recentBlock">
       <p class="recent-label">Recent</p>
       <div class="chips" id="recentChips"></div>
+    </div>
+
+    <div class="home-card reveal d2" id="boroughCard">
+      <div class="home-card-header">
+        <h3 class="home-card-title">Browse by borough</h3>
+      </div>
+      <div class="borough-chips" id="boroughChips"></div>
     </div>
   </div>
 
@@ -1831,6 +2109,251 @@ function showSearch() {
   $('detailView').classList.add('hidden');
   if ($('headerParkName')) $('headerParkName').textContent = '';
   renderRecent();
+  initHome();
+}
+
+// Lazy-init home extras (featured park, borough chips) once per session.
+let homeInited = false;
+function initHome() {
+  if (homeInited) return;
+  homeInited = true;
+  loadFeaturedPark();
+  renderBoroughChips();
+  // Reveal animations for the home cards
+  setupReveal();
+}
+
+function dayOfYear() {
+  const now = new Date();
+  return Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+}
+
+let featuredCache = null;
+async function loadFeaturedPark() {
+  const card = $('featuredCard');
+  if (!card) return;
+  card.innerHTML = `<div class="featured-skeleton"></div>`;
+  if (!featuredCache) {
+    try {
+      const where = `typecategory='Flagship Park'`;
+      featuredCache = await fetchJSON(`${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,borough,acres,typecategory,multipolygon&$order=signname&$limit=30`);
+    } catch { featuredCache = []; }
+  }
+  if (!featuredCache.length) {
+    $('featuredCardWrap').style.display = 'none';
+    return;
+  }
+  const park = featuredCache[dayOfYear() % featuredCache.length];
+  renderFeaturedPark(park);
+}
+
+function renderFeaturedPark(p) {
+  const card = $('featuredCard');
+  const bor = BOROUGHS[p.borough] || p.borough;
+  const acres = p.acres ? `${Number(p.acres).toFixed(0)} acres` : '';
+  card.innerHTML = `
+    <div class="featured-photo" id="featuredPhoto"></div>
+    <div class="featured-overlay">
+      <span class="featured-badge">Park of the day</span>
+      <h2 class="featured-name">${escapeHTML(p.signname)}</h2>
+      <p class="featured-sub">${escapeHTML([bor, p.typecategory, acres].filter(Boolean).join(' · '))}</p>
+    </div>
+  `;
+  card.onclick = () => loadDetailByGispropnum(p.gispropnum);
+  // Pull a Wikipedia photo, same action API as the detail-view hero
+  fetchWikiSummary(p, undefined).then(async (data) => {
+    if (!data) return;
+    try {
+      const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=900&titles=${encodeURIComponent(data.title)}&redirects=1&origin=*`;
+      const r = await fetch(apiUrl);
+      if (!r.ok) return;
+      const json = await r.json();
+      const url = Object.values(json?.query?.pages || {})[0]?.thumbnail?.source;
+      if (!url) return;
+      const img = new Image();
+      img.onload = () => {
+        const photo = $('featuredPhoto');
+        if (!photo) return;
+        photo.style.backgroundImage = `url(${JSON.stringify(url)})`;
+        card.classList.add('has-photo');
+      };
+      img.src = url;
+    } catch {}
+  });
+}
+
+function renderBoroughChips() {
+  const chips = [
+    { code: 'M', name: 'Manhattan' },
+    { code: 'X', name: 'Bronx' },
+    { code: 'K', name: 'Brooklyn' },
+    { code: 'Q', name: 'Queens' },
+    { code: 'R', name: 'Staten Island' },
+  ];
+  const host = $('boroughChips');
+  if (!host) return;
+  host.innerHTML = chips.map(c =>
+    `<button class="borough-chip" type="button" data-bor="${c.code}">
+       <span class="borough-chip-mark">${c.code === 'X' ? 'Bx' : c.code === 'R' ? 'SI' : c.code === 'K' ? 'Bk' : c.code}</span>
+       <span class="borough-chip-label">${escapeHTML(c.name)}</span>
+     </button>`
+  ).join('');
+  host.querySelectorAll('button[data-bor]').forEach(btn => {
+    btn.addEventListener('click', () => browseBorough(btn.dataset.bor));
+  });
+}
+
+async function browseBorough(code) {
+  const results = $('results');
+  results.classList.add('show');
+  results.innerHTML = `<div class="result-empty"><span class="spinner" style="vertical-align:-2px"></span> Loading ${escapeHTML(BOROUGHS[code] || code)} flagship parks…</div>`;
+  try {
+    const where = `borough='${code}' AND typecategory IN ('Flagship Park','Community Park')`;
+    const rows = await fetchJSON(`${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,name311,borough,location,zipcode,acres&$order=acres DESC&$limit=20`);
+    renderResults(rows);
+    $('searchInput').value = '';
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    results.innerHTML = `<div class="result-empty">Could not load: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+// ---- Geolocation: closest park + closest street tree ----
+async function requestNearMe() {
+  if (!navigator.geolocation) {
+    $('nearMePrompt').innerHTML = `<p style="color:var(--text-3)">Your browser does not support geolocation.</p>`;
+    return;
+  }
+  $('nearMePrompt').innerHTML = `<p style="font-size:13px;color:var(--text-2)"><span class="spinner" style="vertical-align:-2px"></span>&nbsp;&nbsp;Getting your location…</p>`;
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      $('nearMePrompt').innerHTML = `<p style="font-size:13px;color:var(--text-2)"><span class="spinner" style="vertical-align:-2px"></span>&nbsp;&nbsp;Searching nearby parks and trees…</p>`;
+      try {
+        const [parkRes, treeRes] = await Promise.all([
+          findNearestPark(lat, lng),
+          findNearestTree(lat, lng),
+        ]);
+        renderNearMe(parkRes, treeRes);
+      } catch (e) {
+        $('nearMePrompt').innerHTML = `<p style="color:var(--bad);font-size:13px">Lookup failed: ${escapeHTML(e.message)}</p>`;
+      }
+    },
+    (err) => {
+      const msg = err.code === err.PERMISSION_DENIED
+        ? 'Location permission denied. Reload to try again.'
+        : 'Location unavailable. Are you indoors?';
+      $('nearMePrompt').innerHTML = `<p style="color:var(--text-3);font-size:13px">${escapeHTML(msg)}</p>`;
+    },
+    { timeout: 12000, maximumAge: 120000 }
+  );
+}
+
+async function findNearestPark(lat, lng) {
+  // Socrata supports within_circle on the multipolygon column. Expand the radius
+  // until we find at least one match (NYC is dense; 600m usually hits something).
+  for (const radius of [600, 2000, 8000]) {
+    try {
+      const where = `within_circle(multipolygon, ${lat}, ${lng}, ${radius})`;
+      const rows = await fetchJSON(`${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,borough,multipolygon,typecategory,acres&$limit=15`);
+      if (!rows.length) continue;
+      const scored = rows.map(p => {
+        const c = centroidFromMultipolygon(p.multipolygon);
+        const d = c ? haversine(lat, lng, c.lat, c.lng) : Infinity;
+        return { p, d };
+      }).sort((a, b) => a.d - b.d);
+      return { park: scored[0].p, dist: scored[0].d };
+    } catch (e) { /* try next radius */ }
+  }
+  return null;
+}
+
+async function findNearestTree(lat, lng) {
+  // 2015 Street Tree Census uvpi-gqnh — no spatial fn on this dataset, so we use
+  // a small lat/lng bbox and rank by haversine distance.
+  for (const radiusMeters of [80, 250, 600]) {
+    const dLat = radiusMeters / 111111;
+    const dLng = radiusMeters / (111111 * Math.cos(lat * Math.PI / 180));
+    const where = `latitude > ${lat - dLat} AND latitude < ${lat + dLat} AND longitude > ${lng - dLng} AND longitude < ${lng + dLng} AND status='Alive'`;
+    try {
+      const rows = await fetchJSON(`https://data.cityofnewyork.us/resource/uvpi-gqnh.json?$where=${encodeURIComponent(where)}&$select=tree_id,spc_common,spc_latin,health,tree_dbh,latitude,longitude,address,status&$limit=30`);
+      if (!rows.length) continue;
+      const scored = rows.map(t => ({
+        t,
+        d: haversine(lat, lng, parseFloat(t.latitude), parseFloat(t.longitude)),
+      })).sort((a, b) => a.d - b.d);
+      return { tree: scored[0].t, dist: scored[0].d };
+    } catch { /* try next */ }
+  }
+  return null;
+}
+
+function haversine(lat1, lng1, lat2, lng2) {
+  if (!Number.isFinite(lat1) || !Number.isFinite(lng1) || !Number.isFinite(lat2) || !Number.isFinite(lng2)) return Infinity;
+  const R = 6371000;
+  const toRad = (d) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistance(m) {
+  if (!Number.isFinite(m)) return '';
+  if (m < 100) return `${Math.round(m * 3.28084)} ft`;
+  if (m < 1609) return `${Math.round(m)} m`;
+  return `${(m / 1609.34).toFixed(1)} mi`;
+}
+
+function renderNearMe(parkRes, treeRes) {
+  const root = $('nearMeContent');
+  const items = [];
+  if (parkRes) {
+    const p = parkRes.park;
+    const bor = BOROUGHS[p.borough] || p.borough;
+    const acres = p.acres ? `${Number(p.acres).toFixed(1)} ac` : '';
+    items.push(`
+      <a class="nm-item" data-park="${escapeHTML(p.gispropnum)}">
+        <span class="nm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M5 8c0-3 3-6 7-6s7 3 7 6c0 4-3 6-7 6S5 12 5 8z"/></svg></span>
+        <div class="nm-body">
+          <div class="nm-kind">Closest park</div>
+          <div class="nm-name">${escapeHTML(p.signname)}</div>
+          <div class="nm-sub">${escapeHTML([bor, p.typecategory, acres].filter(Boolean).join(' · '))}</div>
+        </div>
+        <div class="nm-dist">${escapeHTML(formatDistance(parkRes.dist))}</div>
+      </a>`);
+  }
+  if (treeRes) {
+    const t = treeRes.tree;
+    const species = (t.spc_common || 'Unknown tree').replace(/\b\w/g, c => c.toUpperCase());
+    const dbh = t.tree_dbh && parseInt(t.tree_dbh, 10) > 0 ? `${t.tree_dbh}" trunk` : '';
+    const health = t.health || '';
+    const addr = t.address ? toTitleCase(t.address) : '';
+    // Link to the official NYC Parks Street Tree Map at the tree's record. The tree_id
+    // matches the dataset's primary key; the public map URL pattern is /tree-map/tree/{id}.
+    const treeMapUrl = t.tree_id
+      ? `https://tree-map.nycgovparks.org/tree-map/tree/${encodeURIComponent(t.tree_id)}`
+      : `https://tree-map.nycgovparks.org/tree-map?x=${encodeURIComponent(t.longitude)}&y=${encodeURIComponent(t.latitude)}&z=19`;
+    items.push(`
+      <a class="nm-item" href="${escapeHTML(treeMapUrl)}" target="_blank" rel="noopener">
+        <span class="nm-icon tree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c-3 0-5-2-5-5 0-2 1-3 2-4 1 1 1 2 3 2s2-1 3-2c1 1 2 2 2 4 0 3-2 5-5 5z"/><path d="M6 14c0 2 2 4 6 4s6-2 6-4"/></svg></span>
+        <div class="nm-body">
+          <div class="nm-kind">Closest street tree</div>
+          <div class="nm-name">${escapeHTML(species)}</div>
+          <div class="nm-sub">${escapeHTML([dbh, health, addr].filter(Boolean).join(' · '))}</div>
+        </div>
+        <div class="nm-dist">${escapeHTML(formatDistance(treeRes.dist))}</div>
+      </a>`);
+  }
+  if (!items.length) {
+    root.innerHTML = `<div class="empty">No parks or trees within range. Are you outside NYC?</div>`;
+    return;
+  }
+  root.innerHTML = `<div class="near-me-result">${items.join('')}</div>`;
+  root.querySelectorAll('[data-park]').forEach(el => {
+    el.addEventListener('click', () => loadDetailByGispropnum(el.dataset.park));
+  });
 }
 function showDetail() {
   document.body.classList.add('detail');
@@ -2251,7 +2774,9 @@ function setupReveal() {
       }
     });
   }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('#detailView .reveal').forEach((el, i) => {
+  // Scope: whichever view is currently visible.
+  const scope = document.body.classList.contains('detail') ? '#detailView' : '#searchView';
+  document.querySelectorAll(`${scope} .reveal`).forEach((el, i) => {
     el.style.animationDelay = `${Math.min(i * 40, 300)}ms`;
     revealObserver.observe(el);
   });
@@ -2306,7 +2831,9 @@ function renderOfficials(p) {
     const subLabel = asmDistricts.length > 1
       ? `Districts ${asmDistricts.map(d => parseInt(d, 10)).join(', ')}`
       : `District ${parseInt(asmDistricts[0], 10)}`;
-    rows.push(officialRow('State Assembly', names.join(', '), subLabel, null, firstUrl));
+    // Multi-rep rows: show first name + "+N more" so the photo lookup targets one person.
+    const displayName = names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0];
+    rows.push(officialRow('State Assembly', displayName, subLabel, null, firstUrl, false, { photoKey: normalizePhotoKey(names[0]) }));
   }
 
   if (p.us_congress) {
@@ -2317,7 +2844,9 @@ function renderOfficials(p) {
       rep ? rep.name : `District ${cg}`,
       rep ? `NY-${cg}${rep.party ? ' · ' + rep.party : ''}` : `NY-${cg}`,
       null,
-      rep ? rep.url : `https://www.house.gov/representatives`
+      rep ? rep.url : `https://www.house.gov/representatives`,
+      false,
+      rep ? { photoKey: normalizePhotoKey(rep.name) } : {}
     ));
   }
 
@@ -2336,12 +2865,12 @@ function renderOfficials(p) {
       if (!firstUrl) firstUrl = `https://www.nyc.gov/site/${slug}/index.page`;
     });
     if (labels.length) {
-      rows.push(officialRow('Community Board', labels.join(', '), labels.length > 1 ? `${labels.length} boards` : 'NYC Community Board', null, firstUrl));
+      rows.push(officialRow('Community Board', labels.join(', '), labels.length > 1 ? `${labels.length} boards` : 'NYC Community Board', null, firstUrl, false, { iconKey: 'cb' }));
     }
   }
 
   const bp = BOROUGH_PRESIDENTS[borChar] || BOROUGH_PRESIDENTS[bor];
-  if (bp) rows.push(officialRow('Borough Pres', bp.name, `${BOROUGHS[bor] || bor} Borough President`, null, bp.url));
+  if (bp) rows.push(officialRow('Borough Pres', bp.name, `${BOROUGHS[bor] || bor} Borough President`, null, bp.url, false, { photoKey: normalizePhotoKey(bp.name) }));
 
   // Parks operations district (department field, e.g. "M-12" = Manhattan District 12)
   const dept = (p.department || p.permitdistrict || '').trim();
@@ -2350,14 +2879,14 @@ function renderOfficials(p) {
     const code = deptMatch[1].toUpperCase();
     const borName = CB_BOROUGH_NAME[code === 'B' ? 'X' : code] || BOROUGHS[code] || '';
     const num = parseInt(deptMatch[2], 10);
-    rows.push(officialRow('Parks Dist', `${borName} District ${num}`, `NYC Parks operations · ${dept}`, null, 'https://www.nycgovparks.org/about/borough-management'));
+    rows.push(officialRow('Parks Dist', `${borName} District ${num}`, `NYC Parks operations · ${dept}`, null, 'https://www.nycgovparks.org/about/borough-management', false, { iconKey: 'parks' }));
   }
 
   const pc = PARKS_BOROUGH_COMMISSIONERS[borChar] || PARKS_BOROUGH_COMMISSIONERS[bor];
-  if (pc) rows.push(officialRow('Parks Boro', pc.name, 'NYC Parks borough management', null, pc.url));
+  if (pc) rows.push(officialRow('Parks Boro', pc.name, 'NYC Parks borough management', null, pc.url, false, { iconKey: 'parks' }));
 
   if (p.precinct) {
-    rows.push(officialRow('NYPD', `Precinct ${p.precinct}`, 'Local police precinct', null, `https://www.nyc.gov/site/nypd/bureaus/patrol/precincts/${p.precinct}-precinct.page`));
+    rows.push(officialRow('NYPD', `Precinct ${p.precinct}`, 'Local police precinct', null, `https://www.nyc.gov/site/nypd/bureaus/patrol/precincts/${p.precinct}-precinct.page`, false, { iconKey: 'shield' }));
   }
 
   $('officials').innerHTML = rows.join('') || `<div class="empty">No district info on file.</div>`;
@@ -2368,14 +2897,33 @@ function renderOfficials(p) {
   loadOfficialPhotos(loadGen);
 }
 
-function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
+// SVG glyphs for officials rows that represent institutions (no specific person),
+// e.g. Community Board, Parks district, Police precinct. Keeps the avatar slot from
+// showing an arbitrary letter for non-person rows.
+const OFFICIAL_ICONS = {
+  cb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
+  parks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c-3 0-5-2-5-5 0-2 1-3 2-4 1 1 1 2 3 2s2-1 3-2c1 1 2 2 2 4 0 3-2 5-5 5z"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg>',
+};
+
+// Normalize a person's name for photo lookup. "Carmen N. De La Rosa" → "Carmen De La Rosa"
+// so Wikipedia's article title (which usually drops middle initials) matches.
+function normalizePhotoKey(name) {
+  return String(name || '').replace(/\b[A-Z]\.\s+/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function officialRow(role, name, sub, slotId, url, withSkeleton = false, opts = {}) {
+  const { iconKey = null, photoKey = null } = opts;
   const slot = slotId ? ` id="${slotId}"` : '';
   const arrow = `<span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>`;
-  // Pick the first letter of the first name for the placeholder avatar. For "Carmen N. De La Rosa"
-  // we want "C", not "N." (which is what splitting on whitespace would naively give).
   const initial = (name || '?').trim().charAt(0).toUpperCase();
-  const photoKey = name ? name.trim() : '';
-  const avatar = `<span class="official-avatar" data-photo-key="${escapeHTML(photoKey)}">${escapeHTML(initial)}</span>`;
+  let avatar;
+  if (iconKey && OFFICIAL_ICONS[iconKey]) {
+    avatar = `<span class="official-avatar inst-icon" aria-hidden="true">${OFFICIAL_ICONS[iconKey]}</span>`;
+  } else {
+    const key = photoKey != null ? photoKey : normalizePhotoKey(name);
+    avatar = `<span class="official-avatar" data-photo-key="${escapeHTML(key)}">${escapeHTML(initial)}</span>`;
+  }
   const inner = `
     ${avatar}
     <div class="official-body"${slot}>
@@ -2472,9 +3020,10 @@ async function fillCouncilMember(p, gen) {
   const districtUrl = `https://council.nyc.gov/district-${cd}/`;
   const name = (member && member.name) ? member.name : `District ${cd}`;
   const initial = (name || '?').trim().charAt(0).toUpperCase();
+  const photoKey = normalizePhotoKey(name);
   slot.parentElement.outerHTML = `
     <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
-      <span class="official-avatar" data-photo-key="${escapeHTML(name)}">${escapeHTML(initial)}</span>
+      <span class="official-avatar" data-photo-key="${escapeHTML(photoKey)}">${escapeHTML(initial)}</span>
       <div class="official-body">
         <div class="official-role">Council</div>
         <div class="official-name">${escapeHTML(name)}</div>
@@ -2482,7 +3031,6 @@ async function fillCouncilMember(p, gen) {
       </div>
       <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
     </a>`;
-  // Trigger photo lookup for the real council name (placeholder was a district number).
   loadOfficialPhotos(loadGen);
 }
 
@@ -3987,6 +4535,16 @@ async function init() {
     const r = await fetch('reps.json');
     if (r.ok) reps = await r.json();
   } catch { reps = null; }
+  // Pre-seed Congress photos from bioguide IDs so they appear without a Wikipedia roundtrip.
+  // congress.gov serves canonical 200x250 headshots at /img/member/{lower-bioguide}_200.jpg.
+  if (reps?.congress) {
+    for (const rep of Object.values(reps.congress)) {
+      if (rep.bioguide && rep.name) {
+        const url = `https://www.congress.gov/img/member/${rep.bioguide.toLowerCase()}_200.jpg`;
+        officialPhotoCache.set(normalizePhotoKey(rep.name), url);
+      }
+    }
+  }
 
   const input = $('searchInput');
   const clear = $('searchClear');
@@ -4005,6 +4563,7 @@ async function init() {
   });
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrap')) $('results').classList.remove('show');
+    if (e.target.closest('#locateBtn')) requestNearMe();
   });
   $('backBtn').addEventListener('click', () => {
     if (window.location.hash) {
