@@ -948,17 +948,17 @@ function clearSearch() {
 }
 
 // Detail loading
-async function loadDetailByGispropnum(id) {
+async function loadDetailByGispropnum(id, fromHistory = false) {
   try {
     const rows = await fetchJSON(`${ENDPOINT_PARKS}?gispropnum=${encodeURIComponent(id)}&$limit=1`);
     if (!rows.length) throw new Error('Park not found');
-    loadDetail(rows[0]);
+    loadDetail(rows[0], fromHistory);
   } catch (e) {
     alert('Could not load park: ' + e.message);
   }
 }
 
-async function loadDetail(stub) {
+async function loadDetail(stub, fromHistory = false) {
   // stub from search may have fewer fields; refetch full row to be safe
   let full = stub;
   if (!stub.councildistrict || !stub.multipolygon) {
@@ -966,6 +966,12 @@ async function loadDetail(stub) {
       const rows = await fetchJSON(`${ENDPOINT_PARKS}?gispropnum=${encodeURIComponent(stub.gispropnum)}&$limit=1`);
       if (rows.length) full = rows[0];
     } catch { /* fall through with stub */ }
+  }
+  if (!fromHistory && full.gispropnum) {
+    const newHash = `#/p/${encodeURIComponent(full.gispropnum)}`;
+    if (window.location.hash !== newHash) {
+      history.pushState({ gispropnum: full.gispropnum }, '', newHash);
+    }
   }
   pushRecent(full);
   clearSearch();
@@ -1986,9 +1992,27 @@ async function init() {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrap')) $('results').classList.remove('show');
   });
-  $('backBtn').addEventListener('click', showSearch);
+  $('backBtn').addEventListener('click', () => {
+    if (window.location.hash) {
+      history.back();
+    } else {
+      showSearch();
+    }
+  });
+
+  window.addEventListener('popstate', handleRoute);
 
   renderRecent();
+  handleRoute();
+}
+
+function handleRoute() {
+  const match = window.location.hash.match(/^#\/p\/(.+)$/);
+  if (match) {
+    loadDetailByGispropnum(decodeURIComponent(match[1]), true);
+  } else {
+    showSearch();
+  }
 }
 
 init();
