@@ -455,9 +455,37 @@
   .phase-pill.completed { background: var(--bg-soft); color: var(--text-3); border: 1px solid var(--border); }
   .phase-pill.other { background: var(--accent-soft); color: var(--accent); }
   .project-funding {
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--ok-soft);
+    color: var(--ok);
+    font-variant-numeric: tabular-nums;
+  }
+  .project-funding.estimate {
+    background: var(--bg-soft);
+    color: var(--text-3);
+    border: 1px dashed var(--border);
     font-weight: 600;
-    color: var(--text-2);
+  }
+  .funding-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .funding-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent);
   }
   .project-summary {
     font-size: 13px;
@@ -1077,9 +1105,124 @@ async function loadCapitalProjects(p) {
     }
     countEl.textContent = String(rows.length);
     root.innerHTML = rows.map(renderProject).join('');
+    upgradeFundingViaPowerBI(rows);
   } catch (e) {
     root.innerHTML = `<div class="error">Could not load capital projects: ${escapeHTML(e.message)}</div>`;
   }
+}
+
+function fmsToDashboardId(rawFmsid) {
+  if (!rawFmsid) return null;
+  const m = String(rawFmsid).match(/P-[A-Z0-9]+/i);
+  return m ? m[0].toUpperCase() : null;
+}
+
+async function upgradeFundingViaPowerBI(rows) {
+  if (!WORKER_URL) return;
+  const tasks = rows
+    .map(prj => ({ prj, dashId: fmsToDashboardId(prj.fmsid) }))
+    .filter(t => t.dashId);
+  const concurrency = 3;
+  let i = 0;
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (i < tasks.length) {
+      const idx = i++;
+      const { prj, dashId } = tasks[idx];
+      try {
+        const url = `${WORKER_URL.replace(/\/$/, '')}/?mode=powerbi&fmsid=${encodeURIComponent(dashId)}`;
+        const detail = await fetchJSON(url);
+        if (!detail || detail.error) continue;
+        applyPowerBIDetail(prj, detail);
+      } catch (_) {
+        // silent — keep dataset value
+      }
+    }
+  });
+  await Promise.all(workers);
+}
+
+function applyPowerBIDetail(prj, detail) {
+  const node = document.querySelector(`.project[data-fmsid="${cssEscape(prj.fmsid)}"]`);
+  if (!node) return;
+  const total = detail.totalBudget;
+  if (typeof total !== 'number' || total <= 0) return;
+  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const fmt = usd.format(total);
+  const titleBits = [`Power BI: ${fmt}`];
+  if (prj.totalfunding) titleBits.push(`Dataset: ${prj.totalfunding}`);
+  if (typeof detail.spendToDate === 'number') titleBits.push(`Spent: ${usd.format(detail.spendToDate)}`);
+  if (typeof detail.spendPercent === 'number') titleBits.push(`${Math.round(detail.spendPercent * 100)}% spent`);
+  const title = titleBits.join(' · ');
+  let pill = node.querySelector('.project-funding');
+  if (pill) {
+    pill.classList.remove('estimate');
+    pill.classList.add('exact');
+    pill.setAttribute('title', title);
+    pill.textContent = fmt;
+  } else {
+    const meta = node.querySelector('.project-meta');
+    if (meta) {
+      pill = document.createElement('span');
+      pill.className = 'project-funding exact';
+      pill.setAttribute('title', title);
+      pill.textContent = fmt;
+      meta.appendChild(pill);
+    }
+  }
+}
+
+function cssEscape(s) {
+  return String(s).replace(/[^a-zA-Z0-9_-]/g, ch => '\\' + ch);
+}
+
+const FUNDING_CATEGORIES = ['Borough President', 'City Council', 'Mayoral', 'Federal', 'State', 'Private'];
+
+function splitFundingSources(s) {
+  if (!s) return [];
+  let remaining = s;
+  const found = [];
+  while (remaining.length) {
+    const next = FUNDING_CATEGORIES
+      .map(cat => ({ cat, idx: remaining.indexOf(cat) }))
+      .filter(x => x.idx !== -1)
+      .sort((a, b) => a.idx - b.idx)[0];
+    if (!next) {
+      const trimmed = remaining.trim();
+      if (trimmed) found.push(trimmed);
+      break;
+    }
+    if (next.idx > 0) {
+      const trimmed = remaining.slice(0, next.idx).trim();
+      if (trimmed) found.push(trimmed);
+    }
+    found.push(next.cat);
+    remaining = remaining.slice(next.idx + next.cat.length);
+  }
+  return found;
+}
+
+function formatFunding(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  // Range strings from the dataset for design/procurement phase projects.
+  const lessMatch = s.match(/^Less than \$?([\d.]+)\s*(million|thousand)?/i);
+  const greaterMatch = s.match(/^Greater than \$?([\d.]+)\s*(million|thousand)?/i);
+  const betweenMatch = s.match(/^Between \$?([\d.]+)\s*(million|thousand)?\s*and\s*\$?([\d.]+)\s*(million|thousand)?/i);
+  const abbr = (n, unit) => {
+    const u = (unit || '').toLowerCase();
+    if (u === 'million') return `$${n}M`;
+    if (u === 'thousand') return `$${n}K`;
+    return `$${n}`;
+  };
+  if (lessMatch) return { specific: false, display: `< ${abbr(lessMatch[1], lessMatch[2])}` };
+  if (greaterMatch) return { specific: false, display: `> ${abbr(greaterMatch[1], greaterMatch[2])}` };
+  if (betweenMatch) return { specific: false, display: `${abbr(betweenMatch[1], betweenMatch[2])}–${abbr(betweenMatch[3], betweenMatch[4])}` };
+  // Specific value — usually already formatted like "$150,000". If it's a raw number, format it.
+  if (/^\d+(\.\d+)?$/.test(s)) {
+    const n = parseFloat(s);
+    return { specific: true, display: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n) };
+  }
+  return { specific: true, display: s };
 }
 
 function renderProject(prj) {
@@ -1103,18 +1246,26 @@ function renderProject(prj) {
   const foot = [];
   if (completionDate) foot.push(`<span><strong>Target:</strong> ${escapeHTML(completionDate)}</span>`);
   if (prj.projectliaison) foot.push(`<span><strong>Liaison:</strong> ${escapeHTML(prj.projectliaison)}</span>`);
-  if (prj.fundingsource) foot.push(`<span><strong>Funding:</strong> ${escapeHTML(prj.fundingsource)}</span>`);
   if (prj.fmsid) foot.push(`<span><strong>FMS:</strong> ${escapeHTML(prj.fmsid)}</span>`);
 
-  const fundingPill = prj.totalfunding ? `<span class="project-funding">${escapeHTML(prj.totalfunding)}</span>` : '';
+  const funding = formatFunding(prj.totalfunding);
+  const fundingPill = funding
+    ? `<span class="project-funding${funding.specific ? '' : ' estimate'}" title="${escapeHTML(prj.totalfunding)}">${funding.specific ? '' : 'Est: '}${escapeHTML(funding.display)}</span>`
+    : '';
+
+  const sources = splitFundingSources(prj.fundingsource);
+  const sourceChips = sources.length
+    ? `<div class="funding-chips">${sources.map(s => `<span class="funding-chip">${escapeHTML(s)}</span>`).join('')}</div>`
+    : '';
 
   return `
-    <div class="project">
+    <div class="project" data-fmsid="${escapeHTML(prj.fmsid || '')}">
       <h3 class="project-title">${escapeHTML(prj.title || 'Untitled project')}</h3>
       <div class="project-meta">
         ${phaseRaw ? `<span class="phase-pill ${phaseClass}">${escapeHTML(phaseRaw)}</span>` : ''}
         ${fundingPill}
       </div>
+      ${sourceChips}
       ${pct != null ? `
         <div class="progress-row">
           <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
