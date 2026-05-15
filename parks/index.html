@@ -1138,16 +1138,29 @@ async function fetchViaProxy(target, signal) {
   return r.text();
 }
 
-// --- History (Wikipedia REST API — CORS-open, no worker needed) ---
+// --- History — try NYC Parks' historical sign first, fall back to Wikipedia ---
 async function loadHistory(p) {
   const root = $('history');
   const open = $('historyOpen');
   const name = p.signname || p.name311 || '';
-  const fallback = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(name + ' park New York City')}`;
-  open.href = fallback;
+  const parksUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(p.gispropnum || '')}/history`;
+  open.href = parksUrl;
   if (!name) { root.innerHTML = `<div class="empty">No park name to look up.</div>`; return; }
   root.innerHTML = `<div class="article-body"><span class="skeleton" style="width:80%"></span></div>`;
 
+  // 1) NYC Parks Historical Sign (via worker)
+  if (WORKER_URL && p.gispropnum) {
+    try {
+      const html = await fetchViaProxy(parksUrl);
+      const sign = extractHistoricalSign(html);
+      if (sign && sign.paragraphs.length) {
+        root.innerHTML = `<div class="article-body">${sign.paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From NYC Parks Historical Signs Project · <a href="${escapeHTML(parksUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Open page →</a></p></div>`;
+        return;
+      }
+    } catch { /* fall through to Wikipedia */ }
+  }
+
+  // 2) Wikipedia fallback
   const candidates = [name, `${name} (Manhattan)`, `${name} (Bronx)`, `${name} (Brooklyn)`, `${name} (Queens)`, `${name} (Staten Island)`, `${name}, New York City`];
   for (const title of candidates) {
     try {
@@ -1158,11 +1171,34 @@ async function loadHistory(p) {
       const articleUrl = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title)}`;
       open.href = articleUrl;
       const paragraphs = data.extract.split(/\n+/).map(s => s.trim()).filter(Boolean);
-      root.innerHTML = `<div class="article-body">${paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From Wikipedia · <a href="${escapeHTML(articleUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Read full article →</a></p></div>`;
+      root.innerHTML = `<div class="article-body">${paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From Wikipedia (no NYC Parks sign for this site) · <a href="${escapeHTML(articleUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Read full article →</a></p></div>`;
       return;
     } catch { /* try next title */ }
   }
-  root.innerHTML = `<div class="empty">No Wikipedia article matched. <a href="${escapeHTML(fallback)}" target="_blank" rel="noopener">Search Wikipedia</a></div>`;
+
+  const wikiSearch = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(name + ' park New York City')}`;
+  root.innerHTML = `<div class="empty">No history posted yet. <a href="${escapeHTML(parksUrl)}" target="_blank" rel="noopener">Open NYC Parks page</a> · <a href="${escapeHTML(wikiSearch)}" target="_blank" rel="noopener">Search Wikipedia</a></div>`;
+}
+
+// Pull the historical-sign prose out of an nycgovparks.org /history page.
+// The post-1990s-ish layout has #park_feature > [h3, .alert, prose-div].
+function extractHistoricalSign(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const feature = doc.querySelector('#park_feature');
+  if (!feature) return null;
+  const prose = Array.from(feature.children).filter(c => c.tagName === 'DIV' && !c.classList.contains('alert')).pop();
+  if (!prose || prose.textContent.trim().length < 50) return null;
+  // Capture paragraph breaks; use <p> boundaries plus double newlines from <br><br>.
+  const paras = [];
+  prose.querySelectorAll('p').forEach(p => {
+    const txt = p.textContent.replace(/\s+/g, ' ').trim();
+    if (txt) paras.push(txt);
+  });
+  if (!paras.length) {
+    const fallback = prose.textContent.replace(/\s+/g, ' ').trim();
+    if (fallback) paras.push(fallback);
+  }
+  return { paragraphs: paras };
 }
 
 // --- News (DuckDuckGo via worker — Google News blocks Cloudflare) ---
