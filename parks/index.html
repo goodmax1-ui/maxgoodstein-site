@@ -4211,6 +4211,30 @@ function eventLooksLikeProgram(name) {
   return true;
 }
 
+// Generic single-word event names that are almost always private bookings rather
+// than public programs ("Picnic" = someone's family picnic, "Wedding" = ceremony).
+// Anything more specific ("In Flanders Fields Memorial event", "Bike To Work Day")
+// is treated as a public program.
+const PRIVATE_PERMIT_NAMES = new Set([
+  'picnic', 'party', 'birthday', 'birthday party', 'wedding', 'wedding ceremony',
+  'reunion', 'family reunion', 'family gathering', 'gathering', 'celebration',
+  'baby shower', 'engagement', 'photoshoot', 'photo shoot', 'photo session',
+  'miscellaneous', 'private event', 'film shoot', 'photography', 'rehearsal',
+  'meeting', 'cookout', 'barbecue', 'bbq', 'graduation',
+]);
+
+// 'Events' = public, named programs (Bike to Work, Forest Friday, NYRR Open Run).
+// 'Permits' = field reservations + private bookings (sports, picnics, parties).
+// 'Closures' = facility-admin records (lawn closures, maintenance windows).
+function classifyEvent(ev) {
+  const name = (ev.event_name || '').trim();
+  if (/closure|closed|maintenance/i.test(name)) return 'Closures';
+  const t = (ev.event_type || '').toLowerCase();
+  if (t.startsWith('sport')) return 'Permits';
+  if (PRIVATE_PERMIT_NAMES.has(name.toLowerCase())) return 'Permits';
+  return 'Events';
+}
+
 function eventBucketKey(date) {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -4262,24 +4286,26 @@ async function loadParkEvents(p, gen) {
     if (gen !== undefined && gen !== loadGen) return;
     if (!permits.length) return;
     const merged = permits.map(e => {
-      const isSport = (e.event_type || '').toLowerCase().startsWith('sport');
-      const isProgram = !isSport && eventLooksLikeProgram(e.event_name);
+      const cat = classifyEvent(e);
       const { venue } = splitPermitLocation(e.event_location || '');
+      const isSport = (e.event_type || '').toLowerCase().startsWith('sport');
       return {
         title: e.event_name,
         startDate: e.start_date_time,
         location: venue,
         url: permitDetailsUrl(e, p),
-        categories: [isSport ? 'Field reservation' : (isProgram ? 'Permitted event' : 'Facility closure')],
-        _cat: isSport ? 'Sports' : (isProgram ? 'Special' : 'Closures'),
+        categories: [cat === 'Events' ? 'Program' : (isSport ? 'Field reservation' : (cat === 'Closures' ? 'Facility closure' : 'Permit'))],
+        _cat: cat,
       };
     });
     merged.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-    const specialCount = merged.filter(e => e._cat === 'Special').length;
+    const eventsCount = merged.filter(e => e._cat === 'Events').length;
+    const permitsCount = merged.filter(e => e._cat === 'Permits').length;
+    // Default to whichever bucket has content, with Events winning ties.
     eventState = {
       rows: merged,
       parkName: name,
-      filter: specialCount > 0 ? 'Special' : 'Sports',
+      filter: eventsCount > 0 ? 'Events' : (permitsCount > 0 ? 'Permits' : 'All'),
     };
     sec.hidden = false;
     countEl.textContent = String(merged.length);
@@ -4305,14 +4331,16 @@ function renderEventsView() {
   const { rows, parkName, filter } = eventState;
   const counts = {
     All: rows.length,
-    Special: rows.filter(r => r._cat === 'Special').length,
-    Sports: rows.filter(r => r._cat === 'Sports').length,
+    Events: rows.filter(r => r._cat === 'Events').length,
+    Permits: rows.filter(r => r._cat === 'Permits').length,
+    Closures: rows.filter(r => r._cat === 'Closures').length,
   };
   const filtered = filter === 'All' ? rows : rows.filter(r => r._cat === filter);
   const chipDefs = [];
-  if (counts.Special > 0) chipDefs.push({ id: 'Special', label: 'Special' });
-  if (counts.Sports > 0) chipDefs.push({ id: 'Sports', label: 'Sports' });
-  if (counts.Special + counts.Sports > 0) chipDefs.push({ id: 'All', label: 'All' });
+  if (counts.Events > 0) chipDefs.push({ id: 'Events', label: 'Events' });
+  if (counts.Permits > 0) chipDefs.push({ id: 'Permits', label: 'Permits' });
+  if (counts.Closures > 0) chipDefs.push({ id: 'Closures', label: 'Closures' });
+  if (rows.length > 0) chipDefs.push({ id: 'All', label: 'All' });
   const chips = chipDefs.map(c =>
     `<button class="sort-pill${c.id === filter ? ' active' : ''}" data-evcat="${c.id}">${escapeHTML(c.label)} <span class="scope-count">${counts[c.id]}</span></button>`
   ).join('');
