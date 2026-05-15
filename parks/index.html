@@ -603,6 +603,16 @@
     color: var(--text-3);
     margin-top: 6px;
   }
+  .stat-since {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-3);
+    margin-top: 3px;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: 0.02em;
+  }
   .stat-card.skeleton-card .stat-val,
   .stat-card.skeleton-card .stat-label {
     background: linear-gradient(90deg, var(--bg-soft), var(--border), var(--bg-soft));
@@ -610,6 +620,39 @@
     color: transparent;
     border-radius: 4px;
     animation: shimmer 1.4s linear infinite;
+  }
+  button.stat-card {
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .stat-card.clickable {
+    cursor: pointer;
+    position: relative;
+  }
+  .stat-card.clickable::after {
+    content: "↗";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    opacity: 0.45;
+    transition: opacity 0.15s, transform 0.18s var(--ease-spring);
+  }
+  .stat-card.clickable:hover { transform: translateY(-3px); box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-glow); border-color: var(--accent); }
+  .stat-card.clickable:hover::after { opacity: 1; transform: translate(2px, -2px); }
+  .stat-card.clickable:active { transform: translateY(-1px) scale(0.98); }
+  @keyframes flashActive {
+    0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0); }
+    20%  { box-shadow: 0 0 0 6px var(--accent-glow), 0 8px 20px -8px var(--accent-glow); }
+    100% { box-shadow: 0 0 0 0 rgba(45,106,79,0); }
+  }
+  .project.flash-active {
+    animation: flashActive 2.4s var(--ease-out);
+    border-radius: 12px;
   }
   @media (max-width: 480px) {
     .stat-strip { gap: 6px; }
@@ -728,52 +771,91 @@
   .section-link:hover { text-decoration: underline; }
   .section-link::after { content: "→"; opacity: 0.7; }
 
-  /* Officials rows */
+  /* Officials grid */
+  #officials {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+  @media (min-width: 600px) {
+    #officials { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  #officials > .empty { grid-column: 1 / -1; background: var(--bg-elev); }
   .official {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    border-top: 1px solid var(--border);
+    gap: 10px;
+    padding: 11px 12px;
+    background: var(--bg-elev);
     text-decoration: none;
     color: var(--text);
-    transition: background 0.15s, padding-left 0.18s var(--ease-out);
+    transition: background 0.15s;
+    min-width: 0;
   }
-  .official:first-child { border-top: none; }
-  .official:hover { background: var(--bg-soft); padding-left: 22px; }
+  .official:hover { background: var(--bg-soft); }
   .official:active { background: var(--accent-soft); }
   .official.no-link { cursor: default; }
-  .official.no-link:hover { padding-left: 18px; background: transparent; }
-  .official-role {
-    flex: 0 0 100px;
-    font-size: 10px;
+  .official.no-link:hover { background: var(--bg-elev); }
+  .official-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid var(--bg-elev);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.10), 0 0 0 1px var(--border);
+    position: relative;
+  }
+  .official-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    animation: fadeIn 0.35s var(--ease-out);
+  }
+  .official-avatar.has-photo { background: var(--bg-soft); }
+  .official-role {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-3);
+    margin-bottom: 1px;
   }
   .official-body { flex: 1; min-width: 0; }
   .official-name {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    line-height: 1.22;
+    letter-spacing: -0.005em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
   }
   .official-sub {
-    font-size: 12px;
+    font-size: 10.5px;
     color: var(--text-3);
     margin-top: 2px;
     font-weight: 500;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .official-arrow {
-    color: var(--text-3);
-    flex-shrink: 0;
-    transition: transform 0.18s var(--ease-spring), color 0.15s;
-  }
-  .official:hover .official-arrow { transform: translateX(3px); color: var(--accent); }
-  .official-arrow svg { width: 14px; height: 14px; }
-  .official.no-link .official-arrow { display: none; }
+  .official-arrow { display: none; }
   .skeleton {
     display: inline-block;
     height: 14px;
@@ -831,6 +913,16 @@
     text-transform: uppercase;
     color: var(--text-3);
     margin-top: 4px;
+  }
+  .donut-center-sub {
+    font-size: 8.5px;
+    font-weight: 700;
+    color: var(--text-3);
+    opacity: 0.7;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: 0.02em;
   }
   .finance-legend {
     display: flex;
@@ -1883,7 +1975,7 @@ async function loadDetail(stub, fromHistory = false) {
   renderLinks(full);
   loadHeroImage(full, gen);
   loadParkBadges(full, gen);
-  loadAmenityCount(full, gen);
+  loadCommunityBoardLeaders(full, gen);
   loadHistory(full, gen);
   loadNews(full, gen);
   loadResolutions(full, gen);
@@ -2004,8 +2096,8 @@ function renderStatStripPlaceholder() {
   $('statStrip').innerHTML = `
     ${statCard(acresN != null ? compactNumberParts(acresN).val : '–', acresN != null ? (compactNumberParts(acresN).unit || 'ac') : '', 'Acres', acresN == null)}
     ${statCard(since != null ? String(since) : '–', '', 'Est.', since == null)}
-    ${statCard('–', '', 'Active $', true)}
-    ${statCard('–', '', 'Amenities', true)}
+    ${statCard('–', '', 'Active $', true, { action: 'projects' })}
+    ${statCard('–', '', 'Spent', true)}
   `;
   if (acresN != null) {
     animateCountUp($('statStrip').children[0].querySelector('.stat-val'), acresN, compactNumberParts(acresN).unit || 'ac');
@@ -2042,14 +2134,17 @@ function statCardText(value, label) {
   </div>`;
 }
 
-function statCard(val, unit, label, skeleton = false) {
-  return `<div class="stat-card${skeleton ? ' skeleton-card' : ''}">
+function statCard(val, unit, label, skeleton = false, opts = {}) {
+  const clickable = opts.action ? ' clickable' : '';
+  const tag = opts.action ? 'button' : 'div';
+  const attrs = opts.action ? ` type="button" data-action="${escapeHTML(opts.action)}"` : '';
+  return `<${tag} class="stat-card${skeleton ? ' skeleton-card' : ''}${clickable}"${attrs}>
     <div class="stat-val" data-num="0">${escapeHTML(val)}${unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : ''}</div>
     <div class="stat-label">${escapeHTML(label)}</div>
-  </div>`;
+  </${tag}>`;
 }
 
-function setStatCard(idx, val, unit, label, animateTo) {
+function setStatCard(idx, val, unit, label, animateTo, footnote) {
   const card = $('statStrip').children[idx];
   if (!card) return;
   card.classList.remove('skeleton-card');
@@ -2060,6 +2155,19 @@ function setStatCard(idx, val, unit, label, animateTo) {
     animateCountUp(valEl, animateTo, unit);
   } else if (valEl) {
     valEl.innerHTML = `${escapeHTML(String(val))}${unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : ''}`;
+  }
+  // Optional footnote line below the label (e.g. "since 2007"). Removed when not provided
+  // so cards stay tidy when the footnote no longer applies.
+  let fnEl = card.querySelector('.stat-since');
+  if (footnote) {
+    if (!fnEl) {
+      fnEl = document.createElement('div');
+      fnEl.className = 'stat-since';
+      card.appendChild(fnEl);
+    }
+    fnEl.textContent = footnote;
+  } else if (fnEl) {
+    fnEl.remove();
   }
 }
 
@@ -2255,14 +2363,23 @@ function renderOfficials(p) {
   $('officials').innerHTML = rows.join('') || `<div class="empty">No district info on file.</div>`;
   $('officialsCount').textContent = String(rows.length);
   setNavCount('sec-officials', rows.length);
+  // Kick off avatar photo fetches (Wikipedia per name). Photos for council members
+  // get loaded again after fillCouncilMember replaces the placeholder name.
+  loadOfficialPhotos(loadGen);
 }
 
 function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
   const slot = slotId ? ` id="${slotId}"` : '';
   const arrow = `<span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>`;
+  // Pick the first letter of the first name for the placeholder avatar. For "Carmen N. De La Rosa"
+  // we want "C", not "N." (which is what splitting on whitespace would naively give).
+  const initial = (name || '?').trim().charAt(0).toUpperCase();
+  const photoKey = name ? name.trim() : '';
+  const avatar = `<span class="official-avatar" data-photo-key="${escapeHTML(photoKey)}">${escapeHTML(initial)}</span>`;
   const inner = `
-    <div class="official-role">${escapeHTML(role)}</div>
+    ${avatar}
     <div class="official-body"${slot}>
+      <div class="official-role">${escapeHTML(role)}</div>
       <div class="official-name">${withSkeleton ? '<span class="skeleton"></span>' : escapeHTML(name)}</div>
       <div class="official-sub">${escapeHTML(sub)}</div>
     </div>
@@ -2271,6 +2388,64 @@ function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
     return `<a class="official" href="${escapeHTML(url)}" target="_blank" rel="noopener">${inner}</a>`;
   }
   return `<div class="official no-link">${inner}</div>`;
+}
+
+// Wikipedia photo cache: persistent across park views so officials we've already
+// resolved don't re-fetch. Key is the official's name; value is the thumbnail URL
+// or null for a cached miss.
+const officialPhotoCache = new Map();
+
+async function loadOfficialPhotos(gen) {
+  const avatars = Array.from(document.querySelectorAll('.official-avatar[data-photo-key]'));
+  const seen = new Set();
+  for (const el of avatars) {
+    const key = el.getAttribute('data-photo-key');
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    if (officialPhotoCache.has(key)) {
+      const cached = officialPhotoCache.get(key);
+      if (cached) applyOfficialAvatar(key, cached);
+      continue;
+    }
+    fetchOfficialPhoto(key).then(url => {
+      officialPhotoCache.set(key, url || null);
+      if (gen !== undefined && gen !== loadGen) return;
+      if (url) applyOfficialAvatar(key, url);
+    });
+  }
+}
+
+async function fetchOfficialPhoto(name) {
+  // Many NYC officials share names with non-politicians on Wikipedia (e.g. "Mark Levine"
+  // is also a writer). Try disambiguated titles in order, and require the article's
+  // description or extract to look political before accepting it.
+  const candidates = [
+    `${name} (New York politician)`,
+    `${name} (politician)`,
+    name,
+  ];
+  const politicalKeywords = /politician|senator|assembly|representative|member of (congress|the )|council\s*member|councilmember|councilman|councilwoman|governor|president|mayor|borough|elected/i;
+  for (const title of candidates) {
+    try {
+      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`);
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d.type === 'disambiguation') continue;
+      if (!d.thumbnail?.source) continue;
+      const combined = ((d.description || '') + ' ' + (d.extract || '')).slice(0, 600);
+      if (!politicalKeywords.test(combined)) continue;
+      return d.thumbnail.source;
+    } catch {}
+  }
+  return null;
+}
+
+function applyOfficialAvatar(key, url) {
+  const slots = document.querySelectorAll(`.official-avatar[data-photo-key="${cssEscape(key)}"]`);
+  slots.forEach(slot => {
+    slot.classList.add('has-photo');
+    slot.innerHTML = `<img src="${escapeHTML(url)}" alt="" onerror="this.parentElement.classList.remove('has-photo');this.parentElement.textContent='${escapeHTML(key.charAt(0).toUpperCase())}'" />`;
+  });
 }
 
 async function fillCouncilMember(p, gen) {
@@ -2296,15 +2471,19 @@ async function fillCouncilMember(p, gen) {
   if (!slot) return;
   const districtUrl = `https://council.nyc.gov/district-${cd}/`;
   const name = (member && member.name) ? member.name : `District ${cd}`;
+  const initial = (name || '?').trim().charAt(0).toUpperCase();
   slot.parentElement.outerHTML = `
     <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
-      <div class="official-role">Council</div>
+      <span class="official-avatar" data-photo-key="${escapeHTML(name)}">${escapeHTML(initial)}</span>
       <div class="official-body">
+        <div class="official-role">Council</div>
         <div class="official-name">${escapeHTML(name)}</div>
         <div class="official-sub">District ${cd} · NYC City Council</div>
       </div>
       <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
     </a>`;
+  // Trigger photo lookup for the real council name (placeholder was a district number).
+  loadOfficialPhotos(loadGen);
 }
 
 // ---- Capital projects ----
@@ -2559,7 +2738,33 @@ document.addEventListener('click', (e) => {
     document.getElementById('sec-projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
+  const statBtn = e.target.closest('.stat-card.clickable');
+  if (statBtn && statBtn.dataset.action === 'projects') {
+    revealActiveProjects();
+    return;
+  }
 });
+
+function revealActiveProjects() {
+  const sec = document.getElementById('sec-projects');
+  if (!sec) return;
+  // If projects are collapsed, expand so all active-phase cards are visible after scroll.
+  const root = document.getElementById('projects');
+  if (root && !root.classList.contains('expanded') && root.querySelector('.hide-collapsed')) {
+    const btn = root.querySelector(':scope > .show-more-btn');
+    btn?.click();
+  }
+  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Briefly flash the design / procurement / construction cards.
+  const cards = document.querySelectorAll('#projects > .project[data-phase="construction"], #projects > .project[data-phase="design"], #projects > .project[data-phase="procurement"]');
+  cards.forEach(c => {
+    c.classList.remove('flash-active');
+    // Force reflow so the animation re-triggers if it fires twice in quick succession.
+    void c.offsetWidth;
+    c.classList.add('flash-active');
+    setTimeout(() => c.classList.remove('flash-active'), 2400);
+  });
+}
 
 function historicalPhaseRank(cpdb) {
   const adopt = parseFloat(cpdb.adopt_total) || 0;
@@ -2946,11 +3151,19 @@ function computeAggregates() {
   let trackerBudget = 0;
   let activeBudget = 0;
   let totalSpent = 0;
+  let earliestSpendYear = Infinity;
+  let earliestAdoptYear = Infinity;
   const phaseCounts = { design: 0, procurement: 0, construction: 0, completed: 0, other: 0 };
   let progressSum = 0;
   let progressCount = 0;
 
   const fundMix = { mayoral: 0, council: 0, state: 0, federal: 0, other: 0 };
+
+  const minYear = (cur, iso) => {
+    if (!iso) return cur;
+    const y = new Date(iso).getFullYear();
+    return Number.isFinite(y) && y < cur ? y : cur;
+  };
 
   for (const prj of capState.tracker) {
     const pbi = prj._pbi;
@@ -2961,13 +3174,14 @@ function computeAggregates() {
     phaseCounts[cls] = (phaseCounts[cls] || 0) + 1;
     if (total > 0) {
       trackerBudget += total;
-      // "Active" = $ in active pipeline phases only (design / procurement / construction).
-      // Phases like "proposed" or "hold" don't represent committed work in flight.
       if (cls === 'design' || cls === 'procurement' || cls === 'construction') {
         activeBudget += total;
       }
     }
-    if (pbi && Number.isFinite(pbi.spendToDate)) totalSpent += pbi.spendToDate;
+    if (pbi && Number.isFinite(pbi.spendToDate) && pbi.spendToDate > 0) {
+      totalSpent += pbi.spendToDate;
+      earliestSpendYear = minYear(earliestSpendYear, prj.designstart || prj.procurementstart || prj.constructionstart || pbi.currentPhaseStart);
+    }
 
     let pct = null;
     if (cls === 'design' && prj.designpercentcomplete) pct = parseFloat(prj.designpercentcomplete);
@@ -2977,22 +3191,32 @@ function computeAggregates() {
 
     const cpdb = capState.cpdbByKey.get(normalizeFmsKey(prj.fmsid));
     if (cpdb) {
-      fundMix.mayoral += parseFloat(cpdb.adopt_ccnonexempt) || 0;
-      fundMix.council += parseFloat(cpdb.adopt_ccexempt) || 0;
-      fundMix.state += parseFloat(cpdb.adopt_nccstate) || 0;
-      fundMix.federal += parseFloat(cpdb.adopt_nccfederal) || 0;
-      fundMix.other += parseFloat(cpdb.adopt_nccother) || 0;
+      const m = parseFloat(cpdb.adopt_ccnonexempt) || 0;
+      const c = parseFloat(cpdb.adopt_ccexempt) || 0;
+      const s = parseFloat(cpdb.adopt_nccstate) || 0;
+      const f = parseFloat(cpdb.adopt_nccfederal) || 0;
+      const o = parseFloat(cpdb.adopt_nccother) || 0;
+      fundMix.mayoral += m; fundMix.council += c; fundMix.state += s; fundMix.federal += f; fundMix.other += o;
+      if (m + c + s + f + o > 0) earliestAdoptYear = minYear(earliestAdoptYear, cpdb.mindate);
     }
   }
   let historicalBudget = 0;
   for (const cpdb of capState.historical) {
-    fundMix.mayoral += parseFloat(cpdb.adopt_ccnonexempt) || 0;
-    fundMix.council += parseFloat(cpdb.adopt_ccexempt) || 0;
-    fundMix.state += parseFloat(cpdb.adopt_nccstate) || 0;
-    fundMix.federal += parseFloat(cpdb.adopt_nccfederal) || 0;
-    fundMix.other += parseFloat(cpdb.adopt_nccother) || 0;
+    const m = parseFloat(cpdb.adopt_ccnonexempt) || 0;
+    const c = parseFloat(cpdb.adopt_ccexempt) || 0;
+    const s = parseFloat(cpdb.adopt_nccstate) || 0;
+    const f = parseFloat(cpdb.adopt_nccfederal) || 0;
+    const o = parseFloat(cpdb.adopt_nccother) || 0;
+    fundMix.mayoral += m; fundMix.council += c; fundMix.state += s; fundMix.federal += f; fundMix.other += o;
     historicalBudget += parseFloat(cpdb.adopt_total) || 0;
-    totalSpent += parseFloat(cpdb.spent_total) || 0;
+    const spent = parseFloat(cpdb.spent_total) || 0;
+    if (spent > 0) {
+      totalSpent += spent;
+      earliestSpendYear = minYear(earliestSpendYear, cpdb.mindate);
+    }
+    if (m + c + s + f + o > 0 || (parseFloat(cpdb.adopt_total) || 0) > 0) {
+      earliestAdoptYear = minYear(earliestAdoptYear, cpdb.mindate);
+    }
   }
 
   return {
@@ -3005,15 +3229,18 @@ function computeAggregates() {
     avgPct: progressCount ? progressSum / progressCount : null,
     phaseCounts,
     fundMix,
+    earliestSpendYear: Number.isFinite(earliestSpendYear) ? earliestSpendYear : null,
+    earliestAdoptYear: Number.isFinite(earliestAdoptYear) ? earliestAdoptYear : null,
   };
 }
 
 function finalizeStatsAndViz() {
   // Slot 0 (Acres) and Slot 1 (Est.) come from currentPark in renderStatStripPlaceholder
-  // and don't change here. Slot 2 = Active $, Slot 3 = Amenities (loaded async elsewhere).
+  // and don't change here. Slot 2 = Active $, Slot 3 = Spent (cumulative).
   const agg = computeAggregates();
   if (!agg) {
     setStatCard(2, '–', '', 'Active $');
+    setStatCard(3, '–', '', 'Spent');
     return;
   }
   if (agg.activeBudget > 0) {
@@ -3022,6 +3249,11 @@ function finalizeStatsAndViz() {
     setStatCard(2, '', '', 'Budget', agg.totalBudget);
   } else {
     setStatCard(2, '–', '', 'Active $');
+  }
+  if (agg.totalSpent > 0) {
+    setStatCard(3, '', '', 'Spent', agg.totalSpent, agg.earliestSpendYear ? `since ${agg.earliestSpendYear}` : null);
+  } else {
+    setStatCard(3, '–', '', 'Spent');
   }
   renderFinanceCard(agg);
   renderTimelineCard();
@@ -3072,9 +3304,17 @@ function renderFinanceCard(agg) {
     </div>` : '';
 
   const footBits = [];
-  if (agg.activeBudget > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.activeBudget))}</strong> active budget</span>`);
-  if (agg.totalSpent > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.totalSpent))}</strong> spent to date</span>`);
-  if (totalMix > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(totalMix))}</strong> historical adopt</span>`);
+  if (agg.activeBudget > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.activeBudget))}</strong> in active phases</span>`);
+  if (agg.totalSpent > 0) {
+    const spentSince = agg.earliestSpendYear ? ` (since ${agg.earliestSpendYear})` : '';
+    footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.totalSpent))}</strong> spent${spentSince}</span>`);
+  }
+  if (totalMix > 0) {
+    const adoptSince = agg.earliestAdoptYear ? ` (since ${agg.earliestAdoptYear})` : '';
+    footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(totalMix))}</strong> adopted${adoptSince}</span>`);
+  }
+
+  const sinceLine = agg.earliestAdoptYear ? `since ${agg.earliestAdoptYear}` : '';
 
   root.innerHTML = `
     ${totalMix > 0 ? `<div class="finance">
@@ -3082,7 +3322,8 @@ function renderFinanceCard(agg) {
         ${donutHtml}
         <div class="donut-center">
           <div class="donut-center-val">${escapeHTML(fmtUSDCompact(totalMix))}</div>
-          <div class="donut-center-lab">Funded</div>
+          <div class="donut-center-lab">Adopted</div>
+          ${sinceLine ? `<div class="donut-center-sub">${escapeHTML(sinceLine)}</div>` : ''}
         </div>
       </div>
       ${legendHtml}
@@ -3215,6 +3456,7 @@ async function fetchViaProxy(target, signal) {
 
 const ENDPOINT_SIGNS = SOCRATA + '/hv9n-xgy4.json';
 const ENDPOINT_FOREVERWILD = SOCRATA + '/48va-85tp.json';
+const ENDPOINT_CB_LEADERS = SOCRATA + '/3gkd-ddzn.json';
 
 // Count distinct amenity types from NYC Parks Signs (each sign is placed at a park
 // feature like "Playground", "Tennis Courts", "Kayak Launch"). Gives a real "what's
@@ -3239,6 +3481,70 @@ async function loadAmenityCount(p, gen) {
     setStatCard(3, '', '', 'Amenities', cats.size);
   } catch {
     setStatCard(3, '–', '', 'Amenities');
+  }
+}
+
+// Map borough letter codes to the uppercase borough names the CB Leadership dataset
+// uses (e.g. "MANHATTAN", "STATEN ISLAND").
+const BOR_CODE_TO_DATASET_NAME = {
+  M: 'MANHATTAN', X: 'BRONX', B: 'BRONX', K: 'BROOKLYN', Q: 'QUEENS', R: 'STATEN ISLAND',
+};
+
+async function loadCommunityBoardLeaders(p, gen) {
+  const cbCodes = chunkDistricts(p.communityboard, 3);
+  if (!cbCodes.length) return;
+  let any = false;
+  for (const code of cbCodes) {
+    if (!/^\d{3}$/.test(code)) continue;
+    const borDigit = code[0];
+    const cbNum = parseInt(code.slice(1), 10);
+    const borCode = CB_BOROUGH_PREFIX[borDigit];
+    const datasetBor = BOR_CODE_TO_DATASET_NAME[borCode];
+    if (!datasetBor) continue;
+    try {
+      const where = `community_board_number='${cbNum}' AND upper(borough)='${escSoql(datasetBor)}'`;
+      const rows = await fetchJSON(`${ENDPOINT_CB_LEADERS}?$where=${encodeURIComponent(where)}&$limit=1`);
+      if (gen !== undefined && gen !== loadGen) return;
+      if (!rows.length) continue;
+      insertCBLeaderRows(borCode, cbNum, rows[0]);
+      any = true;
+    } catch { /* silent */ }
+  }
+  if (any) {
+    const count = $('officials').querySelectorAll('.official').length;
+    $('officialsCount').textContent = String(count);
+    setNavCount('sec-officials', count);
+    loadOfficialPhotos(gen);
+  }
+}
+
+function insertCBLeaderRows(borCode, cbNum, data) {
+  // Insert chair + district manager right after the existing institutional Community
+  // Board row so the three sit together. Multi-CB parks stack pairs in order.
+  const borName = CB_BOROUGH_NAME[borCode] || '';
+  const slug = (CB_BOROUGH_SLUG[borCode] || 'communityboard') + cbNum;
+  const cbUrl = `https://www.nyc.gov/site/${slug}/index.page`;
+  // Find the institutional row that mentions "CB <num>". Scan from the top until we
+  // find the matching one (multi-CB parks have multiple institutional rows).
+  const officials = $('officials');
+  const allRows = Array.from(officials.querySelectorAll('.official'));
+  const cbLabel = `${borName} CB ${cbNum}`;
+  let anchor = allRows.find(row => {
+    const name = row.querySelector('.official-name')?.textContent || '';
+    const sub = row.querySelector('.official-sub')?.textContent || '';
+    return name.includes(cbLabel) || sub.includes(cbLabel);
+  });
+  if (!anchor) return;
+  const insertAfter = (afterEl, html) => {
+    afterEl.insertAdjacentHTML('afterend', html);
+    return afterEl.nextElementSibling;
+  };
+  let cursor = anchor;
+  if (data.chair) {
+    cursor = insertAfter(cursor, officialRow('CB Chair', data.chair, cbLabel, null, cbUrl));
+  }
+  if (data.district_manager) {
+    cursor = insertAfter(cursor, officialRow('District Mgr', data.district_manager, cbLabel, null, cbUrl));
   }
 }
 
