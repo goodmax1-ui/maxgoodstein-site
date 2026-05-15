@@ -1776,6 +1776,8 @@
   .expanded > .feed-item.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
   .expanded > .project.hide-collapsed { display: block !important; animation: fadeUp 0.4s var(--ease-out); }
   .expanded > .project-section-header.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
+  .expanded > .event-item.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
+  .expanded > .event-bucket-header.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
 
   .article-body.collapsed {
     max-height: 360px;
@@ -1825,6 +1827,30 @@
   .link-btn-sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
 
   /* Events */
+  .event-bucket-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 6px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+  }
+  .event-bucket-header:first-child { border-top: none; }
+  .event-bucket-header .bucket-count {
+    color: var(--text-3);
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
   .event-item {
     display: flex;
     gap: 12px;
@@ -3394,6 +3420,14 @@ document.addEventListener('click', (e) => {
     revealActiveProjects();
     return;
   }
+  const evChip = e.target.closest('[data-evcat]');
+  if (evChip) {
+    if (eventState) {
+      eventState.filter = evChip.dataset.evcat;
+      renderEventsView();
+    }
+    return;
+  }
 });
 
 function revealActiveProjects() {
@@ -4140,6 +4174,33 @@ async function loadAmenityCount(p, gen) {
 // The CRO-permitted events feed is current and covers Parks Department events; we
 // match per-park by the event_location prefix ("Inwood Hill Park: …") and per-borough
 // for the home "near me" card.
+
+// Rough categorization. The dataset has three event_type values in practice:
+// "Sport - Youth", "Sport - Adult", "Special Event". Youth/adult sports tend to be
+// permitted league reservations (high volume, less browsable); Special Events are
+// programs, tours, closures, and one-offs (the interesting bucket for a casual user).
+function categorizeEvent(ev) {
+  const t = (ev.event_type || '').toLowerCase();
+  if (t.startsWith('sport')) return 'Sports';
+  return 'Special';
+}
+
+function eventBucketKey(date) {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.floor((date.getTime() - startOfToday.getTime()) / 86400000);
+  if (diff < 0) return null;
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff < 7) return 'This week';
+  if (diff < 14) return 'Next week';
+  return 'Later';
+}
+
+const EVENT_BUCKET_ORDER = ['Today', 'Tomorrow', 'This week', 'Next week', 'Later'];
+
+let eventState = null;
+
 async function loadParkEvents(p, gen) {
   const sec = $('sec-events');
   const root = $('events');
@@ -4148,21 +4209,110 @@ async function loadParkEvents(p, gen) {
   sec.hidden = true;
   root.innerHTML = '';
   setNavCount('sec-events', null);
+  eventState = null;
   const name = (p.signname || '').trim();
   if (!name) return;
   const safeName = name.replace(/'/g, "''");
-  const now = new Date().toISOString().slice(0, 19);
-  const where = `event_agency='Parks Department' AND starts_with(event_location, '${safeName}') AND start_date_time >= '${now}'`;
+  const now = new Date();
+  const end = new Date(now.getTime() + 28 * 86400000);
+  const nowIso = now.toISOString().slice(0, 19);
+  const endIso = end.toISOString().slice(0, 19);
+  const where = `event_agency='Parks Department' AND starts_with(event_location, '${safeName}') AND start_date_time >= '${nowIso}' AND start_date_time < '${endIso}'`;
   try {
-    const rows = await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=12`);
+    const rows = await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=300`);
     if (gen !== undefined && gen !== loadGen) return;
     if (!rows.length) return;
+    for (const r of rows) r._cat = categorizeEvent(r);
+    const specialCount = rows.filter(r => r._cat === 'Special').length;
+    // Default the filter to whatever is most useful: Special if any exist, otherwise
+    // surface the Sports bucket so a sports-only park still shows something.
+    eventState = {
+      rows,
+      parkName: name,
+      filter: specialCount > 0 ? 'Special' : 'Sports',
+    };
     sec.hidden = false;
-    root.innerHTML = rows.map(r => renderEventItem(r, name)).join('');
     countEl.textContent = String(rows.length);
     setNavCount('sec-events', rows.length);
-    makeExpandable(root, { selector: '.event-item', limit: 4, labelMore: `Show ${rows.length - 4} more` });
+    renderEventsView();
   } catch { /* silent */ }
+}
+
+function renderEventsView() {
+  if (!eventState) return;
+  const { rows, parkName, filter } = eventState;
+  const counts = {
+    All: rows.length,
+    Special: rows.filter(r => r._cat === 'Special').length,
+    Sports: rows.filter(r => r._cat === 'Sports').length,
+  };
+  const filtered = filter === 'All' ? rows : rows.filter(r => r._cat === filter);
+  // Build chips in Special / Sports / All order; hide ones with zero matches.
+  const chipDefs = [];
+  if (counts.Special > 0) chipDefs.push({ id: 'Special', label: 'Special' });
+  if (counts.Sports > 0) chipDefs.push({ id: 'Sports', label: 'Sports' });
+  if (counts.Special + counts.Sports > 0) chipDefs.push({ id: 'All', label: 'All' });
+  const chips = chipDefs.map(c =>
+    `<button class="sort-pill${c.id === filter ? ' active' : ''}" data-evcat="${c.id}">${escapeHTML(c.label)} <span class="scope-count">${counts[c.id]}</span></button>`
+  ).join('');
+  const root = $('events');
+  let html = chipDefs.length > 1 ? `<div class="sort-row scope-row">${chips}</div>` : '';
+  // Bucket the filtered set by relative-date label.
+  const buckets = new Map(EVENT_BUCKET_ORDER.map(k => [k, []]));
+  for (const ev of filtered) {
+    const d = new Date(ev.start_date_time);
+    if (!Number.isFinite(d.getTime())) continue;
+    const key = eventBucketKey(d);
+    if (key && buckets.has(key)) buckets.get(key).push(ev);
+  }
+  for (const bucket of EVENT_BUCKET_ORDER) {
+    const items = buckets.get(bucket);
+    if (!items.length) continue;
+    html += `<div class="event-bucket-header">${escapeHTML(bucket)} <span class="bucket-count">${items.length}</span></div>`;
+    html += items.map(e => renderEventItem(e, parkName)).join('');
+  }
+  if (!filtered.length) {
+    html += `<div class="empty">Nothing in this category in the next 4 weeks.</div>`;
+  }
+  root.innerHTML = html;
+  root.classList.remove('expanded');
+  makeExpandableEvents(root, 6);
+}
+
+function makeExpandableEvents(root, limit) {
+  const prev = root.querySelector(':scope > .show-more-btn');
+  if (prev) prev.remove();
+  const items = root.querySelectorAll(':scope > .event-item');
+  if (items.length <= limit) return;
+  items.forEach((it, i) => { if (i >= limit) it.classList.add('hide-collapsed'); });
+  // Hide bucket headers whose events are all hidden after collapse.
+  const children = Array.from(root.children);
+  for (let i = 0; i < children.length; i++) {
+    const el = children[i];
+    if (!el.classList.contains('event-bucket-header')) continue;
+    let hasAny = false, allHidden = true;
+    for (let j = i + 1; j < children.length; j++) {
+      const next = children[j];
+      if (next.classList.contains('event-bucket-header')) break;
+      if (next.classList.contains('event-item')) {
+        hasAny = true;
+        if (!next.classList.contains('hide-collapsed')) allHidden = false;
+      }
+    }
+    if (hasAny && allHidden) el.classList.add('hide-collapsed');
+  }
+  const remaining = items.length - limit;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'show-more-btn';
+  btn.innerHTML = `<span>Show ${remaining} more</span><span class="show-more-arrow">▾</span>`;
+  btn.addEventListener('click', () => {
+    const expanded = root.classList.toggle('expanded');
+    btn.innerHTML = expanded
+      ? `<span>Show less</span><span class="show-more-arrow up">▴</span>`
+      : `<span>Show ${remaining} more</span><span class="show-more-arrow">▾</span>`;
+  });
+  root.appendChild(btn);
 }
 
 async function loadNearbyEvents(boroughCode, gen) {
@@ -4171,16 +4321,33 @@ async function loadNearbyEvents(boroughCode, gen) {
   if (!card || !root) return;
   const boroFull = BOROUGHS[boroughCode === 'B' ? 'X' : boroughCode] || BOROUGHS[boroughCode];
   if (!boroFull) return;
-  const now = new Date().toISOString().slice(0, 19);
-  const where = `event_agency='Parks Department' AND event_borough='${boroFull}' AND start_date_time >= '${now}'`;
+  const now = new Date();
+  const end = new Date(now.getTime() + 14 * 86400000);
+  const where = `event_agency='Parks Department' AND event_borough='${boroFull}' AND event_type='Special Event' AND start_date_time >= '${now.toISOString().slice(0,19)}' AND start_date_time < '${end.toISOString().slice(0,19)}'`;
   try {
-    const rows = await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=8`);
+    const rows = await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=40`);
     if (gen !== undefined && gen !== loadGen) return;
     if (!rows.length) return;
     card.hidden = false;
-    // Subtle update to the card title so it reflects which borough we used.
     card.querySelector('.home-card-title').textContent = `Upcoming events in ${boroFull}`;
-    root.innerHTML = rows.map(r => renderEventItem(r, '')).join('');
+    // Group by date bucket like the detail view.
+    const buckets = new Map(EVENT_BUCKET_ORDER.map(k => [k, []]));
+    for (const ev of rows) {
+      const d = new Date(ev.start_date_time);
+      if (!Number.isFinite(d.getTime())) continue;
+      const key = eventBucketKey(d);
+      if (key && buckets.has(key)) buckets.get(key).push(ev);
+    }
+    let html = '';
+    for (const bucket of EVENT_BUCKET_ORDER) {
+      const items = buckets.get(bucket);
+      if (!items.length) continue;
+      html += `<div class="event-bucket-header">${escapeHTML(bucket)} <span class="bucket-count">${items.length}</span></div>`;
+      html += items.map(e => renderEventItem(e, '')).join('');
+    }
+    root.innerHTML = html;
+    root.classList.remove('expanded');
+    makeExpandableEvents(root, 5);
   } catch { /* silent */ }
 }
 
