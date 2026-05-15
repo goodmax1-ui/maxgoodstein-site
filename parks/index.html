@@ -12,20 +12,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://data.cityofnewyork.us">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f6f8;
+    --bg: #eef1f4;
+    --bg-grad: radial-gradient(1200px 600px at 50% -200px, #e1ece5 0%, #eef1f4 60%);
     --bg-elev: #ffffff;
-    --bg-soft: #fafbfc;
-    --text: #0f172a;
+    --bg-soft: #f6f8fa;
+    --bg-glass: rgba(255,255,255,0.78);
+    --text: #0b1220;
     --text-2: #475569;
     --text-3: #94a3b8;
-    --border: #e5e7eb;
+    --text-inv: #ffffff;
+    --border: #e6e8ec;
     --border-strong: #d1d5db;
     --accent: #2d6a4f;
     --accent-2: #40916c;
+    --accent-3: #74c69d;
     --accent-soft: #d8eee2;
+    --accent-glow: rgba(45,106,79,0.22);
+    --accent-grad: linear-gradient(135deg, #1b4332 0%, #2d6a4f 40%, #52b788 100%);
+    --accent-grad-soft: linear-gradient(135deg, rgba(45,106,79,0.06), rgba(82,183,136,0.10));
     --ok: #16a34a;
     --ok-soft: #dcfce7;
     --warn: #d97706;
@@ -34,80 +41,125 @@
     --bad-soft: #fee2e2;
     --info: #2563eb;
     --info-soft: #dbeafe;
-    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
-    --shadow-md: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
-    --shadow-lg: 0 12px 40px rgba(15,23,42,0.12);
-    --radius: 14px;
-    --radius-sm: 10px;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --rose: #e11d48;
+    --rose-soft: #ffe4e6;
+    --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+    --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+    --shadow-md: 0 8px 24px -8px rgba(15,23,42,0.10), 0 2px 4px rgba(15,23,42,0.04);
+    --shadow-lg: 0 24px 60px -16px rgba(15,23,42,0.18);
+    --shadow-glow: 0 0 0 1px var(--accent-glow), 0 12px 32px -10px var(--accent-glow);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --radius-lg: 26px;
+    --radius-xl: 32px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0a0c11;
-      --bg-elev: #15181f;
-      --bg-soft: #1a1e26;
+      --bg: #07090e;
+      --bg-grad: radial-gradient(1200px 600px at 50% -200px, #112218 0%, #07090e 60%);
+      --bg-elev: #11141b;
+      --bg-soft: #161a23;
+      --bg-glass: rgba(17,20,27,0.78);
       --text: #f1f5f9;
       --text-2: #cbd5e1;
       --text-3: #64748b;
-      --border: #232832;
-      --border-strong: #2f3540;
-      --accent: #40916c;
-      --accent-2: #52b788;
-      --accent-soft: rgba(64,145,108,0.18);
+      --border: #1d2230;
+      --border-strong: #2a3142;
+      --accent: #52b788;
+      --accent-2: #74c69d;
+      --accent-3: #95d5b2;
+      --accent-soft: rgba(82,183,136,0.16);
+      --accent-glow: rgba(82,183,136,0.25);
+      --accent-grad: linear-gradient(135deg, #1b4332 0%, #2d6a4f 40%, #52b788 100%);
+      --accent-grad-soft: linear-gradient(135deg, rgba(82,183,136,0.06), rgba(82,183,136,0.14));
       --ok: #22c55e;
-      --ok-soft: rgba(34,197,94,0.15);
+      --ok-soft: rgba(34,197,94,0.16);
       --warn: #f59e0b;
-      --warn-soft: rgba(245,158,11,0.15);
+      --warn-soft: rgba(245,158,11,0.16);
       --bad: #f87171;
-      --bad-soft: rgba(248,113,113,0.15);
+      --bad-soft: rgba(248,113,113,0.16);
       --info: #60a5fa;
-      --info-soft: rgba(96,165,250,0.15);
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+      --info-soft: rgba(96,165,250,0.16);
+      --purple: #a78bfa;
+      --purple-soft: rgba(167,139,250,0.16);
+      --rose: #fb7185;
+      --rose-soft: rgba(251,113,133,0.16);
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+      --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.5);
+      --shadow-lg: 0 24px 60px -16px rgba(0,0,0,0.6);
     }
   }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   html, body { margin: 0; padding: 0; touch-action: manipulation; }
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background: var(--bg);
+    background-image: var(--bg-grad);
+    background-attachment: fixed;
     color: var(--text);
     font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 64px;
+    overflow-x: hidden;
   }
+  ::selection { background: var(--accent-glow); color: var(--text); }
 
+  /* Header */
   header {
     position: sticky;
     top: 0;
-    z-index: 20;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
+    z-index: 30;
+    background: var(--bg-glass);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    border-bottom: 1px solid transparent;
     padding: env(safe-area-inset-top) 0 0;
+    transition: border-color 0.2s, background 0.2s;
   }
+  header.scrolled { border-bottom-color: var(--border); }
   .header-inner {
-    max-width: 720px;
+    max-width: 760px;
     margin: 0 auto;
     padding: 14px 18px 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
   h1 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     letter-spacing: -0.02em;
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  h1 .dot { color: var(--accent); }
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-grad);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px -4px var(--accent-glow);
+    flex-shrink: 0;
+  }
+  .logo-mark svg { width: 16px; height: 16px; color: #fff; }
   .back-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--bg-elev);
     color: var(--text);
@@ -115,50 +167,104 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s var(--ease-spring), background 0.15s, border-color 0.15s;
+    box-shadow: var(--shadow-xs);
   }
-  .back-btn:active { transform: scale(0.93); background: var(--accent-soft); }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .back-btn:active { transform: scale(0.92); background: var(--accent-soft); }
   .back-btn svg { width: 18px; height: 18px; }
   body.detail .back-btn { display: inline-flex; }
+  body.detail h1 .header-title { display: none; }
+  .header-park-name {
+    display: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+  }
+  body.detail header.scrolled .header-park-name { display: block; opacity: 1; transform: none; }
+  body.detail header.scrolled h1 .header-title { display: none; }
 
-  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+  main { max-width: 760px; margin: 0 auto; padding: 18px; }
+
+  /* Reveal animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes drawIn { from { stroke-dashoffset: var(--len, 1000); } to { stroke-dashoffset: 0; } }
+  @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .reveal { opacity: 0; }
+  .reveal.in-view {
+    animation: fadeUp 0.55s var(--ease-out) forwards;
+  }
+  .reveal.d1.in-view { animation-delay: 60ms; }
+  .reveal.d2.in-view { animation-delay: 120ms; }
+  .reveal.d3.in-view { animation-delay: 180ms; }
+  .reveal.d4.in-view { animation-delay: 240ms; }
+  .reveal.d5.in-view { animation-delay: 300ms; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; }
+    .reveal.in-view { animation: none; }
+  }
 
   /* Search */
-  .search-wrap { position: relative; margin-bottom: 18px; }
+  .search-wrap { margin-bottom: 22px; }
+  .search-box { position: relative; }
   .search-input {
     width: 100%;
-    padding: 14px 16px 14px 44px;
-    font: 500 16px/1.4 inherit;
+    padding: 18px 18px 18px 50px;
+    font: 600 17px/1.4 inherit;
     background: var(--bg-elev);
     color: var(--text);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
     -webkit-appearance: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    letter-spacing: -0.01em;
   }
   .search-input:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: -1px;
+    outline: none;
     border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
   }
+  .search-input::placeholder { color: var(--text-3); font-weight: 500; }
   .search-icon {
     position: absolute;
-    left: 14px;
+    left: 18px;
     top: 50%;
     transform: translateY(-50%);
     width: 20px;
     height: 20px;
     color: var(--text-3);
     pointer-events: none;
+    transition: color 0.18s;
   }
+  .search-input:focus + .search-icon,
+  .search-box:focus-within .search-icon { color: var(--accent); }
   .search-clear {
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    border-radius: 999px;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
     border: none;
     background: var(--bg-soft);
     color: var(--text-2);
@@ -166,207 +272,461 @@
     display: none;
     align-items: center;
     justify-content: center;
+    transition: background 0.15s;
   }
+  .search-clear:hover { background: var(--accent-soft); color: var(--accent); }
   .search-clear.show { display: inline-flex; }
   .search-clear svg { width: 14px; height: 14px; }
 
   .results {
-    margin-top: 8px;
+    margin-top: 10px;
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
     display: none;
+    animation: fadeIn 0.2s var(--ease-out);
   }
   .results.show { display: block; }
   .result-row {
-    display: block;
-    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
     border-top: 1px solid var(--border);
     cursor: pointer;
     transition: background 0.12s;
   }
   .result-row:first-child { border-top: none; }
-  .result-row:active { background: var(--accent-soft); }
-  .result-name { font-size: 15px; font-weight: 600; color: var(--text); }
-  .result-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .result-row:hover, .result-row:active { background: var(--accent-soft); }
+  .result-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px -4px var(--accent-glow);
+  }
+  .result-text { flex: 1; min-width: 0; }
+  .result-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .result-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; font-weight: 500; }
   .result-empty {
-    padding: 16px;
+    padding: 22px;
     text-align: center;
     color: var(--text-3);
     font-size: 14px;
   }
 
-  /* Recent chips */
-  .recent { margin-bottom: 18px; }
+  /* Recent */
+  .recent { margin-bottom: 22px; }
   .recent-label {
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    font-weight: 800;
+    letter-spacing: 0.14em;
     color: var(--text-3);
     text-transform: uppercase;
-    margin: 0 0 8px;
+    margin: 0 0 10px;
   }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
+    gap: 8px;
+    padding: 8px 12px 8px 8px;
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text);
     cursor: pointer;
-    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    transition: transform 0.15s var(--ease-spring), border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow-xs);
   }
-  .chip:active { transform: scale(0.96); border-color: var(--accent); background: var(--accent-soft); }
-  .chip .chip-bor {
+  .chip:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .chip:active { transform: scale(0.95); background: var(--accent-soft); }
+  .chip-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 11px;
-    font-weight: 600;
-    color: var(--text-3);
+    font-weight: 800;
   }
 
-  /* Detail view */
-  .park-header {
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
     background: var(--bg-elev);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    padding: 18px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     margin-bottom: 14px;
+    isolation: isolate;
   }
-  .park-name {
-    margin: 0 0 4px;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+  .hero-canvas {
+    position: relative;
+    height: 220px;
+    background: var(--accent-grad);
+    overflow: hidden;
   }
-  .park-name311 {
-    font-size: 13px;
+  .hero-canvas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(900px 300px at -10% 110%, rgba(255,255,255,0.18), transparent 60%),
+      radial-gradient(700px 280px at 110% -20%, rgba(255,255,255,0.14), transparent 60%);
+    pointer-events: none;
+  }
+  .hero-canvas::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.7s var(--ease-out);
+    z-index: 0;
+  }
+  .hero-canvas.has-photo .hero-photo { opacity: 1; }
+  .hero-canvas.has-photo .hero-shape { opacity: 0; transition: opacity 0.4s var(--ease-out); pointer-events: none; }
+  .hero-canvas.has-photo::after {
+    background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.62) 100%);
+  }
+  .hero-credit {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 3;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+    background: rgba(0,0,0,0.3);
+    padding: 3px 8px;
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.16);
+    transition: background 0.15s;
+    display: none;
+  }
+  .hero-canvas.has-photo .hero-credit { display: inline-block; }
+  .hero-credit:hover { background: rgba(0,0,0,0.5); }
+  .hero-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-shape path.fill {
+    fill: rgba(255,255,255,0.28);
+    stroke: rgba(255,255,255,0.92);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: var(--len, 2000);
+    stroke-dashoffset: var(--len, 2000);
+    animation: drawIn 1.6s var(--ease-out) 0.2s forwards;
+    filter: drop-shadow(0 4px 18px rgba(0,0,0,0.25));
+  }
+  .hero-shape circle.dot {
+    fill: #fff;
+    opacity: 0;
+    animation: fadeIn 0.4s ease 1.4s forwards;
+  }
+  .hero-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 20px 22px 18px;
+    color: #fff;
+    z-index: 2;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.20);
+    color: rgba(255,255,255,0.92);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    backdrop-filter: blur(8px);
+  }
+  .hero-name {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .hero-sub {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255,255,255,0.88);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .hero-info {
+    padding: 12px 18px 0;
+    background: var(--bg-elev);
+    font-size: 12px;
+    font-weight: 500;
     color: var(--text-3);
-    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px 10px;
+    flex-wrap: wrap;
+    letter-spacing: -0.005em;
   }
-  .park-meta {
+  .hero-info .info-item { display: inline-flex; align-items: center; gap: 5px; }
+  .hero-info .info-item strong { color: var(--text-2); font-weight: 700; }
+  .hero-info .info-sep { color: var(--border-strong); opacity: 0.7; }
+  .hero-info svg { width: 13px; height: 13px; opacity: 0.7; flex-shrink: 0; }
+
+  .hero-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 12px;
+    padding: 12px 18px 14px;
+    background: var(--bg-elev);
   }
-  .meta-pill {
+  .hero-badges:empty { display: none; }
+  .park-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-2);
+    gap: 6px;
+    padding: 6px 12px 6px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
-  .meta-pill.accent { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-  .park-address {
-    margin: 0;
-    font-size: 14px;
-    color: var(--text-2);
-    line-height: 1.5;
+  .park-badge svg { width: 14px; height: 14px; }
+  .park-badge.waterfront { background: linear-gradient(135deg, rgba(96,165,250,0.18), rgba(59,130,246,0.10)); color: var(--info); border: 1px solid rgba(96,165,250,0.25); }
+  .park-badge.foreverwild { background: linear-gradient(135deg, rgba(34,197,94,0.20), rgba(22,163,74,0.10)); color: var(--ok); border: 1px solid rgba(34,197,94,0.25); }
+  .park-badge.flagship { background: linear-gradient(135deg, rgba(245,158,11,0.20), rgba(217,119,6,0.10)); color: var(--warn); border: 1px solid rgba(245,158,11,0.25); }
+  .park-badge.historic { background: linear-gradient(135deg, rgba(167,139,250,0.20), rgba(124,58,237,0.10)); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+
+  /* Stat strip */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px 12px;
+    box-shadow: var(--shadow-xs);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--accent-grad-soft);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .stat-card > * { position: relative; z-index: 1; }
+  .stat-val {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .stat-val .stat-unit {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-3);
+    margin-left: 1px;
+    font-family: 'Inter', sans-serif;
+  }
+  .stat-val.stat-val-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-top: 6px;
+  }
+  .stat-card.skeleton-card .stat-val,
+  .stat-card.skeleton-card .stat-label {
+    background: linear-gradient(90deg, var(--bg-soft), var(--border), var(--bg-soft));
+    background-size: 200% 100%;
+    color: transparent;
+    border-radius: 4px;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @media (max-width: 480px) {
+    .stat-strip { gap: 6px; }
+    .stat-card { padding: 12px 10px 10px; }
+    .stat-val { font-size: 18px; }
+    .stat-label { font-size: 9px; }
   }
 
+  /* Section nav */
+  .section-nav {
+    position: sticky;
+    top: calc(54px + env(safe-area-inset-top));
+    z-index: 15;
+    background: var(--bg-glass);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    margin: 0 -18px 14px;
+    padding: 8px 18px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .section-nav::-webkit-scrollbar { display: none; }
+  .section-nav-inner {
+    display: flex;
+    gap: 6px;
+    max-width: 760px;
+    margin: 0 auto;
+    width: max-content;
+    min-width: 100%;
+  }
+  .nav-pill {
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-3);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-pill:hover { color: var(--text); background: var(--bg-soft); }
+  .nav-pill.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .nav-pill .nav-count {
+    margin-left: 4px;
+    opacity: 0.6;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Sections */
   .section {
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
     margin-bottom: 14px;
     overflow: hidden;
+    scroll-margin-top: 120px;
   }
   .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    background: var(--bg-soft);
+    background: linear-gradient(to bottom, var(--bg-soft), var(--bg-elev));
     border-bottom: 1px solid var(--border);
   }
   .section-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
   .section-title::before {
     content: "";
     width: 4px;
     height: 14px;
-    background: var(--accent);
+    background: var(--accent-grad);
     border-radius: 2px;
   }
   .section-count {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-3);
     font-variant-numeric: tabular-nums;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
   }
   .section-link {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--accent);
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
   }
   .section-link:hover { text-decoration: underline; }
-
-  /* Inline article body (history) */
-  .article-body {
-    padding: 14px 18px 18px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--text-2);
-  }
-  .article-body p { margin: 0 0 10px; }
-  .article-body p:last-child { margin-bottom: 0; }
-
-  /* News / resolutions list */
-  .feed-item {
-    display: block;
-    padding: 12px 18px;
-    border-top: 1px solid var(--border);
-    text-decoration: none;
-    color: var(--text);
-    transition: background 0.15s;
-  }
-  .feed-item:first-child { border-top: none; }
-  .feed-item:active { background: var(--accent-soft); }
-  .feed-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.35;
-  }
-  .feed-meta {
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--text-3);
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .feed-meta .src { color: var(--accent); font-weight: 600; }
-  .feed-snippet {
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--text-2);
-    line-height: 1.4;
-  }
+  .section-link::after { content: "→"; opacity: 0.7; }
 
   /* Officials rows */
   .official {
@@ -377,36 +737,41 @@
     border-top: 1px solid var(--border);
     text-decoration: none;
     color: var(--text);
-    transition: background 0.15s;
+    transition: background 0.15s, padding-left 0.18s var(--ease-out);
   }
   .official:first-child { border-top: none; }
+  .official:hover { background: var(--bg-soft); padding-left: 22px; }
   .official:active { background: var(--accent-soft); }
   .official.no-link { cursor: default; }
-  .official.no-link:active { background: transparent; }
+  .official.no-link:hover { padding-left: 18px; background: transparent; }
   .official-role {
-    flex: 0 0 110px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    flex: 0 0 100px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-3);
   }
   .official-body { flex: 1; min-width: 0; }
   .official-name {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text);
     line-height: 1.3;
+    letter-spacing: -0.01em;
   }
   .official-sub {
     font-size: 12px;
     color: var(--text-3);
     margin-top: 2px;
+    font-weight: 500;
   }
   .official-arrow {
     color: var(--text-3);
     flex-shrink: 0;
+    transition: transform 0.18s var(--ease-spring), color 0.15s;
   }
+  .official:hover .official-arrow { transform: translateX(3px); color: var(--accent); }
   .official-arrow svg { width: 14px; height: 14px; }
   .official.no-link .official-arrow { display: none; }
   .skeleton {
@@ -418,205 +783,666 @@
     border-radius: 4px;
     animation: shimmer 1.4s linear infinite;
   }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Finance card */
+  .finance {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 18px;
+    align-items: center;
+  }
+  @media (max-width: 480px) {
+    .finance { grid-template-columns: 110px 1fr; gap: 14px; }
+  }
+  .donut-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+  .donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .donut-wrap svg circle.track { stroke: var(--bg-soft); }
+  .donut-wrap svg circle.seg {
+    transition: stroke-dashoffset 0.9s var(--ease-out);
+    transform-origin: center;
+  }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .donut-center-val {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .donut-center-lab {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  .finance-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-name {
+    color: var(--text-2);
+    flex: 1;
+    font-weight: 600;
+  }
+  .legend-val {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .legend-pct {
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .finance-foot {
+    border-top: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 12px;
+    color: var(--text-3);
+    background: var(--bg-soft);
+  }
+  .finance-foot strong { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* Phase summary mini */
+  .phase-summary {
+    display: flex;
+    padding: 14px 18px 18px;
+    gap: 6px;
+    align-items: stretch;
+  }
+  .phase-block {
+    flex: 1;
+    min-width: 0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.15s var(--ease-spring), border-color 0.15s;
+    font: inherit;
+  }
+  .phase-block:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .phase-block .pb-count {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .phase-block .pb-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .phase-block.design { background: var(--info-soft); }
+  .phase-block.design .pb-count { color: var(--info); }
+  .phase-block.procurement { background: var(--warn-soft); }
+  .phase-block.procurement .pb-count { color: var(--warn); }
+  .phase-block.construction { background: var(--ok-soft); }
+  .phase-block.construction .pb-count { color: var(--ok); }
+  .phase-block.completed { background: var(--bg-soft); }
+  .phase-block.completed .pb-count { color: var(--text-2); }
+
+  /* Timeline / Gantt */
+  .timeline {
+    padding: 16px 18px 18px;
+    position: relative;
+  }
+  .tl-axis {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 0;
+    margin-bottom: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .tl-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    position: relative;
+  }
+  .tl-label {
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+  .tl-title { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .tl-years {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  .tl-track {
+    position: relative;
+    height: 16px;
+    background: var(--bg-soft);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .tl-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 6px;
+    transform-origin: left;
+    animation: barGrow 0.6s var(--ease-out);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.95);
+    text-transform: uppercase;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .tl-bar.design { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .tl-bar.procurement { background: linear-gradient(90deg, #d97706, #f59e0b); }
+  .tl-bar.construction { background: linear-gradient(90deg, #16a34a, #22c55e); }
+  .tl-bar.completed { background: linear-gradient(90deg, #64748b, #94a3b8); }
+  .tl-bar.other { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+  .tl-bar .tl-dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .tl-today {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--rose);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .tl-today::before {
+    content: "TODAY";
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--rose);
+    background: var(--bg-elev);
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+  .tl-empty {
+    padding: 8px 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-3);
+  }
 
   /* Capital project cards */
   .project {
     border-top: 1px solid var(--border);
-    padding: 14px 18px;
+    padding: 16px 18px;
+    transition: background 0.15s;
+    position: relative;
   }
+  .project::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: transparent;
+    transition: background 0.18s;
+  }
+  .project[data-phase="design"]::before { background: var(--info); }
+  .project[data-phase="procurement"]::before { background: var(--warn); }
+  .project[data-phase="construction"]::before { background: var(--ok); }
+  .project[data-phase="completed"]::before { background: var(--text-3); }
+  .project[data-phase="other"]::before { background: var(--purple); }
   .project:first-child { border-top: none; }
   .project-title {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     font-size: 15px;
     font-weight: 700;
     color: var(--text);
-    line-height: 1.3;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
   }
   .project-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    align-items: center;
   }
   .phase-pill {
     display: inline-flex;
     align-items: center;
+    gap: 5px;
     padding: 3px 10px;
     border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+  }
+  .phase-pill::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
   }
   .phase-pill.design { background: var(--info-soft); color: var(--info); }
   .phase-pill.procurement { background: var(--warn-soft); color: var(--warn); }
-  .phase-pill.construction { background: var(--ok-soft); color: var(--ok); }
+  .phase-pill.construction { background: var(--ok-soft); color: var(--ok); animation: pulse 2s ease-in-out infinite; }
   .phase-pill.completed { background: var(--bg-soft); color: var(--text-3); border: 1px solid var(--border); }
-  .phase-pill.other { background: var(--accent-soft); color: var(--accent); }
+  .phase-pill.other { background: var(--purple-soft); color: var(--purple); }
   .project-funding {
     display: inline-flex;
     align-items: center;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 11px;
-    font-weight: 700;
-    background: var(--ok-soft);
-    color: var(--ok);
+    font-weight: 800;
+    background: var(--accent-soft);
+    color: var(--accent);
     font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: -0.01em;
   }
   .project-funding.estimate {
     background: var(--bg-soft);
     color: var(--text-3);
-    border: 1px dashed var(--border);
-    font-weight: 600;
+    border: 1px dashed var(--border-strong);
+    font-weight: 700;
   }
   .funding-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
   .funding-chip {
     display: inline-flex;
     align-items: center;
-    padding: 2px 8px;
+    padding: 2px 9px;
     border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--accent-soft);
-    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--bg-soft);
+    color: var(--text-2);
+    border: 1px solid var(--border);
   }
   .project-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 18px 8px;
-    margin-top: 8px;
+    padding: 14px 18px 6px;
+    margin-top: 6px;
     border-top: 1px solid var(--border);
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     color: var(--text-3);
+    background: var(--bg-soft);
   }
   .project-section-count {
-    background: var(--bg-soft);
+    background: var(--bg-elev);
     color: var(--text-3);
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     letter-spacing: 0;
   }
-  .project-historical {
-    opacity: 0.85;
-  }
-  .project-historical .project-title {
-    color: var(--text-2);
-  }
+  .project-historical { opacity: 0.92; background: var(--bg-soft); }
+  .project-historical .project-title { color: var(--text-2); }
   .sort-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 6px;
     padding: 10px 18px;
+    background: linear-gradient(to bottom, var(--bg-soft), var(--bg-elev));
     border-bottom: 1px solid var(--border);
-    background: var(--bg-soft);
   }
   .sort-label {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     color: var(--text-3);
     margin-right: 4px;
   }
   .sort-pill {
-    padding: 4px 11px;
+    padding: 5px 12px;
     border-radius: 999px;
     font-size: 12px;
-    font-weight: 600;
-    background: var(--bg);
+    font-weight: 700;
+    background: var(--bg-elev);
     color: var(--text-2);
     border: 1px solid var(--border);
     cursor: pointer;
     font-family: inherit;
+    transition: transform 0.12s var(--ease-spring), color 0.15s, background 0.15s, border-color 0.15s;
   }
-  .sort-pill:hover {
-    color: var(--text);
-  }
+  .sort-pill:hover { color: var(--text); border-color: var(--accent); }
+  .sort-pill:active { transform: scale(0.94); }
   .sort-pill.active {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-color: transparent;
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 6px -2px var(--accent-glow);
   }
-  .sort-arrow { display: none; font-weight: 700; }
+  .sort-arrow { display: none; font-weight: 800; }
   .sort-pill.active .sort-arrow { display: inline; margin-left: 2px; }
   .scope-row { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .scope-row .sort-pill {
     font-size: 11px;
-    padding: 3px 9px;
+    padding: 4px 10px;
   }
   .scope-count {
     margin-left: 4px;
-    font-weight: 700;
-    opacity: 0.6;
+    font-weight: 800;
+    opacity: 0.65;
     font-variant-numeric: tabular-nums;
   }
   .project-summary {
     font-size: 13px;
     color: var(--text-2);
-    line-height: 1.5;
-    margin: 0 0 8px;
+    line-height: 1.55;
+    margin: 0 0 10px;
+  }
+  .spend-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 8px 0 10px;
+  }
+  .spend-bar-track {
+    height: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .spend-bar-fill {
+    height: 100%;
+    background: var(--accent-grad);
+    border-radius: 999px;
+    transition: width 0.8s var(--ease-out);
+    position: relative;
+  }
+  .spend-bar-fill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+    background: rgba(255,255,255,0.6);
+    box-shadow: 0 0 8px rgba(255,255,255,0.4);
+  }
+  .spend-bar-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .spend-bar-meta .pct {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
   .progress-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin: 6px 0 10px;
   }
   .progress-track {
     flex: 1;
     height: 6px;
-    background: var(--border);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
     border-radius: 999px;
     overflow: hidden;
   }
   .progress-fill {
     height: 100%;
-    background: var(--accent);
+    background: var(--accent-grad);
     border-radius: 999px;
-    transition: width 0.4s ease;
+    transition: width 0.8s var(--ease-out);
   }
   .progress-pct {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 800;
     color: var(--text-2);
     font-variant-numeric: tabular-nums;
-    min-width: 36px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    min-width: 40px;
     text-align: right;
   }
   .project-foot {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 14px;
-    font-size: 12px;
+    gap: 6px 14px;
+    font-size: 11px;
     color: var(--text-3);
   }
-  .project-foot strong { color: var(--text-2); font-weight: 600; }
+  .project-foot strong { color: var(--text-2); font-weight: 700; }
 
   .empty {
-    padding: 22px 18px;
+    padding: 26px 18px;
     text-align: center;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-3);
+    line-height: 1.6;
   }
-  .empty a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .empty a { color: var(--accent); text-decoration: none; font-weight: 700; }
   .empty a:hover { text-decoration: underline; }
 
-  /* Links grid */
+  /* Article body */
+  .article-body {
+    padding: 16px 18px 18px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-2);
+  }
+  .article-body p { margin: 0 0 12px; }
+  .article-body p:last-child { margin-bottom: 0; }
+
+  /* Feed */
+  .feed-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s, padding-left 0.18s var(--ease-out);
+    align-items: flex-start;
+  }
+  .feed-item:first-child { border-top: none; }
+  .feed-item:hover { background: var(--bg-soft); padding-left: 22px; }
+  .feed-item:active { background: var(--accent-soft); }
+  .feed-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    object-fit: cover;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+  }
+  .feed-thumb.favicon {
+    padding: 14px;
+    object-fit: contain;
+    background: var(--bg-soft);
+  }
+  .feed-body { flex: 1; min-width: 0; }
+  .feed-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+  }
+  .feed-meta {
+    margin-top: 5px;
+    font-size: 11px;
+    color: var(--text-3);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 600;
+    align-items: center;
+  }
+  .feed-meta .src { color: var(--accent); font-weight: 800; }
+  .feed-meta .feed-date {
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 999px;
+    color: var(--text-2);
+  }
+  .feed-snippet {
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Show-more / collapse */
+  .show-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 14px;
+    background: var(--bg-soft);
+    border: none;
+    border-top: 1px solid var(--border);
+    font: 700 11px/1 'Inter', inherit;
+    color: var(--accent);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: background 0.15s;
+    font-family: inherit;
+  }
+  .show-more-btn:hover { background: var(--accent-soft); }
+  .show-more-btn:active { background: var(--accent-soft); transform: scale(0.99); }
+  .show-more-arrow {
+    display: inline-block;
+    transition: transform 0.25s var(--ease-spring);
+  }
+  .show-more-arrow.up { transform: rotate(180deg); }
+
+  .hide-collapsed { display: none !important; }
+  .expanded > .feed-item.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
+  .expanded > .project.hide-collapsed { display: block !important; animation: fadeUp 0.4s var(--ease-out); }
+  .expanded > .project-section-header.hide-collapsed { display: flex !important; animation: fadeUp 0.4s var(--ease-out); }
+
+  .article-body.collapsed {
+    max-height: 360px;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  }
+
+  /* Links */
   .links-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -626,38 +1452,69 @@
   .link-btn {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 14px;
     background: var(--bg-soft);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
-    transition: transform 0.15s, border-color 0.15s, background 0.15s;
-    min-height: 56px;
+    transition: transform 0.15s var(--ease-spring), border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    min-height: 60px;
   }
-  .link-btn:active { transform: scale(0.97); background: var(--accent-soft); border-color: var(--accent); }
-  .link-btn svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
-  .link-btn-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .link-btn:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .link-btn:active { transform: scale(0.96); background: var(--accent-soft); }
+  .link-btn-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .link-btn-icon svg { width: 18px; height: 18px; }
+  .link-btn-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
   .link-btn-sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
 
+  /* Loading spinner */
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+
   .hidden { display: none !important; }
+  [hidden] { display: none !important; }
   .error {
-    padding: 14px 18px;
+    padding: 16px 18px;
     color: var(--bad);
     font-size: 13px;
   }
+
+  /* Detail view fade-in */
+  #detailView { animation: fadeIn 0.3s var(--ease-out); }
 </style>
 </head>
 <body>
-<header>
+<header id="appHeader">
   <div class="header-inner">
     <button class="back-btn" id="backBtn" aria-label="Back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h1><span class="dot">·</span> Parks Lookup</h1>
+    <h1>
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg></span>
+      <span class="header-title">Parks Lookup</span>
+      <span class="header-park-name" id="headerParkName"></span>
+    </h1>
   </div>
 </header>
 
@@ -665,13 +1522,15 @@
   <!-- Search view -->
   <div id="searchView">
     <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input id="searchInput" class="search-input" type="search" placeholder="Search any NYC park" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
-      <button class="search-clear" id="searchClear" aria-label="Clear">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
-      </button>
+      <div class="search-box">
+        <input id="searchInput" class="search-input" type="search" placeholder="Search any NYC park…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <button class="search-clear" id="searchClear" aria-label="Clear">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+        </button>
+      </div>
       <div class="results" id="results"></div>
     </div>
     <div class="recent hidden" id="recentBlock">
@@ -682,14 +1541,35 @@
 
   <!-- Detail view -->
   <div id="detailView" class="hidden">
-    <div class="park-header" id="parkHeader"></div>
-    <div class="section">
+    <section class="hero reveal" id="hero"></section>
+    <section class="stat-strip reveal d1" id="statStrip"></section>
+    <nav class="section-nav reveal d2" id="sectionNav"><div class="section-nav-inner"></div></nav>
+
+    <div class="section reveal" id="sec-officials">
       <div class="section-header">
-        <h2 class="section-title">Elected Officials</h2>
+        <h2 class="section-title">Officials</h2>
+        <span class="section-count" id="officialsCount"></span>
       </div>
       <div id="officials"></div>
     </div>
-    <div class="section">
+
+    <div class="section reveal" id="sec-finance" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Capital Finance</h2>
+        <span class="section-count" id="financeCount"></span>
+      </div>
+      <div id="finance"></div>
+    </div>
+
+    <div class="section reveal" id="sec-timeline" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Project Timeline</h2>
+        <span class="section-count" id="timelineCount"></span>
+      </div>
+      <div id="timeline"></div>
+    </div>
+
+    <div class="section reveal" id="sec-projects">
       <div class="section-header">
         <h2 class="section-title">Capital Projects</h2>
         <span class="section-count" id="projectsCount"></span>
@@ -703,28 +1583,32 @@
       <div class="sort-row scope-row" id="projectsScope" hidden></div>
       <div id="projects"></div>
     </div>
-    <div class="section">
+
+    <div class="section reveal" id="sec-history">
       <div class="section-header">
         <h2 class="section-title">Site History</h2>
         <a class="section-link" id="historyOpen" target="_blank" rel="noopener">Open</a>
       </div>
       <div id="history"></div>
     </div>
-    <div class="section">
+
+    <div class="section reveal" id="sec-news">
       <div class="section-header">
         <h2 class="section-title">Recent News</h2>
         <a class="section-link" id="newsOpen" target="_blank" rel="noopener">More</a>
       </div>
       <div id="news"></div>
     </div>
-    <div class="section">
+
+    <div class="section reveal" id="sec-resolutions">
       <div class="section-header">
-        <h2 class="section-title">Community Board Resolutions</h2>
+        <h2 class="section-title">CB Resolutions</h2>
         <a class="section-link" id="resolutionsOpen" target="_blank" rel="noopener">More</a>
       </div>
       <div id="resolutions"></div>
     </div>
-    <div class="section">
+
+    <div class="section reveal" id="sec-links">
       <div class="section-header">
         <h2 class="section-title">Links</h2>
       </div>
@@ -736,15 +1620,7 @@
 <script>
 'use strict';
 
-// Register a free token at https://dev.socrata.com/foundry/data.cityofnewyork.us/enfh-gkve
-// and paste it here. Optional — app works without, just rate-limited.
 const SOCRATA_APP_TOKEN = '';
-
-// CORS-relay Worker for fetching NYC Parks history pages, Google News RSS,
-// and DuckDuckGo HTML search results. Deploy parks/worker.js to Cloudflare
-// Workers and paste the resulting URL here (e.g. https://parks-proxy.<account>.workers.dev).
-// If left blank, history / news / resolutions sections gracefully fall back
-// to deep-links.
 const WORKER_URL = 'https://parks-proxy.goodmax1.workers.dev';
 
 const SOCRATA = 'https://data.cityofnewyork.us/resource';
@@ -754,7 +1630,6 @@ const ENDPOINT_CAPITAL = SOCRATA + '/4hcv-tc5r.json';
 const ENDPOINT_CPDB = SOCRATA + '/fi59-268w.json';
 
 const BOROUGHS = { M: 'Manhattan', B: 'Bronx', X: 'Bronx', Q: 'Queens', K: 'Brooklyn', R: 'Staten Island' };
-// communityboard field uses borough digit: 1=M, 2=Bx, 3=Bk, 4=Q, 5=SI
 const CB_BOROUGH_PREFIX = { '1': 'M', '2': 'X', '3': 'K', '4': 'Q', '5': 'R' };
 const CB_BOROUGH_SLUG = { M: 'manhattancb', X: 'bronxcb', K: 'brooklyncb', Q: 'queenscb', R: 'statenislandcb' };
 const CB_BOROUGH_NAME = { M: 'Manhattan', X: 'Bronx', K: 'Brooklyn', Q: 'Queens', R: 'Staten Island' };
@@ -780,13 +1655,16 @@ const PARKS_BOROUGH_COMMISSIONERS = {
 const RECENT_KEY = 'parks.recent';
 const RECENT_MAX = 10;
 
-// Module state
-let reps = null;            // loaded from reps.json once
-let councilCache = null;    // map of district -> {name, url}
+let reps = null;
+let councilCache = null;
 let searchAbort = null;
 let searchTimer = null;
+let revealObserver = null;
+let navObserver = null;
+let currentPark = null;
+let loadGen = 0;
 
-// Utilities
+// ---- Utilities ----
 function fetchJSON(url, opts = {}) {
   const headers = Object.assign({}, opts.headers || {});
   if (SOCRATA_APP_TOKEN && /data\.cityofnewyork\.us/.test(url)) {
@@ -798,22 +1676,40 @@ function fetchJSON(url, opts = {}) {
   });
 }
 
-function escSoql(s) {
-  return String(s).replace(/'/g, "''");
-}
-
+function escSoql(s) { return String(s).replace(/'/g, "''"); }
 function $(id) { return document.getElementById(id); }
+function escapeHTML(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function cssEscape(s) { return String(s).replace(/[^a-zA-Z0-9_-]/g, ch => '\\' + ch); }
+
+const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+function fmtUSDCompact(n) {
+  if (!Number.isFinite(n) || n === 0) return '$0';
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (abs >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
+  return `$${Math.round(n)}`;
+}
+function compactNumberParts(n) {
+  if (!Number.isFinite(n)) return { val: '–', unit: '' };
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return { val: (n / 1e9).toFixed(1), unit: 'B' };
+  if (abs >= 1e6) return { val: (n / 1e6).toFixed(1), unit: 'M' };
+  if (abs >= 1e3) return { val: (n / 1e3).toFixed(1), unit: 'K' };
+  if (n % 1 === 0) return { val: String(n), unit: '' };
+  return { val: n.toFixed(1), unit: '' };
+}
 
 function getRecent() {
   try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
 }
 function pushRecent(park) {
   const list = getRecent().filter(p => p.gispropnum !== park.gispropnum);
-  list.unshift({
-    gispropnum: park.gispropnum,
-    signname: park.signname,
-    borough: park.borough,
-  });
+  list.unshift({ gispropnum: park.gispropnum, signname: park.signname, borough: park.borough });
   localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX)));
   renderRecent();
 }
@@ -828,23 +1724,20 @@ function renderRecent() {
   list.forEach(p => {
     const el = document.createElement('button');
     el.className = 'chip';
-    el.innerHTML = `<span>${escapeHTML(p.signname)}</span><span class="chip-bor">${BOROUGHS[p.borough] || p.borough || ''}</span>`;
+    const borLabel = BOROUGHS[p.borough] || p.borough || '';
+    const initial = (p.signname || '?').trim().charAt(0).toUpperCase();
+    el.innerHTML = `<span class="chip-avatar">${escapeHTML(initial)}</span><span>${escapeHTML(p.signname)}</span>${borLabel ? `<span style="color:var(--text-3);font-weight:500">${escapeHTML(borLabel)}</span>` : ''}`;
     el.addEventListener('click', () => loadDetailByGispropnum(p.gispropnum));
     chips.appendChild(el);
   });
 }
 
-function escapeHTML(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
-
-// View switching
+// ---- View switching ----
 function showSearch() {
   document.body.classList.remove('detail');
   $('searchView').classList.remove('hidden');
   $('detailView').classList.add('hidden');
+  if ($('headerParkName')) $('headerParkName').textContent = '';
   renderRecent();
 }
 function showDetail() {
@@ -852,13 +1745,11 @@ function showDetail() {
   $('searchView').classList.add('hidden');
   $('detailView').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'instant' });
+  setupReveal();
 }
 
-// Normalize text for forgiving comparison: lowercase, strip apostrophes/periods/commas,
-// replace dashes/slashes with spaces, collapse whitespace.
 function normalize(s) {
-  return String(s || '')
-    .toLowerCase()
+  return String(s || '').toLowerCase()
     .replace(/['’`.,]/g, '')
     .replace(/[-_/]+/g, ' ')
     .replace(/\s+/g, ' ')
@@ -868,8 +1759,6 @@ function normalize(s) {
 const NUM_ONES = ['', 'one','two','three','four','five','six','seven','eight','nine'];
 const NUM_TEENS = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 const NUM_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
-
-// Convert a non-negative integer up to 999 into spelled-out words ("twenty four").
 function numberToWords(n) {
   n = parseInt(n, 10);
   if (!Number.isFinite(n) || n < 0 || n > 999) return null;
@@ -884,7 +1773,7 @@ function numberToWords(n) {
   return rest ? `${NUM_ONES[h]} hundred ${numberToWords(rest)}` : `${NUM_ONES[h]} hundred`;
 }
 
-// Search
+// ---- Search ----
 async function runSearch(q) {
   if (searchAbort) searchAbort.abort();
   const results = $('results');
@@ -894,11 +1783,7 @@ async function runSearch(q) {
   const tokens = term.split(/\s+/).filter(Boolean);
   if (!tokens.length) { results.classList.remove('show'); return; }
 
-  // Normalize the signname column to match: lowercase, strip apostrophes/periods/commas,
-  // replace hyphens with spaces. SoQL escapes a single quote by doubling it.
   const col = "lower(replace(replace(replace(replace(signname, '''', ''), '.', ''), ',', ''), '-', ' '))";
-
-  // Per-token clause: each token must appear; bare digit tokens also match their spelled form.
   const clauses = tokens.map(tok => {
     const variants = [tok];
     if (/^\d+$/.test(tok)) {
@@ -932,9 +1817,13 @@ function renderResults(rows) {
     row.className = 'result-row';
     const bor = BOROUGHS[p.borough] || p.borough || '';
     const sub = [bor, p.location].filter(Boolean).join(' · ');
+    const initial = (p.signname || p.name311 || '?').trim().charAt(0).toUpperCase();
     row.innerHTML = `
-      <div class="result-name">${escapeHTML(p.signname || p.name311 || '(unnamed)')}</div>
-      <div class="result-sub">${escapeHTML(sub)}</div>`;
+      <div class="result-avatar">${escapeHTML(initial)}</div>
+      <div class="result-text">
+        <div class="result-name">${escapeHTML(p.signname || p.name311 || '(unnamed)')}</div>
+        <div class="result-sub">${escapeHTML(sub)}</div>
+      </div>`;
     row.addEventListener('click', () => loadDetail(p));
     results.appendChild(row);
   });
@@ -947,7 +1836,7 @@ function clearSearch() {
   $('results').innerHTML = '';
 }
 
-// Detail loading
+// ---- Detail loading ----
 async function loadDetailByGispropnum(id, fromHistory = false) {
   try {
     const rows = await fetchJSON(`${ENDPOINT_PARKS}?gispropnum=${encodeURIComponent(id)}&$limit=1`);
@@ -959,7 +1848,6 @@ async function loadDetailByGispropnum(id, fromHistory = false) {
 }
 
 async function loadDetail(stub, fromHistory = false) {
-  // stub from search may have fewer fields; refetch full row to be safe
   let full = stub;
   if (!stub.councildistrict || !stub.multipolygon) {
     try {
@@ -973,43 +1861,295 @@ async function loadDetail(stub, fromHistory = false) {
       history.pushState({ gispropnum: full.gispropnum }, '', newHash);
     }
   }
+  currentPark = full;
+  const gen = ++loadGen;
+  // Reset async-rendered sections so they don't show stale data from a previous park
+  // while in-flight fetches for the new park are still pending.
+  $('sec-finance').hidden = true;
+  $('sec-timeline').hidden = true;
+  $('finance').innerHTML = '';
+  $('timeline').innerHTML = '';
+  setNavCount('sec-finance', null);
+  setNavCount('sec-timeline', null);
+  setNavCount('sec-news', null);
+  setNavCount('sec-resolutions', null);
   pushRecent(full);
   clearSearch();
-  renderDetail(full);
+  renderHero(full);
+  renderStatStripPlaceholder();
+  renderSectionNav();
   showDetail();
-  loadHistory(full);
-  loadNews(full);
-  loadResolutions(full);
-  fillCouncilMember(full);
-  loadCapitalProjects(full);
+  renderOfficials(full);
+  renderLinks(full);
+  loadHeroImage(full, gen);
+  loadParkBadges(full, gen);
+  loadAmenityCount(full, gen);
+  loadHistory(full, gen);
+  loadNews(full, gen);
+  loadResolutions(full, gen);
+  fillCouncilMember(full, gen);
+  loadCapitalProjects(full, gen);
+  if ($('headerParkName')) $('headerParkName').textContent = full.signname || full.name311 || '';
 }
 
-function renderDetail(p) {
+// ---- Hero ----
+function renderHero(p) {
   const bor = BOROUGHS[p.borough] || p.borough || '';
-  const acres = p.acres ? `${Number(p.acres).toFixed(2)} ac` : null;
+  const acres = p.acres ? Number(p.acres) : null;
   const cls = [p.typecategory, p.subcategory].filter(Boolean).join(' · ');
   const addr = [p.location, p.zipcode].filter(Boolean).join(' · ');
 
-  const metaPills = [];
-  if (bor) metaPills.push(`<span class="meta-pill accent">${escapeHTML(bor)}</span>`);
-  if (p.gispropnum) metaPills.push(`<span class="meta-pill">${escapeHTML(p.gispropnum)}</span>`);
-  if (acres) metaPills.push(`<span class="meta-pill">${acres}</span>`);
-  if (cls) metaPills.push(`<span class="meta-pill">${escapeHTML(cls)}</span>`);
+  const shape = buildShapeSVG(p.multipolygon);
+  const subBits = [];
+  if (bor) subBits.push(bor);
+  if (cls) subBits.push(cls);
+  if (addr) subBits.push(addr);
 
-  const name311line = p.name311 && p.name311 !== p.signname
-    ? `<p class="park-name311">311 name: ${escapeHTML(p.name311)}</p>` : '';
+  const infoBits = [];
+  if (p.address) infoBits.push(`<span class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${escapeHTML(toTitleCase(p.address))}</span>`);
+  if (p.zipcode) infoBits.push(`<span class="info-item">ZIP <strong>${escapeHTML(p.zipcode)}</strong></span>`);
+  if (p.precinct) infoBits.push(`<span class="info-item">Precinct <strong>${escapeHTML(String(p.precinct))}</strong></span>`);
+  if (p.department) infoBits.push(`<span class="info-item">Parks <strong>${escapeHTML(p.department)}</strong></span>`);
+  if (p.gispropnum) infoBits.push(`<span class="info-item">FMS <strong>${escapeHTML(p.gispropnum)}</strong></span>`);
+  const infoHtml = infoBits.join('<span class="info-sep">·</span>');
 
-  $('parkHeader').innerHTML = `
-    <h2 class="park-name">${escapeHTML(p.signname || p.name311 || '(unnamed park)')}</h2>
-    ${name311line}
-    <div class="park-meta">${metaPills.join('')}</div>
-    ${addr ? `<p class="park-address">${escapeHTML(addr)}</p>` : ''}
+  const badges = [];
+  if (p.typecategory && /flagship/i.test(p.typecategory)) {
+    badges.push(`<span class="park-badge flagship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>Flagship Park</span>`);
+  }
+  if (p.waterfront === true || p.waterfront === 'true') {
+    badges.push(`<span class="park-badge waterfront"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/></svg>Waterfront</span>`);
+  }
+
+  $('hero').innerHTML = `
+    <div class="hero-canvas" id="heroCanvas">
+      <div class="hero-photo" id="heroPhoto"></div>
+      ${shape}
+      <a class="hero-credit" id="heroCredit" target="_blank" rel="noopener" href="#">Wikipedia</a>
+      <div class="hero-overlay">
+        <h2 class="hero-name">${escapeHTML(p.signname || p.name311 || '(unnamed park)')}</h2>
+        <p class="hero-sub">${escapeHTML(subBits.join(' · '))}</p>
+      </div>
+    </div>
+    ${infoHtml ? `<div class="hero-info" id="heroInfo">${infoHtml}</div>` : ''}
+    <div class="hero-badges" id="heroBadges">${badges.join('')}</div>
   `;
-
-  renderOfficials(p);
-  renderLinks(p);
 }
 
+function toTitleCase(s) {
+  return String(s || '').toLowerCase().replace(/\b([a-z])([a-z']*)/g, (_, a, b) => a.toUpperCase() + b);
+}
+
+function buildShapeSVG(geo) {
+  if (!geo || !geo.coordinates) return '';
+  const W = 800, H = 220;
+  let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+  const visit = arr => {
+    if (typeof arr[0] === 'number') {
+      if (arr[0] < minLng) minLng = arr[0];
+      if (arr[0] > maxLng) maxLng = arr[0];
+      if (arr[1] < minLat) minLat = arr[1];
+      if (arr[1] > maxLat) maxLat = arr[1];
+      return;
+    }
+    arr.forEach(visit);
+  };
+  visit(geo.coordinates);
+  if (!Number.isFinite(minLng)) return '';
+  const dx = Math.max(maxLng - minLng, 1e-9);
+  const dy = Math.max(maxLat - minLat, 1e-9);
+  // "Cover" the canvas: scale by the larger axis so the silhouette fills the hero;
+  // the SVG viewBox clips whatever extends beyond. For very oblong parks (like Central
+  // Park, which is tall and thin) you see a wide middle band; for squarish parks, the
+  // whole shape sits inside.
+  const pad = 8;
+  const scaleX = (W - pad * 2) / dx;
+  const scaleY = (H - pad * 2) / dy;
+  const scale = Math.max(scaleX, scaleY) * 0.92;
+  const offsetX = (W - dx * scale) / 2;
+  const offsetY = (H - dy * scale) / 2;
+  const px = ([lng, lat]) => {
+    const x = offsetX + (lng - minLng) * scale;
+    const y = offsetY + (maxLat - lat) * scale;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  };
+  const paths = [];
+  const drawRing = ring => {
+    if (!ring || !ring.length) return;
+    paths.push('M' + ring.map(px).join(' L') + ' Z');
+  };
+  // multipolygon: [[[ring, ring], [ring]], ...]
+  // polygon:      [[ring, ring]]
+  const coords = geo.coordinates;
+  const isMulti = Array.isArray(coords[0]?.[0]?.[0]);
+  if (isMulti) {
+    coords.forEach(poly => poly.forEach(drawRing));
+  } else {
+    coords.forEach(drawRing);
+  }
+  if (!paths.length) return '';
+  const d = paths.join(' ');
+  // Rough path length estimate so the draw-in animation runs cleanly
+  const approxLen = Math.max(2 * (dx + dy) * scale * (paths.length || 1), 600);
+  return `<svg class="hero-shape" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <path class="fill" d="${d}" style="--len:${Math.round(approxLen)}; stroke-dasharray:${Math.round(approxLen)};" />
+  </svg>`;
+}
+
+// ---- Stat strip ----
+function renderStatStripPlaceholder() {
+  const p = currentPark || {};
+  const acresN = p.acres ? Number(p.acres) : null;
+  const since = p.acquisitiondate ? new Date(p.acquisitiondate).getFullYear() : null;
+  $('statStrip').innerHTML = `
+    ${statCard(acresN != null ? compactNumberParts(acresN).val : '–', acresN != null ? (compactNumberParts(acresN).unit || 'ac') : '', 'Acres', acresN == null)}
+    ${statCard(since != null ? String(since) : '–', '', 'Est.', since == null)}
+    ${statCard('–', '', 'Active $', true)}
+    ${statCard('–', '', 'Amenities', true)}
+  `;
+  if (acresN != null) {
+    animateCountUp($('statStrip').children[0].querySelector('.stat-val'), acresN, compactNumberParts(acresN).unit || 'ac');
+  }
+}
+
+function parkTypeShort(p) {
+  const raw = (p.typecategory || p.subcategory || p.class || '').trim();
+  if (!raw) return null;
+  const map = {
+    'Flagship Park': 'Flagship',
+    'Community Park': 'Comm.',
+    'Neighborhood Park': 'Neigh.',
+    'Nature Area': 'Nature',
+    'Recreation Field/Courts': 'Rec',
+    'Historic House Park': 'Historic',
+    'Triangle/Plaza': 'Triangle',
+    'Public Place': 'Public',
+    'Strip': 'Strip',
+    'Garden': 'Garden',
+    'Playground': 'Playgrnd',
+    'Mall': 'Mall',
+    'Square': 'Square',
+    'Lot': 'Lot',
+    'Cemetery': 'Cemetery',
+  };
+  return map[raw] || raw.split(/\s+/)[0].slice(0, 8);
+}
+
+function statCardText(value, label) {
+  return `<div class="stat-card">
+    <div class="stat-val stat-val-text">${escapeHTML(value)}</div>
+    <div class="stat-label">${escapeHTML(label)}</div>
+  </div>`;
+}
+
+function statCard(val, unit, label, skeleton = false) {
+  return `<div class="stat-card${skeleton ? ' skeleton-card' : ''}">
+    <div class="stat-val" data-num="0">${escapeHTML(val)}${unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : ''}</div>
+    <div class="stat-label">${escapeHTML(label)}</div>
+  </div>`;
+}
+
+function setStatCard(idx, val, unit, label, animateTo) {
+  const card = $('statStrip').children[idx];
+  if (!card) return;
+  card.classList.remove('skeleton-card');
+  const valEl = card.querySelector('.stat-val');
+  const labEl = card.querySelector('.stat-label');
+  if (labEl) labEl.textContent = label;
+  if (animateTo != null && Number.isFinite(animateTo)) {
+    animateCountUp(valEl, animateTo, unit);
+  } else if (valEl) {
+    valEl.innerHTML = `${escapeHTML(String(val))}${unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : ''}`;
+  }
+}
+
+function animateCountUp(el, target, unit) {
+  if (!el) return;
+  const dur = 900;
+  const start = performance.now();
+  const isCurrency = unit === '' && target >= 1000;
+  function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = target * eased;
+    const parts = compactNumberParts(v);
+    el.innerHTML = `${parts.val}${parts.unit ? `<span class="stat-unit">${parts.unit}</span>` : (unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : '')}`;
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      const fp = compactNumberParts(target);
+      el.innerHTML = `${fp.val}${fp.unit ? `<span class="stat-unit">${fp.unit}</span>` : (unit ? `<span class="stat-unit">${escapeHTML(unit)}</span>` : '')}`;
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+// ---- Section nav ----
+function renderSectionNav() {
+  const inner = document.querySelector('.section-nav-inner');
+  const sections = [
+    { id: 'sec-officials', label: 'Officials' },
+    { id: 'sec-finance', label: 'Finance' },
+    { id: 'sec-timeline', label: 'Timeline' },
+    { id: 'sec-projects', label: 'Projects' },
+    { id: 'sec-history', label: 'History' },
+    { id: 'sec-news', label: 'News' },
+    { id: 'sec-resolutions', label: 'CB' },
+    { id: 'sec-links', label: 'Links' },
+  ];
+  inner.innerHTML = sections.map(s =>
+    `<a class="nav-pill" href="#${s.id}" data-target="${s.id}">${s.label}<span class="nav-count" data-count-for="${s.id}"></span></a>`
+  ).join('');
+  // intercept clicks for smooth scroll without changing the hash (which controls routing)
+  inner.querySelectorAll('a.nav-pill').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const t = document.getElementById(a.dataset.target);
+      if (!t || t.hidden) return;
+      const top = t.getBoundingClientRect().top + window.scrollY - 110;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+  setupNavSpy();
+}
+
+function setNavCount(secId, count) {
+  const el = document.querySelector(`[data-count-for="${secId}"]`);
+  if (el) el.textContent = count != null ? String(count) : '';
+}
+
+function setupNavSpy() {
+  if (navObserver) navObserver.disconnect();
+  const targets = document.querySelectorAll('#detailView .section');
+  navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting && en.intersectionRatio > 0.2) {
+        document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+        const link = document.querySelector(`.nav-pill[data-target="${en.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-120px 0px -60% 0px', threshold: [0.2, 0.5] });
+  targets.forEach(t => { if (!t.hidden) navObserver.observe(t); });
+}
+
+// ---- Reveal animations ----
+function setupReveal() {
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add('in-view');
+        revealObserver.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('#detailView .reveal').forEach((el, i) => {
+    el.style.animationDelay = `${Math.min(i * 40, 300)}ms`;
+    revealObserver.observe(el);
+  });
+}
+
+// ---- Officials ----
 function chunkDistricts(s, width) {
   if (!s) return [];
   const str = String(s);
@@ -1022,15 +2162,13 @@ function chunkDistricts(s, width) {
 function renderOfficials(p) {
   const rows = [];
   const bor = p.borough;
-  const borChar = bor === 'B' ? 'X' : bor; // dataset uses X for Bronx
+  const borChar = bor === 'B' ? 'X' : bor;
 
-  // Council district (1-2 digits, rarely multi)
   if (p.councildistrict) {
     const cd = String(p.councildistrict);
     rows.push(officialRow('Council', `District ${cd}`, 'NYC City Council', 'council-' + cd, null, true));
   }
 
-  // State Senate — chunk by 2
   const senateDistricts = chunkDistricts(p.nys_senate, 2);
   if (senateDistricts.length) {
     const names = [];
@@ -1047,7 +2185,6 @@ function renderOfficials(p) {
     rows.push(officialRow('State Senate', names.join(', '), subLabel, null, firstUrl));
   }
 
-  // State Assembly — chunk by 2
   const asmDistricts = chunkDistricts(p.nys_assembly, 2);
   if (asmDistricts.length) {
     const names = [];
@@ -1064,7 +2201,6 @@ function renderOfficials(p) {
     rows.push(officialRow('State Assembly', names.join(', '), subLabel, null, firstUrl));
   }
 
-  // US Congress (1-2 digits, rarely multi)
   if (p.us_congress) {
     const cg = String(p.us_congress);
     const rep = reps && reps.congress && reps.congress[cg];
@@ -1077,7 +2213,6 @@ function renderOfficials(p) {
     ));
   }
 
-  // Community Board — chunk by 3 (borough digit + 2-digit number)
   const cbCodes = chunkDistricts(p.communityboard, 3);
   if (cbCodes.length) {
     const labels = [];
@@ -1093,34 +2228,33 @@ function renderOfficials(p) {
       if (!firstUrl) firstUrl = `https://www.nyc.gov/site/${slug}/index.page`;
     });
     if (labels.length) {
-      rows.push(officialRow(
-        'Community Board',
-        labels.join(', '),
-        labels.length > 1 ? `${labels.length} boards` : 'NYC Community Board',
-        null,
-        firstUrl
-      ));
+      rows.push(officialRow('Community Board', labels.join(', '), labels.length > 1 ? `${labels.length} boards` : 'NYC Community Board', null, firstUrl));
     }
   }
 
-  // Borough President
   const bp = BOROUGH_PRESIDENTS[borChar] || BOROUGH_PRESIDENTS[bor];
-  if (bp) {
-    rows.push(officialRow('Borough Pres', bp.name, `${BOROUGHS[bor] || bor} Borough President`, null, bp.url));
+  if (bp) rows.push(officialRow('Borough Pres', bp.name, `${BOROUGHS[bor] || bor} Borough President`, null, bp.url));
+
+  // Parks operations district (department field, e.g. "M-12" = Manhattan District 12)
+  const dept = (p.department || p.permitdistrict || '').trim();
+  const deptMatch = dept.match(/^([MKQRBX])-?(\d+)/i);
+  if (deptMatch) {
+    const code = deptMatch[1].toUpperCase();
+    const borName = CB_BOROUGH_NAME[code === 'B' ? 'X' : code] || BOROUGHS[code] || '';
+    const num = parseInt(deptMatch[2], 10);
+    rows.push(officialRow('Parks Dist', `${borName} District ${num}`, `NYC Parks operations · ${dept}`, null, 'https://www.nycgovparks.org/about/borough-management'));
   }
 
-  // Parks Borough Commissioner
   const pc = PARKS_BOROUGH_COMMISSIONERS[borChar] || PARKS_BOROUGH_COMMISSIONERS[bor];
-  if (pc) {
-    rows.push(officialRow('Parks Boro', pc.name, 'NYC Parks borough management', null, pc.url));
-  }
+  if (pc) rows.push(officialRow('Parks Boro', pc.name, 'NYC Parks borough management', null, pc.url));
 
-  // Precinct
   if (p.precinct) {
     rows.push(officialRow('NYPD', `Precinct ${p.precinct}`, 'Local police precinct', null, `https://www.nyc.gov/site/nypd/bureaus/patrol/precincts/${p.precinct}-precinct.page`));
   }
 
   $('officials').innerHTML = rows.join('') || `<div class="empty">No district info on file.</div>`;
+  $('officialsCount').textContent = String(rows.length);
+  setNavCount('sec-officials', rows.length);
 }
 
 function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
@@ -1139,7 +2273,7 @@ function officialRow(role, name, sub, slotId, url, withSkeleton = false) {
   return `<div class="official no-link">${inner}</div>`;
 }
 
-async function fillCouncilMember(p) {
+async function fillCouncilMember(p, gen) {
   const cd = p.councildistrict;
   if (!cd) return;
   if (!councilCache) {
@@ -1156,31 +2290,31 @@ async function fillCouncilMember(p) {
       councilCache = {};
     }
   }
+  if (gen !== undefined && gen !== loadGen) return;
   const member = councilCache[String(parseInt(cd, 10))];
   const slot = document.querySelector('#council-' + cd);
   if (!slot) return;
   const districtUrl = `https://council.nyc.gov/district-${cd}/`;
-  if (member && member.name) {
-    slot.parentElement.outerHTML = `
-      <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
-        <div class="official-role">Council</div>
-        <div class="official-body">
-          <div class="official-name">${escapeHTML(member.name)}</div>
-          <div class="official-sub">District ${cd} · NYC City Council</div>
-        </div>
-        <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
-      </a>`;
-  } else {
-    slot.parentElement.outerHTML = `
-      <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
-        <div class="official-role">Council</div>
-        <div class="official-body">
-          <div class="official-name">District ${cd}</div>
-          <div class="official-sub">NYC City Council</div>
-        </div>
-        <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
-      </a>`;
-  }
+  const name = (member && member.name) ? member.name : `District ${cd}`;
+  slot.parentElement.outerHTML = `
+    <a class="official" href="${escapeHTML(districtUrl)}" target="_blank" rel="noopener">
+      <div class="official-role">Council</div>
+      <div class="official-body">
+        <div class="official-name">${escapeHTML(name)}</div>
+        <div class="official-sub">District ${cd} · NYC City Council</div>
+      </div>
+      <span class="official-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+    </a>`;
+}
+
+// ---- Capital projects ----
+function phaseClass(phaseRaw) {
+  const p = (phaseRaw || '').toLowerCase();
+  if (/design/.test(p)) return 'design';
+  if (/procure/.test(p)) return 'procurement';
+  if (/construct/.test(p)) return 'construction';
+  if (/complete|closed/.test(p)) return 'completed';
+  return 'other';
 }
 
 function phaseRank(phase) {
@@ -1251,7 +2385,6 @@ function computeScopes(text) {
 }
 
 let capState = null;
-
 const DEFAULT_DIR = { phase: 'asc', date: 'desc', dollar: 'desc' };
 
 function applyCapSort() {
@@ -1292,7 +2425,6 @@ function buildScopeRow() {
   for (const p of allProjects) {
     for (const s of (p._scopes || [])) counts.set(s, (counts.get(s) || 0) + 1);
   }
-  // Preserve SCOPE_RULES order, with "Other" last.
   const order = SCOPE_RULES.map(r => r[0]).concat(['Other']);
   const entries = order
     .map(label => [label, counts.get(label) || 0])
@@ -1344,15 +2476,52 @@ function renderCapState() {
     : '';
   if (!trackerHtml && !historicalHtml) {
     root.innerHTML = `<div class="empty">No projects match the selected scope filters.</div>`;
+    root.classList.remove('expanded');
     return;
   }
   root.innerHTML = trackerHtml + historicalHtml;
+  root.classList.remove('expanded');
+  makeExpandableProjects(root, 4);
   if (powerBI) {
     for (const prj of visibleTracker) {
       const detail = powerBI.get(prj.fmsid);
       if (detail) applyPowerBIDetail(prj, detail);
     }
   }
+}
+
+function makeExpandableProjects(root, limit) {
+  const prev = root.querySelector(':scope > .show-more-btn');
+  if (prev) prev.remove();
+  const children = Array.from(root.children);
+  let projectsCount = 0;
+  let cutoffIdx = -1;
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].classList.contains('project')) {
+      projectsCount++;
+      if (projectsCount === limit) cutoffIdx = i;
+    }
+  }
+  const totalProjects = projectsCount;
+  if (cutoffIdx < 0 || totalProjects <= limit) return;
+  for (let i = cutoffIdx + 1; i < children.length; i++) {
+    children[i].classList.add('hide-collapsed');
+  }
+  const remaining = totalProjects - limit;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'show-more-btn';
+  btn.innerHTML = `<span>Show ${remaining} more</span><span class="show-more-arrow">▾</span>`;
+  btn.addEventListener('click', () => {
+    const expanded = root.classList.toggle('expanded');
+    btn.innerHTML = expanded
+      ? `<span>Show less</span><span class="show-more-arrow up">▴</span>`
+      : `<span>Show ${remaining} more</span><span class="show-more-arrow">▾</span>`;
+    if (!expanded) {
+      root.closest('.section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  root.appendChild(btn);
 }
 
 function setCapSort(sort) {
@@ -1385,6 +2554,11 @@ document.addEventListener('click', (e) => {
   if (sortBtn) { setCapSort(sortBtn.dataset.sort); return; }
   const scopeBtn = e.target.closest('#projectsScope .sort-pill');
   if (scopeBtn) { toggleCapScope(scopeBtn.dataset.scope || ''); return; }
+  const phaseBtn = e.target.closest('.phase-block');
+  if (phaseBtn && phaseBtn.dataset.scopePhase) {
+    document.getElementById('sec-projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
 });
 
 function historicalPhaseRank(cpdb) {
@@ -1393,35 +2567,32 @@ function historicalPhaseRank(cpdb) {
   const endYear = cpdb.maxdate ? new Date(cpdb.maxdate).getFullYear() : null;
   const startYear = cpdb.mindate ? new Date(cpdb.mindate).getFullYear() : null;
   const now = new Date().getFullYear();
-  if (adopt > 0 && spent / adopt >= 0.95) return 6; // Completed
-  if (endYear && endYear < now) return 6;             // Past
-  if (spent > 0 && adopt > 0) return 1;               // In progress
-  if (startYear && startYear > now) return 4;         // Planned
-  return 4;                                            // In plan
+  if (adopt > 0 && spent / adopt >= 0.95) return 6;
+  if (endYear && endYear < now) return 6;
+  if (spent > 0 && adopt > 0) return 1;
+  if (startYear && startYear > now) return 4;
+  return 4;
 }
 
-async function loadCapitalProjects(p) {
+async function loadCapitalProjects(p, gen) {
   const root = $('projects');
   const countEl = $('projectsCount');
   const sortRow = $('projectsSort');
   const scopeRow = $('projectsScope');
   root.innerHTML = '<div class="empty"><span class="skeleton" style="width:140px"></span></div>';
   countEl.textContent = '';
-  if (sortRow) sortRow.hidden = true;
-  if (scopeRow) scopeRow.hidden = true;
+  if (sortRow) { sortRow.hidden = true; }
+  if (scopeRow) { scopeRow.hidden = true; scopeRow.innerHTML = ''; }
   capState = null;
   try {
     const [trackerRows, cpdbRows] = await Promise.all([
       fetchJSON(`${ENDPOINT_CAPITAL}?parkid=${encodeURIComponent(p.gispropnum)}&$order=lastupdated DESC&$limit=50`),
       loadCPDBForPark(p).catch(() => []),
     ]);
+    if (gen !== loadGen) return;
 
-    const trackerKeys = new Set(
-      trackerRows.map(r => normalizeFmsKey(r.fmsid)).filter(Boolean)
-    );
-    const trackerTitles = new Set(
-      trackerRows.map(r => normalizeTitle(r.title)).filter(Boolean)
-    );
+    const trackerKeys = new Set(trackerRows.map(r => normalizeFmsKey(r.fmsid)).filter(Boolean));
+    const trackerTitles = new Set(trackerRows.map(r => normalizeTitle(r.title)).filter(Boolean));
     const cpdbByKey = new Map();
     for (const c of cpdbRows) {
       const k = normalizeFmsKey(c.maprojid);
@@ -1436,7 +2607,6 @@ async function loadCapitalProjects(p) {
       return true;
     });
 
-    // Compute sort keys + scope tags once.
     for (const r of trackerRows) {
       r._sortPhase = phaseRank(r.currentphase);
       r._sortDate = projectActivityDate(r);
@@ -1454,9 +2624,12 @@ async function loadCapitalProjects(p) {
     if (totalCount === 0) {
       root.innerHTML = `<div class="empty">No capital projects on record.<br><a href="https://www.nycgovparks.org/planning-and-building/capital-project-tracker" target="_blank" rel="noopener">Open Capital Project Tracker</a></div>`;
       countEl.textContent = '0';
+      setNavCount('sec-projects', 0);
+      finalizeStatsAndViz();
       return;
     }
     countEl.textContent = String(totalCount);
+    setNavCount('sec-projects', totalCount);
 
     capState = {
       park: p,
@@ -1470,9 +2643,11 @@ async function loadCapitalProjects(p) {
     };
     applyCapSort();
     renderCapState();
-    upgradeFundingViaPowerBI(trackerRows);
+    finalizeStatsAndViz();
+    upgradeFundingViaPowerBI(trackerRows, gen);
   } catch (e) {
     root.innerHTML = `<div class="error">Could not load capital projects: ${escapeHTML(e.message)}</div>`;
+    setNavCount('sec-projects', 0);
   }
 }
 
@@ -1480,40 +2655,33 @@ function normalizeFmsKey(s) {
   if (!s) return null;
   return String(s).replace(/\s+/g, '').toUpperCase();
 }
-
 function normalizeTitle(s) {
   return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
-
 function cpdbSearchNeedle(name) {
-  // Strip common park-name suffixes so CPDB descriptions like "INWOOD HILL PK" or
-  // "INWOOD HILL & FT TRYON" still match a park named "Inwood Hill Park".
   return name
     .toLowerCase()
     .replace(/\b(park|playground|playgrounds|garden|gardens|square|plaza|field|fields|green|commons|triangle|mall)\b/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
-
 async function loadCPDBForPark(p) {
   const name = (p.signname || p.name311 || '').trim();
   if (!name) return [];
   let needle = cpdbSearchNeedle(name).replace(/'/g, "''");
-  // If stripping suffixes leaves a too-short or too-generic needle, fall back to original.
   if (needle.length < 4) needle = name.toLowerCase().replace(/'/g, "''");
   needle = needle.slice(0, 80);
   const where = `magencyacro='DPR' AND lower(description) like '%${needle}%'`;
   const url = `${ENDPOINT_CPDB}?$where=${encodeURIComponent(where)}&$order=mindate DESC&$limit=60`;
   return await fetchJSON(url);
 }
-
 function fmsToDashboardId(rawFmsid) {
   if (!rawFmsid) return null;
   const m = String(rawFmsid).match(/P-[A-Z0-9]+/i);
   return m ? m[0].toUpperCase() : null;
 }
 
-async function upgradeFundingViaPowerBI(rows) {
+async function upgradeFundingViaPowerBI(rows, gen) {
   if (!WORKER_URL) return;
   const tasks = rows
     .map(prj => ({ prj, dashId: fmsToDashboardId(prj.fmsid) }))
@@ -1524,40 +2692,41 @@ async function upgradeFundingViaPowerBI(rows) {
     while (i < tasks.length) {
       const idx = i++;
       const { prj, dashId } = tasks[idx];
+      if (gen !== loadGen) return;
       try {
         const url = `${WORKER_URL.replace(/\/$/, '')}/?mode=powerbi&fmsid=${encodeURIComponent(dashId)}`;
         const detail = await fetchJSON(url);
+        if (gen !== loadGen) return;
         if (!detail || detail.error) continue;
         if (capState?.powerBI) capState.powerBI.set(prj.fmsid, detail);
         applyPowerBIDetail(prj, detail);
-      } catch (_) {
-        // silent — keep dataset value
-      }
+      } catch (_) { /* silent */ }
     }
   });
   await Promise.all(workers);
-  // After all Power BI values land, if the user is sorting by $, re-render so order reflects authoritative values.
+  if (gen !== loadGen) return;
   if (capState && capState.sort === 'dollar') {
     applyCapSort();
     renderCapState();
   }
+  finalizeStatsAndViz();
 }
 
 function applyPowerBIDetail(prj, detail) {
-  const node = document.querySelector(`.project[data-fmsid="${cssEscape(prj.fmsid)}"]`);
-  if (!node) return;
+  // Store on the project row so renders / sorts can use it.
+  prj._pbi = detail;
   const total = detail.totalBudget;
-  if (typeof total !== 'number' || total <= 0) return;
-  // Update sort key so a future $ resort uses Power BI's authoritative value.
-  if (capState && capState.tracker) {
+  if (typeof total === 'number' && total > 0 && capState && capState.tracker) {
     const target = capState.tracker.find(r => r.fmsid === prj.fmsid);
     if (target) target._sortDollar = total;
   }
-  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-  const fmt = usd.format(total);
+  const node = document.querySelector(`.project[data-fmsid="${cssEscape(prj.fmsid)}"]`);
+  if (!node) return;
+  if (typeof total !== 'number' || total <= 0) return;
+  const fmt = USD.format(total);
   const titleBits = [`Power BI: ${fmt}`];
   if (prj.totalfunding) titleBits.push(`Dataset: ${prj.totalfunding}`);
-  if (typeof detail.spendToDate === 'number') titleBits.push(`Spent: ${usd.format(detail.spendToDate)}`);
+  if (typeof detail.spendToDate === 'number') titleBits.push(`Spent: ${USD.format(detail.spendToDate)}`);
   if (typeof detail.spendPercent === 'number') titleBits.push(`${Math.round(detail.spendPercent * 100)}% spent`);
   let pill = node.querySelector('.project-funding');
   const cpdbExtra = pill?.getAttribute('data-cpdb');
@@ -1578,10 +2747,28 @@ function applyPowerBIDetail(prj, detail) {
       meta.appendChild(pill);
     }
   }
-}
-
-function cssEscape(s) {
-  return String(s).replace(/[^a-zA-Z0-9_-]/g, ch => '\\' + ch);
+  // Replace the phase-progress bar with a spend bar showing authoritative figures.
+  const spendPct = typeof detail.spendPercent === 'number' ? detail.spendPercent : (detail.spendToDate / total);
+  if (Number.isFinite(spendPct)) {
+    const pct = Math.max(0, Math.min(100, spendPct * (spendPct > 1 ? 1 : 100)));
+    const oldSpend = node.querySelector('.spend-row');
+    const oldProg = node.querySelector('.progress-row');
+    const html = `
+      <div class="spend-row">
+        <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${pct}%"></div></div>
+        <div class="spend-bar-meta">
+          <span><strong style="color:var(--text-2)">${escapeHTML(USD.format(detail.spendToDate || 0))}</strong> spent of ${escapeHTML(fmt)}</span>
+          <span class="pct">${Math.round(pct)}%</span>
+        </div>
+      </div>`;
+    if (oldSpend) oldSpend.outerHTML = html;
+    else if (oldProg) oldProg.outerHTML = html;
+    else {
+      const summary = node.querySelector('.project-summary');
+      const target = summary || node.querySelector('.funding-chips') || node.querySelector('.project-meta');
+      if (target) target.insertAdjacentHTML('afterend', html);
+    }
+  }
 }
 
 const FUNDING_CATEGORIES = ['Borough President', 'City Council', 'Mayoral', 'Federal', 'State', 'Private'];
@@ -1590,6 +2777,7 @@ function splitFundingSources(s) {
   if (!s) return [];
   let remaining = s;
   const found = [];
+  const hasLetterOrDigit = (t) => /[a-z0-9]/i.test(t);
   while (remaining.length) {
     const next = FUNDING_CATEGORIES
       .map(cat => ({ cat, idx: remaining.indexOf(cat) }))
@@ -1597,12 +2785,12 @@ function splitFundingSources(s) {
       .sort((a, b) => a.idx - b.idx)[0];
     if (!next) {
       const trimmed = remaining.trim();
-      if (trimmed) found.push(trimmed);
+      if (trimmed && hasLetterOrDigit(trimmed)) found.push(trimmed);
       break;
     }
     if (next.idx > 0) {
       const trimmed = remaining.slice(0, next.idx).trim();
-      if (trimmed) found.push(trimmed);
+      if (trimmed && hasLetterOrDigit(trimmed)) found.push(trimmed);
     }
     found.push(next.cat);
     remaining = remaining.slice(next.idx + next.cat.length);
@@ -1613,7 +2801,6 @@ function splitFundingSources(s) {
 function formatFunding(raw) {
   if (!raw) return null;
   const s = String(raw).trim();
-  // Range strings from the dataset for design/procurement phase projects.
   const lessMatch = s.match(/^Less than \$?([\d.]+)\s*(million|thousand)?/i);
   const greaterMatch = s.match(/^Greater than \$?([\d.]+)\s*(million|thousand)?/i);
   const betweenMatch = s.match(/^Between \$?([\d.]+)\s*(million|thousand)?\s*and\s*\$?([\d.]+)\s*(million|thousand)?/i);
@@ -1626,17 +2813,15 @@ function formatFunding(raw) {
   if (lessMatch) return { specific: false, display: `< ${abbr(lessMatch[1], lessMatch[2])}` };
   if (greaterMatch) return { specific: false, display: `> ${abbr(greaterMatch[1], greaterMatch[2])}` };
   if (betweenMatch) return { specific: false, display: `${abbr(betweenMatch[1], betweenMatch[2])}–${abbr(betweenMatch[3], betweenMatch[4])}` };
-  // Specific value — usually already formatted like "$150,000". If it's a raw number, format it.
   if (/^\d+(\.\d+)?$/.test(s)) {
     const n = parseFloat(s);
-    return { specific: true, display: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n) };
+    return { specific: true, display: USD.format(n) };
   }
   return { specific: true, display: s };
 }
 
 function formatCPDBFunding(cpdb) {
   if (!cpdb) return null;
-  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   const num = (v) => v == null ? 0 : parseFloat(v) || 0;
   const parts = [];
   const mayoral = num(cpdb.adopt_ccnonexempt);
@@ -1644,30 +2829,25 @@ function formatCPDBFunding(cpdb) {
   const state = num(cpdb.adopt_nccstate);
   const federal = num(cpdb.adopt_nccfederal);
   const other = num(cpdb.adopt_nccother);
-  if (mayoral) parts.push(`City: ${usd.format(mayoral)}`);
-  if (council) parts.push(`Council discr: ${usd.format(council)}`);
-  if (state) parts.push(`State: ${usd.format(state)}`);
-  if (federal) parts.push(`Federal: ${usd.format(federal)}`);
-  if (other) parts.push(`Other: ${usd.format(other)}`);
+  if (mayoral) parts.push(`City: ${USD.format(mayoral)}`);
+  if (council) parts.push(`Council discr: ${USD.format(council)}`);
+  if (state) parts.push(`State: ${USD.format(state)}`);
+  if (federal) parts.push(`Federal: ${USD.format(federal)}`);
+  if (other) parts.push(`Other: ${USD.format(other)}`);
   return parts.length ? parts.join(' · ') : null;
 }
 
 function renderProject(prj, cpdb) {
   const phaseRaw = (prj.currentphase || '').trim();
-  const phase = phaseRaw.toLowerCase();
-  let phaseClass = 'other';
-  if (/design/.test(phase)) phaseClass = 'design';
-  else if (/procure/.test(phase)) phaseClass = 'procurement';
-  else if (/construct/.test(phase)) phaseClass = 'construction';
-  else if (/complete|closed/.test(phase)) phaseClass = 'completed';
+  const cls = phaseClass(phaseRaw);
 
   let pct = null;
-  if (/design/.test(phase) && prj.designpercentcomplete) pct = prj.designpercentcomplete;
-  else if (/procure/.test(phase) && prj.procurementpercentcomplete) pct = prj.procurementpercentcomplete;
-  else if (/construct/.test(phase) && prj.constructionpercentcomplete) pct = prj.constructionpercentcomplete;
+  if (cls === 'design' && prj.designpercentcomplete) pct = prj.designpercentcomplete;
+  else if (cls === 'procurement' && prj.procurementpercentcomplete) pct = prj.procurementpercentcomplete;
+  else if (cls === 'construction' && prj.constructionpercentcomplete) pct = prj.constructionpercentcomplete;
   if (pct != null) pct = Math.max(0, Math.min(100, parseFloat(pct)));
 
-  const completion = prj.constructionprojectedcompletion || prj.procurementprojectedcompletion || prj.designprojectedcompletion || prj.constructionactualcompletion;
+  const completion = prj.constructionactualcompletion || prj.constructionadjustedcompletion || prj.constructionprojectedcom || prj.procurementprojectedcompletion || prj.designactualcompletion;
   const completionDate = completion ? new Date(completion).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
 
   const foot = [];
@@ -1690,10 +2870,10 @@ function renderProject(prj, cpdb) {
     : '';
 
   return `
-    <div class="project" data-fmsid="${escapeHTML(prj.fmsid || '')}">
+    <div class="project" data-fmsid="${escapeHTML(prj.fmsid || '')}" data-phase="${cls}">
       <h3 class="project-title">${escapeHTML(prj.title || 'Untitled project')}</h3>
       <div class="project-meta">
-        ${phaseRaw ? `<span class="phase-pill ${phaseClass}">${escapeHTML(phaseRaw)}</span>` : ''}
+        ${phaseRaw ? `<span class="phase-pill ${cls}">${escapeHTML(phaseRaw)}</span>` : ''}
         ${fundingPill}
       </div>
       ${sourceChips}
@@ -1708,7 +2888,6 @@ function renderProject(prj, cpdb) {
 }
 
 function renderHistoricalProject(cpdb) {
-  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   const num = (v) => v == null ? 0 : parseFloat(v) || 0;
   const adoptTotal = num(cpdb.adopt_total);
   const spentTotal = num(cpdb.spent_total);
@@ -1723,37 +2902,309 @@ function renderHistoricalProject(cpdb) {
   const isFuture = startYear && startYear > now;
   const inProgress = spentTotal > 0 && adoptTotal > 0 && spentTotal / adoptTotal < 0.95;
   let label = 'In plan';
-  let labelClass = 'other';
-  if (isCompleted) { label = 'Completed'; labelClass = 'completed'; }
-  else if (isPast) { label = 'Past'; labelClass = 'completed'; }
-  else if (isFuture) { label = 'Planned'; labelClass = 'other'; }
-  else if (inProgress) { label = 'In progress'; labelClass = 'construction'; }
+  let cls = 'other';
+  if (isCompleted) { label = 'Completed'; cls = 'completed'; }
+  else if (isPast) { label = 'Past'; cls = 'completed'; }
+  else if (isFuture) { label = 'Planned'; cls = 'other'; }
+  else if (inProgress) { label = 'In progress'; cls = 'construction'; }
 
   const fundingPill = adoptTotal > 0
-    ? `<span class="project-funding exact" title="${escapeHTML(formatCPDBFunding(cpdb) || usd.format(adoptTotal))}">${escapeHTML(usd.format(adoptTotal))}</span>`
+    ? `<span class="project-funding" title="${escapeHTML(formatCPDBFunding(cpdb) || USD.format(adoptTotal))}">${escapeHTML(USD.format(adoptTotal))}</span>`
+    : '';
+
+  const spendPct = adoptTotal > 0 ? Math.min(100, (spentTotal / adoptTotal) * 100) : null;
+  const spendRow = spendPct != null && spentTotal > 0
+    ? `<div class="spend-row">
+        <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${spendPct}%"></div></div>
+        <div class="spend-bar-meta">
+          <span><strong style="color:var(--text-2)">${escapeHTML(USD.format(spentTotal))}</strong> spent of ${escapeHTML(USD.format(adoptTotal))}</span>
+          <span class="pct">${Math.round(spendPct)}%</span>
+        </div>
+      </div>`
     : '';
 
   const foot = [];
   if (dateRange) foot.push(`<span><strong>Years:</strong> ${escapeHTML(dateRange)}</span>`);
-  if (spentTotal > 0) foot.push(`<span><strong>Spent:</strong> ${escapeHTML(usd.format(spentTotal))}</span>`);
   if (cpdb.maprojid) foot.push(`<span><strong>FMS:</strong> ${escapeHTML(cpdb.maprojid)}</span>`);
 
   return `
-    <div class="project project-historical">
+    <div class="project project-historical" data-phase="${cls}">
       <h3 class="project-title">${escapeHTML(cpdb.description || 'Untitled historical project')}</h3>
       <div class="project-meta">
-        <span class="phase-pill ${labelClass}">${escapeHTML(label)}</span>
+        <span class="phase-pill ${cls}">${escapeHTML(label)}</span>
         ${fundingPill}
       </div>
+      ${spendRow}
       ${foot.length ? `<div class="project-foot">${foot.join('')}</div>` : ''}
     </div>`;
 }
 
+// ---- Finance / Timeline / Stats computation ----
+function computeAggregates() {
+  if (!capState) return null;
+  const all = [...capState.tracker, ...capState.historical];
+  let trackerBudget = 0;
+  let activeBudget = 0;
+  let totalSpent = 0;
+  const phaseCounts = { design: 0, procurement: 0, construction: 0, completed: 0, other: 0 };
+  let progressSum = 0;
+  let progressCount = 0;
+
+  const fundMix = { mayoral: 0, council: 0, state: 0, federal: 0, other: 0 };
+
+  for (const prj of capState.tracker) {
+    const pbi = prj._pbi;
+    const total = (pbi && Number.isFinite(pbi.totalBudget) && pbi.totalBudget > 0)
+      ? pbi.totalBudget
+      : parseFundingToNumber(prj.totalfunding);
+    const cls = phaseClass(prj.currentphase);
+    phaseCounts[cls] = (phaseCounts[cls] || 0) + 1;
+    if (total > 0) {
+      trackerBudget += total;
+      // "Active" = $ in active pipeline phases only (design / procurement / construction).
+      // Phases like "proposed" or "hold" don't represent committed work in flight.
+      if (cls === 'design' || cls === 'procurement' || cls === 'construction') {
+        activeBudget += total;
+      }
+    }
+    if (pbi && Number.isFinite(pbi.spendToDate)) totalSpent += pbi.spendToDate;
+
+    let pct = null;
+    if (cls === 'design' && prj.designpercentcomplete) pct = parseFloat(prj.designpercentcomplete);
+    else if (cls === 'procurement' && prj.procurementpercentcomplete) pct = parseFloat(prj.procurementpercentcomplete);
+    else if (cls === 'construction' && prj.constructionpercentcomplete) pct = parseFloat(prj.constructionpercentcomplete);
+    if (Number.isFinite(pct)) { progressSum += pct; progressCount++; }
+
+    const cpdb = capState.cpdbByKey.get(normalizeFmsKey(prj.fmsid));
+    if (cpdb) {
+      fundMix.mayoral += parseFloat(cpdb.adopt_ccnonexempt) || 0;
+      fundMix.council += parseFloat(cpdb.adopt_ccexempt) || 0;
+      fundMix.state += parseFloat(cpdb.adopt_nccstate) || 0;
+      fundMix.federal += parseFloat(cpdb.adopt_nccfederal) || 0;
+      fundMix.other += parseFloat(cpdb.adopt_nccother) || 0;
+    }
+  }
+  let historicalBudget = 0;
+  for (const cpdb of capState.historical) {
+    fundMix.mayoral += parseFloat(cpdb.adopt_ccnonexempt) || 0;
+    fundMix.council += parseFloat(cpdb.adopt_ccexempt) || 0;
+    fundMix.state += parseFloat(cpdb.adopt_nccstate) || 0;
+    fundMix.federal += parseFloat(cpdb.adopt_nccfederal) || 0;
+    fundMix.other += parseFloat(cpdb.adopt_nccother) || 0;
+    historicalBudget += parseFloat(cpdb.adopt_total) || 0;
+    totalSpent += parseFloat(cpdb.spent_total) || 0;
+  }
+
+  return {
+    total: all.length,
+    trackerBudget,
+    activeBudget,
+    historicalBudget,
+    totalBudget: trackerBudget + historicalBudget,
+    totalSpent,
+    avgPct: progressCount ? progressSum / progressCount : null,
+    phaseCounts,
+    fundMix,
+  };
+}
+
+function finalizeStatsAndViz() {
+  // Slot 0 (Acres) and Slot 1 (Est.) come from currentPark in renderStatStripPlaceholder
+  // and don't change here. Slot 2 = Active $, Slot 3 = Amenities (loaded async elsewhere).
+  const agg = computeAggregates();
+  if (!agg) {
+    setStatCard(2, '–', '', 'Active $');
+    return;
+  }
+  if (agg.activeBudget > 0) {
+    setStatCard(2, '', '', 'Active $', agg.activeBudget);
+  } else if (agg.totalBudget > 0) {
+    setStatCard(2, '', '', 'Budget', agg.totalBudget);
+  } else {
+    setStatCard(2, '–', '', 'Active $');
+  }
+  renderFinanceCard(agg);
+  renderTimelineCard();
+}
+
+function renderFinanceCard(agg) {
+  const sec = $('sec-finance');
+  const root = $('finance');
+  const countEl = $('financeCount');
+  const mix = agg.fundMix;
+  const slices = [
+    { label: 'City', val: mix.mayoral, color: '#2d6a4f' },
+    { label: 'Council', val: mix.council, color: '#52b788' },
+    { label: 'State',   val: mix.state,   color: '#2563eb' },
+    { label: 'Federal', val: mix.federal, color: '#7c3aed' },
+    { label: 'Other',   val: mix.other,   color: '#d97706' },
+  ].filter(s => s.val > 0);
+  const totalMix = slices.reduce((s, x) => s + x.val, 0);
+  const phases = agg.phaseCounts;
+  const hasPhases = phases.design + phases.procurement + phases.construction + phases.completed + phases.other > 0;
+
+  if (totalMix <= 0 && agg.activeBudget <= 0 && !hasPhases) {
+    sec.hidden = true;
+    setNavCount('sec-finance', null);
+    return;
+  }
+  sec.hidden = false;
+
+  const donutHtml = totalMix > 0 ? buildDonutSVG(slices, totalMix) : '';
+  const legendHtml = totalMix > 0
+    ? `<div class="finance-legend">${slices.map(s => {
+        const pct = Math.round((s.val / totalMix) * 100);
+        return `<div class="legend-row">
+          <span class="legend-dot" style="background:${s.color}"></span>
+          <span class="legend-name">${escapeHTML(s.label)}</span>
+          <span class="legend-val">${escapeHTML(fmtUSDCompact(s.val))}</span>
+          <span class="legend-pct">${pct}%</span>
+        </div>`;
+      }).join('')}</div>`
+    : `<div class="finance-legend"><div class="legend-row"><span class="legend-name">No itemized funding splits available for this park's CPDB rows.</span></div></div>`;
+
+  const phaseGrid = hasPhases ? `
+    <div class="phase-summary">
+      ${phaseBlock('design', 'Design', phases.design)}
+      ${phaseBlock('procurement', 'Proc', phases.procurement)}
+      ${phaseBlock('construction', 'Build', phases.construction)}
+      ${phaseBlock('completed', 'Done', phases.completed)}
+    </div>` : '';
+
+  const footBits = [];
+  if (agg.activeBudget > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.activeBudget))}</strong> active budget</span>`);
+  if (agg.totalSpent > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(agg.totalSpent))}</strong> spent to date</span>`);
+  if (totalMix > 0) footBits.push(`<span><strong>${escapeHTML(fmtUSDCompact(totalMix))}</strong> historical adopt</span>`);
+
+  root.innerHTML = `
+    ${totalMix > 0 ? `<div class="finance">
+      <div class="donut-wrap">
+        ${donutHtml}
+        <div class="donut-center">
+          <div class="donut-center-val">${escapeHTML(fmtUSDCompact(totalMix))}</div>
+          <div class="donut-center-lab">Funded</div>
+        </div>
+      </div>
+      ${legendHtml}
+    </div>` : ''}
+    ${phaseGrid}
+    ${footBits.length ? `<div class="finance-foot">${footBits.join('')}</div>` : ''}
+  `;
+
+  countEl.textContent = totalMix > 0 ? fmtUSDCompact(totalMix) : '';
+  setNavCount('sec-finance', hasPhases ? agg.phaseCounts.construction + agg.phaseCounts.design + agg.phaseCounts.procurement : null);
+
+  // Animate donut after a beat.
+  setTimeout(() => {
+    document.querySelectorAll('.donut-wrap svg circle.seg').forEach(c => {
+      c.setAttribute('stroke-dashoffset', c.getAttribute('data-target-offset'));
+    });
+  }, 80);
+}
+
+function phaseBlock(cls, label, count) {
+  return `<button class="phase-block ${cls}" data-scope-phase="${cls}">
+    <span class="pb-count">${count || 0}</span>
+    <span class="pb-label">${escapeHTML(label)}</span>
+  </button>`;
+}
+
+function buildDonutSVG(slices, total) {
+  const r = 40, cx = 50, cy = 50;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  const segs = slices.map(s => {
+    const frac = s.val / total;
+    const len = frac * circ;
+    const html = `<circle class="seg" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="14" stroke-dasharray="${len.toFixed(2)} ${(circ - len).toFixed(2)}" stroke-dashoffset="${(-offset + circ).toFixed(2)}" data-target-offset="${(-offset).toFixed(2)}" stroke-linecap="butt" />`;
+    offset += len;
+    return html;
+  }).join('');
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle class="track" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke-width="14" />
+    ${segs}
+  </svg>`;
+}
+
+function renderTimelineCard() {
+  const sec = $('sec-timeline');
+  const root = $('timeline');
+  const countEl = $('timelineCount');
+  if (!capState) { sec.hidden = true; return; }
+  const items = [];
+  for (const prj of capState.tracker) {
+    const pbi = prj._pbi;
+    const start = pbi?.currentPhaseStart || prj.constructionstart || prj.procurementstart || prj.designstart;
+    const end = pbi?.completionDateForecast || pbi?.currentPhaseEndForecast || prj.constructionactualcompletion || prj.constructionadjustedcompletion || prj.constructionprojectedcom || prj.procurementprojectedcompletion || prj.procurementactualcompletion || prj.designactualcompletion;
+    const s = start ? new Date(start).getTime() : null;
+    const e = end ? new Date(end).getTime() : null;
+    if (!s || !e || s > e) continue;
+    items.push({
+      label: prj.title || 'Untitled',
+      start: s, end: e,
+      cls: phaseClass(prj.currentphase),
+      phase: prj.currentphase || '',
+    });
+  }
+  if (items.length < 2) {
+    sec.hidden = true;
+    setNavCount('sec-timeline', null);
+    return;
+  }
+  sec.hidden = false;
+  const minT = Math.min(...items.map(i => i.start));
+  const maxT = Math.max(...items.map(i => i.end));
+  const padMs = Math.max((maxT - minT) * 0.05, 1000 * 60 * 60 * 24 * 30);
+  const t0 = minT - padMs;
+  const t1 = maxT + padMs;
+  const span = t1 - t0;
+  const minY = new Date(t0).getFullYear();
+  const maxY = new Date(t1).getFullYear();
+  const yearSpan = maxY - minY;
+  // Aim for ~6 axis ticks regardless of span.
+  const step = yearSpan <= 6 ? 1 : yearSpan <= 12 ? 2 : yearSpan <= 24 ? 3 : 5;
+  const yearTicks = [];
+  for (let y = minY; y <= maxY; y += step) yearTicks.push(y);
+  if (yearTicks[yearTicks.length - 1] !== maxY) yearTicks.push(maxY);
+  const today = Date.now();
+  const todayPct = today >= t0 && today <= t1 ? ((today - t0) / span) * 100 : null;
+
+  items.sort((a, b) => a.start - b.start);
+
+  const rows = items.map(it => {
+    const leftPct = ((it.start - t0) / span) * 100;
+    const widthPct = Math.max(2.5, ((it.end - it.start) / span) * 100);
+    const startYr = new Date(it.start).getFullYear();
+    const endYr = new Date(it.end).getFullYear();
+    const yearLabel = startYr === endYr ? String(startYr) : `${startYr}–${endYr}`;
+    return `<div class="tl-row">
+      <div class="tl-label"><span class="tl-title">${escapeHTML(it.label)}</span><span class="tl-years">${escapeHTML(yearLabel)}</span></div>
+      <div class="tl-track">
+        <div class="tl-bar ${it.cls}" style="left:${leftPct.toFixed(1)}%; width:${widthPct.toFixed(1)}%" title="${escapeHTML(it.phase)} · ${new Date(it.start).toLocaleDateString()} → ${new Date(it.end).toLocaleDateString()}">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const axis = yearTicks.map(y => `<span>${y}</span>`).join('');
+  const todayLine = todayPct != null
+    ? `<div class="tl-today" style="left:${todayPct.toFixed(1)}%"></div>`
+    : '';
+  root.innerHTML = `
+    <div class="timeline">
+      <div class="tl-axis">${axis}</div>
+      <div class="tl-rows" style="position:relative">${rows}${todayLine}</div>
+    </div>
+  `;
+  countEl.textContent = String(items.length);
+  setNavCount('sec-timeline', items.length);
+}
+
+// ---- History / news / resolutions (mostly unchanged) ----
 function proxyURL(target) {
   if (!WORKER_URL) return null;
   return WORKER_URL.replace(/\/$/, '') + '/?url=' + encodeURIComponent(target);
 }
-
 async function fetchViaProxy(target, signal) {
   const u = proxyURL(target);
   if (!u) throw new Error('Worker not configured');
@@ -1762,8 +3213,173 @@ async function fetchViaProxy(target, signal) {
   return r.text();
 }
 
-// --- History — try NYC Parks' historical sign first, fall back to Wikipedia ---
-async function loadHistory(p) {
+const ENDPOINT_SIGNS = SOCRATA + '/hv9n-xgy4.json';
+const ENDPOINT_FOREVERWILD = SOCRATA + '/48va-85tp.json';
+
+// Count distinct amenity types from NYC Parks Signs (each sign is placed at a park
+// feature like "Playground", "Tennis Courts", "Kayak Launch"). Gives a real "what's
+// in this park" number — Inwood Hill has 13, a tiny triangle park has 0.
+async function loadAmenityCount(p, gen) {
+  if (!p.gispropnum) return;
+  try {
+    const rows = await fetchJSON(`${ENDPOINT_SIGNS}?gispropnum=${encodeURIComponent(p.gispropnum)}&$select=amenitytype&$limit=500`);
+    if (gen !== undefined && gen !== loadGen) return;
+    const cats = new Set();
+    for (const r of rows) {
+      let t = (r.amenitytype || '').replace(/\s*\(\d+\)\s*$/, '').trim();
+      // Roll up variants ("Comfort Station – W", "Comfort Station – M + Accessible", …)
+      // to a single logical amenity ("Comfort Station").
+      t = t.replace(/\s*[–\-]\s*[MW]\b.*$/i, '').replace(/\s*\+\s*Accessible.*$/i, '').trim();
+      t = t.replace(/\s*Hours\b.*$/i, '').trim();
+      t = t.replace(/\s*\/\s*Exterior$/i, '').trim();
+      t = t.replace(/^Park (with|without) /i, '').trim();
+      t = t.replace(/^Athletic /i, '').trim();
+      if (t) cats.add(t);
+    }
+    setStatCard(3, '', '', 'Amenities', cats.size);
+  } catch {
+    setStatCard(3, '–', '', 'Amenities');
+  }
+}
+
+async function loadParkBadges(p, gen) {
+  if (!p.gispropnum) return;
+  try {
+    const rows = await fetchJSON(`${ENDPOINT_FOREVERWILD}?gispropnum=${encodeURIComponent(p.gispropnum)}&$limit=1`);
+    if (gen !== undefined && gen !== loadGen) return;
+    if (!rows.length) return;
+    const wildAcres = parseFloat(rows[0].acres);
+    const host = $('heroBadges');
+    if (!host) return;
+    const label = Number.isFinite(wildAcres) && wildAcres > 0
+      ? `Forever Wild · ${wildAcres < 10 ? wildAcres.toFixed(1) : Math.round(wildAcres)} ac`
+      : 'Forever Wild';
+    host.insertAdjacentHTML('beforeend',
+      `<span class="park-badge foreverwild"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-3 4-3 8 0 12 3-4 3-8 0-12z"/><path d="M5 14c0 4 3 7 7 7s7-3 7-7"/><path d="M12 14v7"/></svg>${escapeHTML(label)}</span>`);
+  } catch { /* silent */ }
+}
+
+function wikipediaCandidates(p) {
+  const name = (p.signname || p.name311 || '').trim();
+  if (!name) return [];
+  return [
+    name,
+    `${name} (Manhattan)`,
+    `${name} (Bronx)`,
+    `${name} (Brooklyn)`,
+    `${name} (Queens)`,
+    `${name} (Staten Island)`,
+    `${name}, New York City`,
+  ];
+}
+
+// Wikipedia summary cache keyed by gispropnum so the hero-image flow and the
+// history flow can share a single network round-trip per park.
+const wikiSummaryCache = new Map();
+async function fetchWikiSummary(p, gen) {
+  if (wikiSummaryCache.has(p.gispropnum)) return wikiSummaryCache.get(p.gispropnum);
+  for (const title of wikipediaCandidates(p)) {
+    try {
+      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`);
+      if (gen !== undefined && gen !== loadGen) return null;
+      if (!r.ok) continue;
+      const data = await r.json();
+      if (data.type === 'disambiguation') continue;
+      if (!data.extract || data.extract.length < 50) continue;
+      wikiSummaryCache.set(p.gispropnum, data);
+      return data;
+    } catch {}
+  }
+  wikiSummaryCache.set(p.gispropnum, null);
+  return null;
+}
+
+async function loadHeroImage(p, gen) {
+  const data = await fetchWikiSummary(p, gen);
+  if (gen !== undefined && gen !== loadGen) return;
+  if (!data) return;
+  // Hit the action API for a high-res thumb. Rewriting the URL to a custom px size
+  // returns 400 from Wikimedia because non-default sizes need a UTM-token that the
+  // action API generates server-side.
+  let url = null;
+  try {
+    const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=900&titles=${encodeURIComponent(data.title)}&redirects=1&origin=*`;
+    const r = await fetch(apiUrl);
+    if (gen !== undefined && gen !== loadGen) return;
+    if (r.ok) {
+      const json = await r.json();
+      const pages = json?.query?.pages || {};
+      const page = Object.values(pages)[0];
+      url = page?.thumbnail?.source || null;
+    }
+  } catch {}
+  if (!url) url = data.thumbnail?.source || data.originalimage?.source;
+  if (!url) return;
+  const img = new Image();
+  img.onload = () => {
+    if (gen !== undefined && gen !== loadGen) return;
+    const canvas = $('heroCanvas');
+    const photo = $('heroPhoto');
+    const credit = $('heroCredit');
+    if (!canvas || !photo) return;
+    photo.style.backgroundImage = `url(${JSON.stringify(url)})`;
+    canvas.classList.add('has-photo');
+    if (credit && data.content_urls?.desktop?.page) {
+      credit.href = data.content_urls.desktop.page;
+      credit.textContent = 'Wikipedia';
+    }
+  };
+  img.onerror = () => { /* keep silhouette */ };
+  img.src = url;
+}
+
+function makeExpandable(container, opts) {
+  // opts: { selector, limit, labelMore, labelLess }
+  if (!container) return;
+  // Remove any prior show-more button inside this container so re-renders stay clean
+  container.querySelectorAll(':scope > .show-more-btn').forEach(b => b.remove());
+  const items = container.querySelectorAll(opts.selector);
+  if (items.length <= opts.limit) return;
+  items.forEach((it, i) => { if (i >= opts.limit) it.classList.add('hide-collapsed'); });
+  const remaining = items.length - opts.limit;
+  const labelMore = opts.labelMore || `Show ${remaining} more`;
+  const labelLess = opts.labelLess || 'Show less';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'show-more-btn';
+  btn.innerHTML = `<span>${escapeHTML(labelMore)}</span><span class="show-more-arrow">▾</span>`;
+  btn.addEventListener('click', () => {
+    const expanded = container.classList.toggle('expanded');
+    btn.innerHTML = expanded
+      ? `<span>${escapeHTML(labelLess)}</span><span class="show-more-arrow up">▴</span>`
+      : `<span>${escapeHTML(labelMore)}</span><span class="show-more-arrow">▾</span>`;
+    if (!expanded) {
+      container.closest('.section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  container.appendChild(btn);
+}
+
+function collapseLongArticle(root) {
+  const article = root.querySelector('.article-body');
+  if (!article) return;
+  requestAnimationFrame(() => {
+    if (article.offsetHeight > 360) {
+      article.classList.add('collapsed');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'show-more-btn';
+      btn.innerHTML = `<span>Continue reading</span><span class="show-more-arrow">▾</span>`;
+      btn.addEventListener('click', () => {
+        article.classList.remove('collapsed');
+        btn.remove();
+      });
+      article.insertAdjacentElement('afterend', btn);
+    }
+  });
+}
+
+async function loadHistory(p, gen) {
   const root = $('history');
   const open = $('historyOpen');
   const name = p.signname || p.name311 || '';
@@ -1772,47 +3388,40 @@ async function loadHistory(p) {
   if (!name) { root.innerHTML = `<div class="empty">No park name to look up.</div>`; return; }
   root.innerHTML = `<div class="article-body"><span class="skeleton" style="width:80%"></span></div>`;
 
-  // 1) NYC Parks Historical Sign (via worker)
   if (WORKER_URL && p.gispropnum) {
     try {
       const html = await fetchViaProxy(parksUrl);
+      if (gen !== undefined && gen !== loadGen) return;
       const sign = extractHistoricalSign(html);
       if (sign && sign.paragraphs.length) {
         root.innerHTML = `<div class="article-body">${sign.paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From NYC Parks Historical Signs Project · <a href="${escapeHTML(parksUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Open page →</a></p></div>`;
+        collapseLongArticle(root);
         return;
       }
-    } catch { /* fall through to Wikipedia */ }
+    } catch { /* fall through */ }
   }
 
-  // 2) Wikipedia fallback
-  const candidates = [name, `${name} (Manhattan)`, `${name} (Bronx)`, `${name} (Brooklyn)`, `${name} (Queens)`, `${name} (Staten Island)`, `${name}, New York City`];
-  for (const title of candidates) {
-    try {
-      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`);
-      if (!r.ok) continue;
-      const data = await r.json();
-      if (data.type === 'disambiguation' || !data.extract || data.extract.length < 50) continue;
-      const articleUrl = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title)}`;
-      open.href = articleUrl;
-      const paragraphs = data.extract.split(/\n+/).map(s => s.trim()).filter(Boolean);
-      root.innerHTML = `<div class="article-body">${paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From Wikipedia (no NYC Parks sign for this site) · <a href="${escapeHTML(articleUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Read full article →</a></p></div>`;
-      return;
-    } catch { /* try next title */ }
+  const data = await fetchWikiSummary(p, gen);
+  if (gen !== undefined && gen !== loadGen) return;
+  if (data) {
+    const articleUrl = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title)}`;
+    open.href = articleUrl;
+    const paragraphs = data.extract.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    root.innerHTML = `<div class="article-body">${paragraphs.map(t => `<p>${escapeHTML(t)}</p>`).join('')}<p style="margin-top:8px;font-size:12px;color:var(--text-3)">From Wikipedia (no NYC Parks sign for this site) · <a href="${escapeHTML(articleUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Read full article →</a></p></div>`;
+    collapseLongArticle(root);
+    return;
   }
 
   const wikiSearch = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(name + ' park New York City')}`;
   root.innerHTML = `<div class="empty">No history posted yet. <a href="${escapeHTML(parksUrl)}" target="_blank" rel="noopener">Open NYC Parks page</a> · <a href="${escapeHTML(wikiSearch)}" target="_blank" rel="noopener">Search Wikipedia</a></div>`;
 }
 
-// Pull the historical-sign prose out of an nycgovparks.org /history page.
-// The post-1990s-ish layout has #park_feature > [h3, .alert, prose-div].
 function extractHistoricalSign(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const feature = doc.querySelector('#park_feature');
   if (!feature) return null;
   const prose = Array.from(feature.children).filter(c => c.tagName === 'DIV' && !c.classList.contains('alert')).pop();
   if (!prose || prose.textContent.trim().length < 50) return null;
-  // Capture paragraph breaks; use <p> boundaries plus double newlines from <br><br>.
   const paras = [];
   prose.querySelectorAll('p').forEach(p => {
     const txt = p.textContent.replace(/\s+/g, ' ').trim();
@@ -1825,57 +3434,114 @@ function extractHistoricalSign(html) {
   return { paragraphs: paras };
 }
 
-// --- News (DuckDuckGo via worker — Google News blocks Cloudflare) ---
-async function loadNews(p) {
+async function loadNews(p, gen) {
   const root = $('news');
   const open = $('newsOpen');
   const name = p.signname || '';
-  const query = `"${name}" NYC news`;
-  const fallback = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iar=news`;
+  const gnewsQuery = `"${name}" NYC park`;
+  const fallback = `https://news.google.com/search?q=${encodeURIComponent('"' + name + '" NYC')}`;
   open.href = fallback;
   if (!WORKER_URL) {
     root.innerHTML = `<div class="empty">Configure WORKER_URL to inline. <a href="${escapeHTML(fallback)}" target="_blank" rel="noopener">Search news</a></div>`;
     return;
   }
   root.innerHTML = `<div class="feed-item"><span class="skeleton" style="width:60%"></span></div>`;
+  let items = [];
   try {
-    const html = await fetchViaProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
-    const items = parseDDG(html).slice(0, 8);
-    if (!items.length) {
-      root.innerHTML = `<div class="empty">No recent news matched. <a href="${escapeHTML(fallback)}" target="_blank" rel="noopener">Search news</a></div>`;
+    const xml = await fetchViaProxy(`https://news.google.com/rss/search?q=${encodeURIComponent(gnewsQuery)}&hl=en-US&gl=US&ceid=US:en`);
+    if (gen !== undefined && gen !== loadGen) return;
+    items = parseGoogleNewsRSS(xml).slice(0, 8);
+  } catch { /* try DDG */ }
+  if (!items.length) {
+    try {
+      const html = await fetchViaProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent('"' + name + '" NYC news')}`);
+      if (gen !== undefined && gen !== loadGen) return;
+      items = parseDDG(html).slice(0, 8);
+    } catch (e) {
+      root.innerHTML = `<div class="error">Could not load news: ${escapeHTML(e.message)}</div>`;
       return;
     }
-    root.innerHTML = renderFeedItems(items);
-  } catch (e) {
-    root.innerHTML = `<div class="error">Could not load news: ${escapeHTML(e.message)}</div>`;
   }
+  if (!items.length) {
+    root.innerHTML = `<div class="empty">No recent news matched. <a href="${escapeHTML(fallback)}" target="_blank" rel="noopener">Search news</a></div>`;
+    return;
+  }
+  root.innerHTML = renderFeedItems(items);
+  setNavCount('sec-news', items.length);
+  makeExpandable(root, { selector: '.feed-item', limit: 3, labelMore: `Show ${items.length - 3} more` });
+}
+
+function parseGoogleNewsRSS(text) {
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if (doc.querySelector('parsererror')) return [];
+  return Array.from(doc.querySelectorAll('item')).map(it => {
+    const title = it.querySelector('title')?.textContent?.trim() || '';
+    const linkRaw = it.querySelector('link')?.textContent?.trim() || '';
+    const pubDate = it.querySelector('pubDate')?.textContent?.trim() || '';
+    const desc = it.querySelector('description')?.textContent || '';
+    const sourceEl = it.querySelector('source');
+    const sourceName = sourceEl?.textContent?.trim() || '';
+    const sourceUrl = sourceEl?.getAttribute('url') || '';
+    // Description HTML often has <a href="actual_url">title</a>; prefer that over the Google redirect.
+    let link = linkRaw;
+    const m = desc.match(/<a\s+href="([^"]+)"/i);
+    if (m && !m[1].startsWith('https://news.google.com')) link = m[1];
+    // Strip publisher suffix that Google appends to the title, e.g. "Story Title - Source Name"
+    let cleanTitle = title;
+    if (sourceName && cleanTitle.endsWith(' - ' + sourceName)) {
+      cleanTitle = cleanTitle.slice(0, -1 * (sourceName.length + 3));
+    }
+    return { title: cleanTitle, link, pubDate, sourceName, sourceUrl, snippet: '' };
+  }).filter(it => it.title && it.link);
+}
+
+function formatRelativeDate(iso) {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return '';
+  const diffMs = Date.now() - t;
+  const hours = diffMs / 36e5;
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${Math.round(hours)}h ago`;
+  const days = hours / 24;
+  if (days < 30) return `${Math.round(days)}d ago`;
+  const d = new Date(t);
+  const yr = d.getFullYear();
+  const nowYr = new Date().getFullYear();
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(yr !== nowYr ? { year: 'numeric' } : {}) });
+}
+
+function thumbForFeedItem(it, host) {
+  // Google's favicon service returns a 64×64 PNG which we render at 56×56 with padding.
+  if (!host) return '';
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`;
 }
 
 function renderFeedItems(items) {
   return items.map(it => {
-    const host = (() => { try { return new URL(it.link).host.replace(/^www\./, ''); } catch { return ''; } })();
+    const host = (() => {
+      try { return new URL(it.link).host.replace(/^www\./, ''); } catch { return it.sourceUrl ? new URL(it.sourceUrl).host.replace(/^www\./, '') : ''; }
+    })();
+    const dateStr = formatRelativeDate(it.pubDate);
+    const src = it.sourceName || host;
+    const thumb = thumbForFeedItem(it, host);
     return `<a class="feed-item" href="${escapeHTML(it.link)}" target="_blank" rel="noopener">
-      <div class="feed-title">${escapeHTML(it.title)}</div>
-      ${it.snippet ? `<div class="feed-snippet">${escapeHTML(it.snippet)}</div>` : ''}
-      ${host ? `<div class="feed-meta"><span class="src">${escapeHTML(host)}</span></div>` : ''}
+      ${thumb ? `<img class="feed-thumb favicon" src="${escapeHTML(thumb)}" alt="" loading="lazy" onerror="this.style.display='none'" />` : ''}
+      <div class="feed-body">
+        <div class="feed-title">${escapeHTML(it.title)}</div>
+        <div class="feed-meta">
+          ${dateStr ? `<span class="feed-date">${escapeHTML(dateStr)}</span>` : ''}
+          ${src ? `<span class="src">${escapeHTML(src)}</span>` : ''}
+        </div>
+        ${it.snippet ? `<div class="feed-snippet">${escapeHTML(it.snippet)}</div>` : ''}
+      </div>
     </a>`;
   }).join('');
 }
 
-// --- Community Board resolutions (DuckDuckGo HTML search) ---
-async function loadResolutions(p) {
+async function loadResolutions(p, gen) {
   const root = $('resolutions');
   const open = $('resolutionsOpen');
-  const cbCodes = chunkDistricts(p.communityboard, 3);
-  const cbLabels = cbCodes.map(code => {
-    if (!/^\d{3}$/.test(code)) return null;
-    const borCode = CB_BOROUGH_PREFIX[code[0]];
-    const num = parseInt(code.slice(1), 10);
-    return borCode ? `${CB_BOROUGH_NAME[borCode]} Community Board ${num}` : null;
-  }).filter(Boolean);
-  // Plain "community board" + park name surfaces CB resolutions reliably.
-  // Site-restricting to nyc.gov misses CB-hosted domains like cb5.org; OR'ing
-  // every CB name confuses DDG when a park spans multiple boards.
   const query = `"${p.signname || ''}" community board resolution`;
   const fallback = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
   open.href = fallback;
@@ -1886,12 +3552,15 @@ async function loadResolutions(p) {
   root.innerHTML = `<div class="feed-item"><span class="skeleton" style="width:60%"></span></div>`;
   try {
     const html = await fetchViaProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
+    if (gen !== undefined && gen !== loadGen) return;
     const items = parseDDG(html).slice(0, 8);
     if (!items.length) {
       root.innerHTML = `<div class="empty">No CB resolutions found. <a href="${escapeHTML(fallback)}" target="_blank" rel="noopener">Search DuckDuckGo</a></div>`;
       return;
     }
     root.innerHTML = renderFeedItems(items);
+    setNavCount('sec-resolutions', items.length);
+    makeExpandable(root, { selector: '.feed-item', limit: 3, labelMore: `Show ${items.length - 3} more` });
   } catch (e) {
     root.innerHTML = `<div class="error">Could not load resolutions: ${escapeHTML(e.message)}</div>`;
   }
@@ -1899,7 +3568,6 @@ async function loadResolutions(p) {
 
 function parseDDG(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  // Skip sponsored results (.result--ad).
   return Array.from(doc.querySelectorAll('.result:not(.result--ad), .web-result:not(.result--ad)')).map(r => {
     if (r.classList.contains('result--ad')) return null;
     const a = r.querySelector('a.result__a, a.result-link, .result__title a');
@@ -1912,8 +3580,49 @@ function parseDDG(html) {
     } catch { /* keep as is */ }
     if (!link) return null;
     const snippet = r.querySelector('.result__snippet, .result-snippet')?.textContent?.trim() || '';
-    return { title: a.textContent.trim(), link, snippet };
+    // DDG sometimes prefixes the snippet with the date, e.g. "Mar 12, 2024 - rest of snippet"
+    const pubDate = extractDateFromString(snippet) || extractDateFromUrl(link);
+    let cleanSnippet = snippet;
+    if (pubDate) {
+      cleanSnippet = snippet.replace(/^[A-Z][a-z]{2,8} \d{1,2}(,\s*\d{4})?\s*[-–·]\s*/, '').trim();
+    }
+    return { title: a.textContent.trim(), link, snippet: cleanSnippet, pubDate };
   }).filter(Boolean);
+}
+
+// Many news URLs encode the publication date in the path, e.g. "/2024/03/12/" or
+// "/2024-03-12-headline". Extract it for sites that follow that convention.
+function extractDateFromUrl(url) {
+  const m = url.match(/\/(20\d{2})\/(\d{1,2})\/(\d{1,2})(?:\b|\/)/);
+  if (m) {
+    const d = new Date(`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}T00:00:00Z`);
+    if (Number.isFinite(d.getTime())) return d.toISOString();
+  }
+  const m2 = url.match(/\/(20\d{2})-(\d{2})-(\d{2})[-_/]/);
+  if (m2) {
+    const d = new Date(`${m2[1]}-${m2[2]}-${m2[3]}T00:00:00Z`);
+    if (Number.isFinite(d.getTime())) return d.toISOString();
+  }
+  return '';
+}
+
+function extractDateFromString(s) {
+  if (!s) return '';
+  // Match "Mar 12, 2024" or "March 12 2024"
+  const m = s.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:,)?\s+(20\d{2})\b/);
+  if (m) {
+    const d = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+    if (Number.isFinite(d.getTime())) return d.toISOString();
+  }
+  // "5 days ago", "3 hours ago", "1 week ago"
+  const rel = s.match(/\b(\d+)\s+(minute|min|hour|hr|day|week|month|year)s?\s+ago\b/i);
+  if (rel) {
+    const n = parseInt(rel[1], 10);
+    const unit = rel[2].toLowerCase();
+    const ms = { minute: 6e4, min: 6e4, hour: 36e5, hr: 36e5, day: 864e5, week: 6048e5, month: 2592e6, year: 3.1536e10 }[unit] || 0;
+    return new Date(Date.now() - n * ms).toISOString();
+  }
+  return '';
 }
 
 function centroidFromMultipolygon(geo) {
@@ -1939,9 +3648,9 @@ function renderLinks(p) {
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((p.signname || '') + ' ' + (p.location || '') + ' New York')}`;
 
   const links = [
-    { href: `https://www.nycgovparks.org/parks/${id}`, label: 'Official park page', sub: 'nycgovparks.org', icon: 'page' },
+    { href: `https://www.nycgovparks.org/parks/${id}`, label: 'Official page', sub: 'nycgovparks.org', icon: 'page' },
     { href: `https://www.nycgovparks.org/parks/${id}/history`, label: 'History', sub: 'Site history', icon: 'history' },
-    { href: `https://news.google.com/search?q=${q}`, label: 'Recent news', sub: 'Google News search', icon: 'news' },
+    { href: `https://news.google.com/search?q=${q}`, label: 'Recent news', sub: 'Google News', icon: 'news' },
     { href: mapUrl, label: 'Map / directions', sub: 'Google Maps', icon: 'map' },
     { href: `https://www.nycgovparks.org/planning-and-building/capital-project-tracker?selected_parkid=${id}`, label: 'Capital tracker', sub: 'All projects', icon: 'tracker' },
     { href: 'https://www.nycgovparks.org/contact', label: 'Contact Parks', sub: '311 + agency', icon: 'contact' },
@@ -1958,7 +3667,7 @@ function renderLinks(p) {
 
   $('links').innerHTML = links.map(l => `
     <a class="link-btn" href="${escapeHTML(l.href)}" target="_blank" rel="noopener">
-      ${icons[l.icon]}
+      <span class="link-btn-icon">${icons[l.icon]}</span>
       <span class="link-btn-text">
         <span>${escapeHTML(l.label)}</span>
         <span class="link-btn-sub">${escapeHTML(l.sub)}</span>
@@ -1966,9 +3675,8 @@ function renderLinks(p) {
     </a>`).join('');
 }
 
-// Init
+// ---- Init ----
 async function init() {
-  // Load reps.json (best-effort, app still works without)
   try {
     const r = await fetch('reps.json');
     if (r.ok) reps = await r.json();
@@ -1999,6 +3707,12 @@ async function init() {
       showSearch();
     }
   });
+
+  // Header scrolled state
+  const header = $('appHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 6);
+  }, { passive: true });
 
   window.addEventListener('popstate', handleRoute);
 
