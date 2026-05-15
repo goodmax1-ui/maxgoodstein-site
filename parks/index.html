@@ -2154,6 +2154,29 @@ let currentPark = null;
 let loadGen = 0;
 
 // ---- Utilities ----
+// fetchJSON wrapper with localStorage caching. The key namespaces by call site so
+// distinct queries don't collide; TTL lets stale entries refresh in the background.
+async function cachedFetchJSON(key, url, ttlMs) {
+  const lsKey = 'parks.json.' + key;
+  try {
+    const raw = localStorage.getItem(lsKey);
+    if (raw) {
+      const stored = JSON.parse(raw);
+      if (stored && stored.at && Date.now() - stored.at < ttlMs && stored.data !== undefined) {
+        setTimeout(() => {
+          fetchJSON(url).then(data => {
+            try { localStorage.setItem(lsKey, JSON.stringify({ at: Date.now(), data })); } catch {}
+          }).catch(() => {});
+        }, 250);
+        return stored.data;
+      }
+    }
+  } catch {}
+  const data = await fetchJSON(url);
+  try { localStorage.setItem(lsKey, JSON.stringify({ at: Date.now(), data })); } catch {}
+  return data;
+}
+
 function fetchJSON(url, opts = {}) {
   const headers = Object.assign({}, opts.headers || {});
   if (SOCRATA_APP_TOKEN && /data\.cityofnewyork\.us/.test(url)) {
@@ -2355,9 +2378,9 @@ async function requestNearMe() {
           findNearestTree(lat, lng),
         ]);
         renderNearMe(parkRes, treeRes);
-        // Pipe the closest park's borough into the upcoming-events fetch so the home
-        // events list is geographically relevant (the events dataset has no lat/lng).
-        if (parkRes?.park?.borough) loadNearbyEvents(parkRes.park.borough);
+        // Find events at parks actually close to the user (haversine against each
+        // park's centroid), not just "any event in this borough".
+        loadNearbyEvents(lat, lng, parkRes?.park?.borough);
       } catch (e) {
         $('nearMePrompt').innerHTML = `<p style="color:var(--bad);font-size:13px">Lookup failed: ${escapeHTML(e.message)}</p>`;
       }
@@ -2431,9 +2454,11 @@ function haversine(lat1, lng1, lat2, lng2) {
 
 function formatDistance(m) {
   if (!Number.isFinite(m)) return '';
-  if (m < 100) return `${Math.round(m * 3.28084)} ft`;
-  if (m < 1609) return `${Math.round(m)} m`;
-  return `${(m / 1609.34).toFixed(1)} mi`;
+  const ft = m * 3.28084;
+  if (ft < 1000) return `${Math.round(ft)} ft`;
+  const mi = m / 1609.34;
+  if (mi < 10) return `${mi.toFixed(1)} mi`;
+  return `${Math.round(mi)} mi`;
 }
 
 function renderNearMe(parkRes, treeRes) {
@@ -4170,89 +4195,20 @@ async function loadAmenityCount(p, gen) {
   }
 }
 
-// ---- Park events (scraped from the official NYC Parks events calendar) ----
-// We scrape nycgovparks.org/events (via the CORS worker) and parse the schema.org
-// microdata on each event card. This gives us real, Parks-curated special events
-// (Forest Friday, Zumba, tours, etc.) with their canonical detail-page URLs — not
-// the catch-all permit reservations from the tvpp-9vvx dataset.
+// ---- Park events (NYC Permitted Events dataset tvpp-9vvx) ----
+// nycgovparks.org/events is behind AWS WAF as of mid-2026; the worker can't
+// scrape it reliably. Permits from tvpp-9vvx are the next-best real source:
+// they're current through end of 2026, include event_borough + event_location,
+// and many "Special Event" rows ARE the curated NYC Parks programs (Forest
+// Friday, Zumba Gold, etc.) that organizers pull permits for. We default the
+// per-park view to Special Events to filter out league reservations.
 
-let _parksEventsCache = null;
-let _parksEventsCacheAt = 0;
-const PARKS_EVENTS_TTL = 10 * 60 * 1000; // 10 minutes
-
-async function fetchParksEvents() {
-  if (_parksEventsCache && Date.now() - _parksEventsCacheAt < PARKS_EVENTS_TTL) {
-    return _parksEventsCache;
-  }
-  const html = await fetchViaProxy('https://www.nycgovparks.org/events');
-  _parksEventsCache = parseParksEventsHTML(html);
-  _parksEventsCacheAt = Date.now();
-  return _parksEventsCache;
-}
-
-function parseParksEventsHTML(html) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const blocks = Array.from(doc.querySelectorAll('div[itemscope][itemtype="http://schema.org/Event"]'));
-  return blocks.map(div => {
-    const titleA = div.querySelector('h3.event-title a, [itemprop="name"] a, [itemprop="name"]');
-    const titleEl = div.querySelector('h3.event-title a, h3 a[href^="/events/"]');
-    const title = (titleEl?.textContent || titleA?.textContent || '').trim();
-    const href = titleEl?.getAttribute('href') || '';
-    const url = href ? (href.startsWith('http') ? href : `https://www.nycgovparks.org${href}`) : '';
-    const startDate = div.querySelector('meta[itemprop="startDate"]')?.getAttribute('content') || '';
-    const endDate = div.querySelector('meta[itemprop="endDate"]')?.getAttribute('content') || '';
-    const locName = div.querySelector('[itemprop="location"] [itemprop="name"]')?.textContent?.trim() || '';
-    const address = div.querySelector('[itemprop="streetAddress"]')?.getAttribute('content') || '';
-    const borough = div.querySelector('[itemprop="addressLocality"]')?.textContent?.trim() || '';
-    const description = div.querySelector('[itemprop="description"]')?.textContent?.trim() || '';
-    const cats = Array.from(div.querySelectorAll('p > span > a[href^="/events/"]'))
-      .map(a => a.textContent.trim())
-      .filter(Boolean);
-    return { title, url, startDate, endDate, location: locName, address, borough, description, categories: cats };
-  }).filter(e => e.title && e.startDate);
-}
-
-// Famous parks whose events on nycgovparks.org/events are labeled by venue name
-// instead of park name (e.g. "Belvedere Castle" rather than "Central Park: Belvedere
-// Castle"). Mapping is conservative — only landmark names that unambiguously belong
-// to one park. Common shared names ("Dance Room", "Multipurpose Room") are excluded
-// because multiple rec centers across the city use them.
-const PARK_VENUE_ALIASES = {
-  M010: ['Belvedere Castle', 'Bow Bridge', 'Bethesda Terrace', 'Delacorte Theater', 'Great Lawn', 'Sheep Meadow', 'Conservatory Garden', 'North Meadow', 'Wollman Rink', 'Strawberry Fields', 'Heckscher Playground', 'The Mall', 'Loeb Boathouse', 'Bowling Green Lawn', 'Cop Cot'],
-  B073: ['Lakeside', 'Litchfield Villa', 'Audubon Center', 'Concert Grove', 'Long Meadow', 'Nethermead', 'Prospect Park Bandshell', 'Picnic House'],
-  M042: ['Muscota Marsh', 'Inwood Hill Trails', "Pat's Lawn", 'Dyckman Picnic A', 'Dyckman Picnic B', 'Anne Loftus Playground', 'Payson Playground'],
-  M003: ['Hippo Playground', 'Cherry Walk', 'Riverside Park'],
-  M008: ['Bryant Park'],
-  B040: ['Brooklyn Bridge Park'],
-  X039: ['Pelham Bay Park', 'Orchard Beach'],
-  X092: ['Van Cortlandt Park'],
-  Q001: ['Alley Pond Park'],
-  R001: ['Conference House Park'],
-  M063: ['Battery Park', 'The Battery'],
-  M014: ['Washington Square Park'],
-  M020: ['Tompkins Square Park'],
-};
-
-function eventMatchesPark(event, parkName, parkId) {
-  if (!parkName) return false;
-  const loc = (event.location || '').toLowerCase();
-  const name = parkName.toLowerCase();
-  if (loc === name) return true;
-  if (loc.startsWith(name + ' ')) return true;
-  if (loc.startsWith(name + ':')) return true;
-  if (loc.startsWith(name + ',')) return true;
-  if (loc.startsWith(name + '-')) return true;
-  // Address text sometimes carries the park name when the location is a room or feature.
-  const addr = (event.address || '').toLowerCase();
-  if (addr.includes(name)) return true;
-  // Famous-park alias list — landmarks whose location text doesn't carry the park name.
-  if (parkId && PARK_VENUE_ALIASES[parkId]) {
-    for (const alias of PARK_VENUE_ALIASES[parkId]) {
-      const a = alias.toLowerCase();
-      if (loc === a || loc.startsWith(a + ' ') || loc.startsWith(a + ',') || loc.startsWith(a + ':')) return true;
-    }
-  }
-  return false;
+function eventLooksLikeProgram(name) {
+  if (!name) return false;
+  // Filter out facility/lawn closures and maintenance — those are admin records,
+  // not events someone would attend.
+  if (/closure|closed|maintenance/i.test(name)) return false;
+  return true;
 }
 
 function eventBucketKey(date) {
@@ -4269,6 +4225,25 @@ function eventBucketKey(date) {
 
 const EVENT_BUCKET_ORDER = ['Today', 'Tomorrow', 'This week', 'Next week', 'Later'];
 
+// "Inwood Hill Park: Muscota Marsh" → { parkName: "Inwood Hill Park", venue: "Muscota Marsh" }
+function splitPermitLocation(loc) {
+  const i = (loc || '').indexOf(':');
+  if (i < 0) return { parkName: (loc || '').trim(), venue: '' };
+  return { parkName: loc.slice(0, i).trim(), venue: loc.slice(i + 1).trim() };
+}
+
+// Linkable "more details" target per event. Sports/league reservations are best
+// shown against the park's NYC Parks page (where the user can see facilities).
+// Special events get a Google search — most named programs surface a real page.
+function permitDetailsUrl(ev, park) {
+  const isSport = (ev.event_type || '').toLowerCase().startsWith('sport');
+  if (isSport && park) {
+    return `https://www.nycgovparks.org/parks/${encodeURIComponent(park.gispropnum || park)}`;
+  }
+  const q = `"${ev.event_name}" "${park?.signname || ''}" NYC parks`;
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+}
+
 let eventState = null;
 
 async function loadParkEvents(p, gen) {
@@ -4283,43 +4258,22 @@ async function loadParkEvents(p, gen) {
   const name = (p.signname || '').trim();
   if (!name) return;
   try {
-    const [parksList, permits] = await Promise.all([
-      fetchParksEvents().then(all => all.filter(e => eventMatchesPark(e, name, p.gispropnum))).catch(() => []),
-      fetchPermittedEventsForPark(p).catch(() => []),
-    ]);
+    const permits = await fetchPermittedEventsForPark(p);
     if (gen !== undefined && gen !== loadGen) return;
-    if (!parksList.length && !permits.length) return;
-    const parkUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(p.gispropnum)}`;
-    // Unify into one record shape with category + source + link.
-    const merged = [
-      ...parksList.map(e => ({
-        title: e.title,
-        startDate: e.startDate,
-        location: e.location,
-        url: e.url,
-        categories: e.categories,
-        _cat: 'Special',
-        _source: 'parks',
-      })),
-      ...permits.map(e => {
-        const isSport = (e.event_type || '').toLowerCase().startsWith('sport');
-        // Strip the "<Park Name>: " prefix from the permit's location text since
-        // we already know the user is looking at this park.
-        const cleanLoc = (e.event_location || '').replace(new RegExp('^' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[:,\\-\\s]*', 'i'), '');
-        return {
-          title: e.event_name,
-          startDate: e.start_date_time,
-          location: cleanLoc,
-          // Sports/closures are field/lawn reservations — link to the park page so the
-          // user can check facilities. Special-event permits are usually programs we
-          // can search for; fall back to the park page too if there's no better target.
-          url: parkUrl,
-          categories: [isSport ? 'Field reservation' : 'Permitted event'],
-          _cat: isSport ? 'Sports' : 'Special',
-          _source: 'permit',
-        };
-      }),
-    ];
+    if (!permits.length) return;
+    const merged = permits.map(e => {
+      const isSport = (e.event_type || '').toLowerCase().startsWith('sport');
+      const isProgram = !isSport && eventLooksLikeProgram(e.event_name);
+      const { venue } = splitPermitLocation(e.event_location || '');
+      return {
+        title: e.event_name,
+        startDate: e.start_date_time,
+        location: venue,
+        url: permitDetailsUrl(e, p),
+        categories: [isSport ? 'Field reservation' : (isProgram ? 'Permitted event' : 'Facility closure')],
+        _cat: isSport ? 'Sports' : (isProgram ? 'Special' : 'Closures'),
+      };
+    });
     merged.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
     const specialCount = merged.filter(e => e._cat === 'Special').length;
     eventState = {
@@ -4342,7 +4296,7 @@ async function fetchPermittedEventsForPark(p) {
   const end = new Date(now.getTime() + 28 * 86400000);
   const where = `event_agency='Parks Department' AND starts_with(event_location, '${safeName}') AND start_date_time >= '${now.toISOString().slice(0, 19)}' AND start_date_time < '${end.toISOString().slice(0, 19)}'`;
   try {
-    return await fetchJSON(`${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=300`);
+    return await cachedFetchJSON(`park-events:${p.gispropnum}`, `${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=300`, 15 * 60 * 1000);
   } catch { return []; }
 }
 
@@ -4422,24 +4376,77 @@ function makeExpandableEvents(root, limit) {
   root.appendChild(btn);
 }
 
-async function loadNearbyEvents(boroughCode, gen) {
+async function loadNearbyEvents(lat, lng, boroughCode, gen) {
   const card = $('eventsHomeCard');
   const root = $('eventsHomeContent');
   if (!card || !root) return;
-  const boroFull = BOROUGHS[boroughCode === 'B' ? 'X' : boroughCode] || BOROUGHS[boroughCode];
-  if (!boroFull) return;
+  card.hidden = false;
+  card.querySelector('.home-card-title').textContent = 'Upcoming events near you';
+  root.innerHTML = `<div class="empty" style="padding:18px"><span class="spinner" style="vertical-align:-2px"></span>&nbsp;&nbsp;Finding events nearby…</div>`;
   try {
-    const all = await fetchParksEvents();
+    const boroFull = BOROUGHS[boroughCode === 'B' ? 'X' : boroughCode] || BOROUGHS[boroughCode];
+    if (!boroFull) { card.hidden = true; return; }
+    const now = new Date();
+    const end = new Date(now.getTime() + 14 * 86400000);
+    // Limit to event_type='Special Event' so we don't drown in league reservations,
+    // and to the user's borough as a coarse pre-filter. Then we attribute each event
+    // to a nearby park and sort by haversine distance from the user.
+    const where = `event_agency='Parks Department' AND event_borough='${boroFull}' AND event_type='Special Event' AND start_date_time >= '${now.toISOString().slice(0,19)}' AND start_date_time < '${end.toISOString().slice(0,19)}'`;
+    const permitsUrl = `${ENDPOINT_EVENTS}?$where=${encodeURIComponent(where)}&$order=start_date_time&$limit=300`;
+    const [permits, nearbyParks] = await Promise.all([
+      cachedFetchJSON(`nearby-events:${boroFull}`, permitsUrl, 15 * 60 * 1000),
+      fetchNearbyParksWithCentroid(lat, lng, 5000).catch(() => []),
+    ]);
     if (gen !== undefined && gen !== loadGen) return;
-    const inBorough = all.filter(e => (e.borough || '').toLowerCase() === boroFull.toLowerCase());
-    if (!inBorough.length) return;
-    card.hidden = false;
-    card.querySelector('.home-card-title').textContent = `Upcoming events in ${boroFull}`;
-    renderEventsList(root, inBorough, '');
-  } catch { /* silent */ }
+    if (!permits.length) { card.hidden = true; return; }
+
+    // Build park name → { park, centroid } map. tvpp-9vvx labels location as
+    // "<Park Name>: <Venue>" — the prefix is reliable and exact-matches signname.
+    const parkByName = new Map();
+    for (const p of nearbyParks) {
+      const c = centroidFromMultipolygon(p.multipolygon);
+      if (!c) continue;
+      parkByName.set((p.signname || '').toLowerCase(), { park: p, centroid: c });
+    }
+
+    const matched = [];
+    for (const e of permits) {
+      if (!eventLooksLikeProgram(e.event_name)) continue; // drop maintenance / closures
+      const { parkName, venue } = splitPermitLocation(e.event_location || '');
+      if (!parkName) continue;
+      const hit = parkByName.get(parkName.toLowerCase());
+      if (!hit) continue;
+      const dist = haversine(lat, lng, hit.centroid.lat, hit.centroid.lng);
+      matched.push({
+        title: e.event_name,
+        startDate: e.start_date_time,
+        location: venue,
+        url: permitDetailsUrl(e, hit.park),
+        categories: ['Permitted event'],
+        _distance: dist,
+        _parkName: hit.park.signname,
+      });
+    }
+
+    if (!matched.length) { card.hidden = true; return; }
+    matched.sort((a, b) => a._distance - b._distance);
+    // Take the closest 15 — beyond that the "near me" framing stops being honest.
+    const top = matched.slice(0, 15);
+    renderEventsList(root, top, '', { showDistance: true });
+  } catch (e) {
+    root.innerHTML = `<div class="empty">Could not load events: ${escapeHTML(e.message)}</div>`;
+  }
 }
 
-function renderEventsList(root, events, parkNameContext) {
+async function fetchNearbyParksWithCentroid(lat, lng, radiusMeters) {
+  const where = `within_circle(multipolygon, ${lat}, ${lng}, ${radiusMeters})`;
+  // Bucket the cache key to a coarser grid so micro-jitter in geolocation doesn't
+  // create a new cache entry every call (and the within_circle query is heavy).
+  const k = `nearby-parks:${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMeters}`;
+  return await cachedFetchJSON(k, `${ENDPOINT_PARKS}?$where=${encodeURIComponent(where)}&$select=gispropnum,signname,multipolygon&$limit=200`, 30 * 60 * 1000);
+}
+
+function renderEventsList(root, events, parkNameContext, opts = {}) {
   // Bucket events by relative-date label so the user can scan "today / tomorrow / …"
   const buckets = new Map(EVENT_BUCKET_ORDER.map(k => [k, []]));
   for (const ev of events) {
@@ -4453,7 +4460,7 @@ function renderEventsList(root, events, parkNameContext) {
     const items = buckets.get(bucket);
     if (!items.length) continue;
     html += `<div class="event-bucket-header">${escapeHTML(bucket)} <span class="bucket-count">${items.length}</span></div>`;
-    html += items.map(e => renderEventItem(e, parkNameContext)).join('');
+    html += items.map(e => renderEventItem(e, parkNameContext, opts)).join('');
   }
   html += `<a class="show-more-btn" href="https://www.nycgovparks.org/events" target="_blank" rel="noopener" style="text-decoration:none"><span>See the full NYC Parks calendar</span><span class="show-more-arrow" style="transform:rotate(-45deg)">↗</span></a>`;
   root.innerHTML = html;
@@ -4461,7 +4468,7 @@ function renderEventsList(root, events, parkNameContext) {
   makeExpandableEvents(root, 6);
 }
 
-function renderEventItem(ev, parkNameContext) {
+function renderEventItem(ev, parkNameContext, opts = {}) {
   const start = new Date(ev.startDate);
   const valid = Number.isFinite(start.getTime());
   const month = valid ? start.toLocaleDateString('en-US', { month: 'short' }) : '—';
@@ -4482,6 +4489,11 @@ function renderEventItem(ev, parkNameContext) {
   }
   const cat = ev.categories?.[0] || '';
   const url = ev.url || 'https://www.nycgovparks.org/events';
+  // On the home "near me" view we prefer the park name + distance over the room/
+  // landmark name, so the user can see WHICH park each event is at.
+  const subParts = opts.showDistance && ev._parkName
+    ? [time, ev._parkName, Number.isFinite(ev._distance) ? formatDistance(ev._distance) : ''].filter(Boolean)
+    : [time, loc, cat].filter(Boolean);
   return `<a class="event-item" href="${escapeHTML(url)}" target="_blank" rel="noopener" title="${escapeHTML(ev.title)}">
     <div class="event-date ${dateCls}">
       <div class="event-month">${escapeHTML(month)}</div>
@@ -4490,7 +4502,7 @@ function renderEventItem(ev, parkNameContext) {
     </div>
     <div class="event-body">
       <div class="event-title">${escapeHTML(ev.title || 'Untitled')}</div>
-      <div class="event-sub">${escapeHTML([time, loc, cat].filter(Boolean).join(' · '))}</div>
+      <div class="event-sub">${escapeHTML(subParts.join(' · '))}</div>
     </div>
   </a>`;
 }
