@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food — Max Goodstein</title>
+  <meta name="description" content="Keto meal planner and grocery shopping companion">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #2d6a4f;
+      --accent-hover: #40916c;
+      --accent-soft: #e8f1ec;
+      --bg: #fafafa;
+      --text: #1a1a1a;
+      --text-secondary: #555555;
+      --text-muted: #888888;
+      --border: #e0e0e0;
+      --card-bg: #ffffff;
+      --danger: #b54545;
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .page { max-width: 720px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+
+    header.top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .back-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .back-link:hover { color: var(--accent); }
+    h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+    .subtitle { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.75rem; }
+
+    /* Section heading shared with sticky variant */
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Week view ── */
+    .week {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .day {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+    .day.today {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 1px 4px rgba(45, 106, 79, 0.08);
+    }
+    .day-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .day-name { font-weight: 600; font-size: 1rem; }
+    .today-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--accent);
+      color: white;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+    }
+    .meals {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 0.15rem 0.75rem;
+      font-size: 0.92rem;
+    }
+    .meal-label {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      align-self: center;
+    }
+    .meal-text { color: var(--text); }
+
+    /* ── Shopping lists ── */
+    .lists { display: flex; flex-direction: column; gap: 1.25rem; }
+    .list-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .list-head {
+      position: sticky;
+      top: 0;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      z-index: 5;
+    }
+    .list-title { font-size: 1rem; font-weight: 600; }
+    .list-when { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .list-body { padding: 0.25rem 0.5rem 0.5rem; }
+
+    /* Checkbox row — large tap target */
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      min-height: 44px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item:hover { background: #f4f4f4; }
+    .item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .item input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 6px;
+      height: 12px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .item input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .item-text { font-size: 0.95rem; color: var(--text); }
+    .item input:checked ~ .item-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    /* Category labels inside the Initial/Pantry list */
+    .subgroup {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.85rem 0.65rem 0.3rem;
+    }
+
+    /* ── Tips ── */
+    .tips {
+      margin-top: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+    .tips h2 { margin-bottom: 0.5rem; }
+    .tips ul { list-style: disc; padding-left: 1.25rem; color: var(--text-secondary); font-size: 0.92rem; }
+    .tips li { margin-bottom: 0.3rem; }
+
+    /* ── Action bar (Start new week) ── */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+    .btn-reset {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--danger);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.7rem 1.1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 44px;
+      transition: all 0.15s ease;
+    }
+    .btn-reset:hover {
+      border-color: var(--danger);
+      background: #fdf3f3;
+    }
+    .btn-reset:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+    @media (min-width: 600px) {
+      .week { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 2rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      :root { --bg: #fff; --card-bg: #fff; --border: #ccc; }
+      body { background: #fff; }
+      .page { padding: 0.5in; max-width: none; }
+      .back-link, .actions, .today-badge { display: none !important; }
+      .day, .list-card, .tips {
+        border: none;
+        box-shadow: none;
+        background: #fff;
+        page-break-inside: avoid;
+      }
+      .day.today { background: #fff; }
+      .list-head { position: static; border-bottom: 1px solid #ccc; padding-left: 0; }
+      .list-body { padding: 0; }
+      .item { padding: 0.15rem 0; min-height: 0; }
+      .item::before { content: '•'; margin-right: 0.4rem; color: #000; }
+      .item input[type="checkbox"] { display: none; }
+      .item input:checked ~ .item-text { color: #000; text-decoration: none; }
+      .subgroup { padding: 0.4rem 0 0.1rem; }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1rem; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <h1>Food</h1>
+      <a class="back-link" href="/">← home</a>
+    </header>
+    <p class="subtitle">Keto meal plan + grocery shopping companion.</p>
+
+    <section aria-label="Weekly meal plan">
+      <h2>This week</h2>
+      <div class="week" id="week"></div>
+    </section>
+
+    <section aria-label="Shopping lists">
+      <h2>Shopping</h2>
+      <div class="lists" id="lists"></div>
+    </section>
+
+    <aside class="tips" aria-label="Storage tips">
+      <h2>Tips</h2>
+      <ul>
+        <li>Wash all greens once when you get home; dry well, store with a paper towel.</li>
+        <li>Keep avocados on the counter until they yield to gentle pressure, then move to the fridge.</li>
+        <li>Cook fresh fish within 1–2 days of buying; freeze if it'll sit longer.</li>
+        <li>Pre-cook the chicken thighs and ribeye on the day you buy them — leftovers carry the week.</li>
+        <li>Hard-boil a few eggs on Sunday for fast salad protein.</li>
+      </ul>
+    </aside>
+
+    <div class="actions">
+      <button class="btn-reset" id="reset" type="button">Start new week</button>
+    </div>
+  </main>
+
+  <script>
+  /*
+   * ── How to edit ──
+   * MEAL_PLAN: 7 entries keyed by day name. Each has breakfast/lunch/dinner strings.
+   *            Add a `note` string for callouts (e.g. "save half for Thursday").
+   * SHOPPING:  array of lists. Each list has:
+   *              id     — stable slug; do NOT change after first use (it's the localStorage key prefix).
+   *              title  — heading shown on the card.
+   *              when   — short timing label under the title.
+   *              groups — array of { label?, items[] }. Omit label for ungrouped lists.
+   * To add a new shopping trip, append another list object. To rename an item without losing
+   * the checked state, keep the array index/group structure stable — keys are list.id + group
+   * index + item index.
+   */
+
+  const MEAL_PLAN = [
+    { day: 'Monday', breakfast: 'Eggs + bacon + avocado', lunch: 'Tuna salad in lettuce cups', dinner: 'Pan-seared salmon with asparagus' },
+    { day: 'Tuesday', breakfast: 'Greek yogurt + walnuts', lunch: 'Turkey-and-cheese roll-ups with olives', dinner: 'Ribeye with garlic butter and roasted broccoli', note: 'Save half the ribeye for Thursday lunch.' },
+    { day: 'Wednesday', breakfast: 'Cheese-and-spinach omelet', lunch: 'Chef salad (greens, turkey, cheese, egg, olives)', dinner: 'Chicken thighs with cauliflower mash', note: 'Cook all the chicken thighs at once for leftovers.' },
+    { day: 'Thursday', breakfast: 'Eggs + bacon + avocado', lunch: 'Leftover ribeye over greens', dinner: 'Ground beef taco bowls (beef, cheese, salsa, sour cream, avocado over romaine)' },
+    { day: 'Friday', breakfast: 'Greek yogurt + walnuts + chia', lunch: 'Tuna lettuce cups', dinner: 'Zoodles with shrimp scampi' },
+    { day: 'Saturday', breakfast: 'Cheese-and-spinach omelet', lunch: 'Chef salad', dinner: 'Sheet-pan sausage and peppers' },
+    { day: 'Sunday', breakfast: 'Eggs + bacon + avocado', lunch: 'Leftover sausage and peppers (or chef salad)', dinner: 'Reheated chicken thighs with a fresh salad' },
+  ];
+
+  const SHOPPING = [
+    {
+      id: 'initial',
+      title: 'Initial shop — pantry + staples',
+      when: 'Monday',
+      groups: [
+        { label: 'Pantry / fats', items: [
+          'Olive oil', 'Avocado oil', 'Apple cider vinegar', 'Dijon mustard', 'Mayo',
+          'Jarred olives', 'Dill pickles', 'Sugar-free salsa', 'Caesar dressing',
+          'Taco seasoning (or cumin / chili / paprika / garlic powder / onion powder / salt / pepper)',
+          'Almonds', 'Walnuts', 'Chia seeds', 'Pork rinds',
+        ]},
+        { label: 'Dairy', items: [
+          'Butter (1 lb)', 'Heavy cream (1 pt)', 'Cream cheese (8 oz)', 'Block cheddar (8 oz)',
+          'Shredded Parmesan', 'String cheese', 'Sour cream', 'Plain full-fat Greek yogurt (16 oz)',
+        ]},
+        { label: 'Long-lasting produce', items: [
+          '1 head garlic', '1 small yellow onion', '1 lemon', '1 bunch celery',
+          '1 head cauliflower', '2–3 bell peppers', '2 zucchini',
+        ]},
+        { label: 'Other', items: [
+          '2 dozen eggs', '2 cans tuna', 'Sparkling water (optional)',
+        ]},
+      ],
+    },
+    {
+      id: 'shop1-mon',
+      title: 'Shop 1 — Mon → Tue',
+      when: 'Monday',
+      groups: [{ items: [
+        'Bacon (1 lb)', 'Salmon fillet (6–8 oz)', 'Ribeye (10–12 oz)',
+        '1 bunch asparagus', '2 avocados', '1 romaine heart', '1 bag baby spinach',
+      ]}],
+    },
+    {
+      id: 'shop2-wed',
+      title: 'Shop 2 — Wed → Thu',
+      when: 'Wednesday',
+      groups: [{ items: [
+        'Chicken thighs, boneless skinless (~1.5 lb)', 'Ground beef 80/20 (1 lb)',
+        'Deli turkey (½ lb)', '1 head broccoli', '1 clamshell mixed greens',
+        '2 avocados', '1 cucumber',
+      ]}],
+    },
+    {
+      id: 'shop3-fri',
+      title: 'Shop 3 — Fri → Sat',
+      when: 'Friday',
+      groups: [{ items: [
+        'Shrimp, peeled (½ lb)', 'Italian sausage links (½ lb)',
+        '1 pint cherry tomatoes', '1 bunch parsley or cilantro',
+        '1 clamshell mixed greens', '1 avocado',
+      ]}],
+    },
+    {
+      id: 'shop4-sun',
+      title: 'Shop 4 — light top-up',
+      when: 'Sunday',
+      groups: [{ items: [
+        '1 avocado', '1 small bag salad greens',
+        'Eggs (if low)', 'Bacon (if low)', 'Butter (if low)',
+        'Berries — raspberries or blackberries (optional)',
+      ]}],
+    },
+  ];
+
+  const STORAGE_KEY = 'food.checks.v1';
+
+  function loadChecks() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+  function saveChecks(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+
+  function renderWeek() {
+    const todayIdx = (new Date().getDay() + 6) % 7; // shift Sun=0 → 6 so Mon=0
+    const container = document.getElementById('week');
+    container.innerHTML = MEAL_PLAN.map((d, i) => {
+      const isToday = i === todayIdx;
+      return `
+        <article class="day${isToday ? ' today' : ''}"${isToday ? ' aria-current="date"' : ''}>
+          <div class="day-head">
+            <span class="day-name">${d.day}</span>
+            ${isToday ? '<span class="today-badge">Today</span>' : ''}
+          </div>
+          <div class="meals">
+            <span class="meal-label">Breakfast</span><span class="meal-text">${d.breakfast}</span>
+            <span class="meal-label">Lunch</span><span class="meal-text">${d.lunch}</span>
+            <span class="meal-label">Dinner</span><span class="meal-text">${d.dinner}</span>
+            ${d.note ? `<span class="meal-label">Note</span><span class="meal-text" style="color:var(--text-secondary);font-style:italic">${d.note}</span>` : ''}
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function itemKey(listId, groupIdx, itemIdx) {
+    return `${listId}::${groupIdx}::${itemIdx}`;
+  }
+
+  function renderLists() {
+    const state = loadChecks();
+    const container = document.getElementById('lists');
+    container.innerHTML = SHOPPING.map(list => {
+      const groupsHtml = list.groups.map((g, gi) => {
+        const itemsHtml = g.items.map((text, ii) => {
+          const key = itemKey(list.id, gi, ii);
+          const id = `chk-${list.id}-${gi}-${ii}`;
+          const checked = state[key] ? 'checked' : '';
+          return `
+            <label class="item" for="${id}">
+              <input type="checkbox" id="${id}" data-key="${key}" ${checked}>
+              <span class="item-text">${text}</span>
+            </label>
+          `;
+        }).join('');
+        return (g.label ? `<div class="subgroup">${g.label}</div>` : '') + itemsHtml;
+      }).join('');
+      return `
+        <section class="list-card" aria-label="${list.title}">
+          <header class="list-head">
+            <div class="list-title">${list.title}</div>
+            <div class="list-when">${list.when}</div>
+          </header>
+          <div class="list-body">${groupsHtml}</div>
+        </section>
+      `;
+    }).join('');
+
+    container.addEventListener('change', e => {
+      const cb = e.target;
+      if (!(cb instanceof HTMLInputElement) || cb.type !== 'checkbox') return;
+      const next = loadChecks();
+      if (cb.checked) next[cb.dataset.key] = true;
+      else delete next[cb.dataset.key];
+      saveChecks(next);
+    });
+  }
+
+  function resetAll() {
+    if (!confirm('Clear every checkbox and start fresh for a new week?')) return;
+    saveChecks({});
+    document.querySelectorAll('#lists input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  }
+
+  renderWeek();
+  renderLists();
+  document.getElementById('reset').addEventListener('click', resetAll);
+  </script>
+</body>
+</html>
