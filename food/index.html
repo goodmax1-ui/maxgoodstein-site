@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Food — Max Goodstein</title>
   <meta name="description" content="Keto meal planner and grocery shopping companion">
+  <link rel="manifest" href="/food/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/food/icon.svg">
+  <link rel="apple-touch-icon" href="/food/apple-touch-icon.png">
+  <meta name="theme-color" content="#2d6a4f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Food">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -377,6 +384,101 @@
     }
     .aisle-head span { white-space: nowrap; padding: 0 0.2rem; }
 
+    /* Quick-add */
+    .quick-add {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .quick-add input {
+      flex: 1;
+      min-width: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      min-height: 44px;
+    }
+    .quick-add input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-color: var(--accent);
+    }
+    .quick-add button {
+      background: var(--accent);
+      color: white;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 0 1.1rem;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      min-height: 44px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .quick-add button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .quick-add button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Receipt scan */
+    .receipt-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .btn-scan {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .btn-scan:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .btn-scan:disabled { opacity: 0.55; cursor: progress; }
+    .btn-key {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0.3rem 0.4rem;
+      text-decoration: underline;
+    }
+    .btn-key:hover { color: var(--accent); }
+    .scan-result {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      padding: 0.4rem 0.1rem 0;
+      line-height: 1.5;
+    }
+    .scan-result.ok { color: var(--accent); }
+    .scan-result.err { color: var(--danger); }
+
+    /* Best-store hint */
+    .item-hint {
+      font-size: 0.74rem;
+      color: var(--accent);
+      margin-top: 0.15rem;
+      display: block;
+    }
+
     /* Price affordance */
     .price-btn {
       background: transparent;
@@ -548,7 +650,7 @@
       :root { --bg: #fff; --card-bg: #fff; --border: #ccc; }
       body { background: #fff; }
       .page { padding: 0.5in; max-width: none; }
-      .back-link, .actions, .today-badge, .tabs, .pantry-btn, .price-btn, .store-bar, .total-bar { display: none !important; }
+      .back-link, .actions, .today-badge, .tabs, .pantry-btn, .price-btn, .store-bar, .total-bar, .quick-add, .item-hint { display: none !important; }
       .panel[hidden] { display: block !important; }
       .day, .list-card, .tips, .today-card {
         border: none;
@@ -593,7 +695,17 @@
         </div>
         <div id="store-status" class="store-status" hidden></div>
         <div id="store-notes" class="store-notes" hidden></div>
+        <div class="receipt-bar">
+          <button id="scan-btn" class="btn-scan" type="button">📷 Scan receipt</button>
+          <input id="scan-input" type="file" accept="image/*" capture="environment" hidden>
+          <button id="key-btn" class="btn-key" type="button" hidden>Edit API key</button>
+        </div>
+        <div id="scan-result" class="scan-result" hidden></div>
       </div>
+      <form id="quick-add-form" class="quick-add" autocomplete="off">
+        <input id="quick-add-input" type="text" placeholder="Add an item to this week…" aria-label="Add an item">
+        <button type="submit">Add</button>
+      </form>
       <div id="today"></div>
     </section>
 
@@ -784,18 +896,21 @@
   function categorize(text) {
     const t = text.toLowerCase();
     if (/bacon|salmon|ribeye|chicken|beef|turkey|shrimp|sausage|fish/.test(t)) return 'meat';
-    if (/avocado|asparagus|romaine|spinach|broccoli|greens|cucumber|tomato|parsley|cilantro|berries|salad|garlic|onion|lemon|celery|cauliflower|pepper|zucchini/.test(t)) return 'produce';
+    if (/avocado|asparagus|romaine|spinach|broccoli|greens|cucumber|tomato|parsley|cilantro|berries|berry|salad|garlic|onion|lemon|lime|celery|cauliflower|pepper|zucchini|sprout|brussels|kale|arugula|carrot|radish|mushroom|squash|fennel|leek|herb|basil|mint|ginger|scallion|leaf|fruit|apple|banana|orange|grape|melon/.test(t)) return 'produce';
     if (/butter|cream|cheese|cheddar|parmesan|yogurt|sour|egg/.test(t)) return 'dairy';
     if (/tuna|canned/.test(t)) return 'canned';
     if (/sparkling|water/.test(t)) return 'beverage';
     return 'pantry';
   }
 
-  const CHECKS_KEY = 'food.checks.v1';
-  const PANTRY_KEY = 'food.pantry.v1';
-  const PRICES_KEY = 'food.prices.v1';
-  const STORE_KEY  = 'food.store.v1';
-  const VIEW_KEY   = 'food.view.v1';
+  const CHECKS_KEY    = 'food.checks.v1';
+  const PANTRY_KEY    = 'food.pantry.v1';
+  const PRICES_KEY    = 'food.prices.v1';
+  const STORE_KEY     = 'food.store.v1';
+  const VIEW_KEY      = 'food.view.v1';
+  const ADHOC_KEY     = 'food.adhoc.v1';      // [{ key, text, ts }]
+  const PRICEHIST_KEY = 'food.pricehist.v1';  // [{ key, price, store, ts }] append-only
+  const APIKEY_KEY    = 'food.apikey.v1';     // string (Anthropic API key)
 
   const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   const todayName = () => DAY_ORDER[(new Date().getDay() + 6) % 7];
@@ -806,6 +921,60 @@
   const loadStoreId = () => { try { return localStorage.getItem(STORE_KEY) || ''; } catch { return ''; } };
   const saveStoreId = (id) => { try { localStorage.setItem(STORE_KEY, id || ''); } catch {} };
   const fmtPrice = (n) => '$' + (Math.round(n * 100) / 100).toFixed(2);
+
+  function loadAdhoc() {
+    try { const v = JSON.parse(localStorage.getItem(ADHOC_KEY)); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  }
+  function saveAdhoc(arr) {
+    try { localStorage.setItem(ADHOC_KEY, JSON.stringify(arr)); } catch {}
+  }
+  function loadPriceHist() {
+    try { const v = JSON.parse(localStorage.getItem(PRICEHIST_KEY)); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  }
+  function recordPrice(key, price, storeId) {
+    const hist = loadPriceHist();
+    hist.push({ key, price, store: storeId || '', ts: Date.now() });
+    // Trim runaway history at 2000 entries.
+    while (hist.length > 2000) hist.shift();
+    try { localStorage.setItem(PRICEHIST_KEY, JSON.stringify(hist)); } catch {}
+  }
+  function lastPriceFor(key, storeId) {
+    const hist = loadPriceHist();
+    for (let i = hist.length - 1; i >= 0; i--) {
+      const h = hist[i];
+      if (h.key === key && (!storeId || h.store === storeId)) return h;
+    }
+    if (!storeId) return null;
+    for (let i = hist.length - 1; i >= 0; i--) {
+      if (hist[i].key === key) return hist[i];
+    }
+    return null;
+  }
+  function avgPricesByStore(key) {
+    const sums = {}, counts = {};
+    loadPriceHist().forEach(h => {
+      if (h.key !== key || !h.store) return;
+      sums[h.store] = (sums[h.store] || 0) + Number(h.price);
+      counts[h.store] = (counts[h.store] || 0) + 1;
+    });
+    return Object.keys(sums).map(s => ({ store: s, avg: sums[s] / counts[s], count: counts[s] }));
+  }
+  function bestStoreHint(key, currentStoreId) {
+    // Need at least 2 stores with 2+ entries each to recommend a swap.
+    const stats = avgPricesByStore(key).filter(s => s.count >= 2);
+    if (stats.length < 2) return null;
+    stats.sort((a, b) => a.avg - b.avg);
+    const cheapest = stats[0];
+    if (cheapest.store === currentStoreId) return null;
+    const here = stats.find(s => s.store === currentStoreId);
+    const cheapName = STORE_BY_ID[cheapest.store]?.name || 'another store';
+    if (here && cheapest.avg >= here.avg * 0.95) return null; // not meaningfully cheaper
+    return `Cheaper at ${cheapName}: ${fmtPrice(cheapest.avg)} avg`;
+  }
+  const loadApiKey = () => { try { return localStorage.getItem(APIKEY_KEY) || ''; } catch { return ''; } };
+  const saveApiKey = (v) => { try { v ? localStorage.setItem(APIKEY_KEY, v) : localStorage.removeItem(APIKEY_KEY); } catch {} };
 
   function loadJSON(key) {
     try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
@@ -820,6 +989,30 @@
 
   function itemKey(listId, groupIdx, itemIdx) {
     return `${listId}::${groupIdx}::${itemIdx}`;
+  }
+
+  /* Adhoc items become an ephemeral SHOPPING list at the front of the trips. */
+  function adhocList() {
+    const items = loadAdhoc();
+    if (!items.length) return null;
+    return {
+      id: 'adhoc',
+      title: 'Quick-add — this week',
+      when: todayName(),
+      adhoc: true,
+      groups: [{ items: items.map(a => a.text) }],
+      _adhocKeys: items.map(a => a.key),
+    };
+  }
+  function shoppingLists() {
+    const ad = adhocList();
+    return ad ? [ad, ...SHOPPING] : SHOPPING.slice();
+  }
+  // adhoc list uses its own keys keyed by stable id rather than position so
+  // adding/removing items doesn't shuffle check state.
+  function itemKeyForList(list, gi, ii) {
+    if (list.adhoc && list._adhocKeys) return list._adhocKeys[ii];
+    return itemKey(list.id, gi, ii);
   }
 
   function fmtMacros(m) {
@@ -866,19 +1059,20 @@
   }
 
   /* ── Item row HTML (shared by Lists + Today) ── */
-  function itemRowHtml({ key, idAttr, text, checked, pantryButton, showPrice }) {
-    const id = idAttr || `chk-${key.replace(/::/g, '-')}`;
+  function itemRowHtml({ key, idAttr, text, checked, pantryButton, showPrice, hint }) {
+    const id = idAttr || `chk-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
     const prices = showPrice ? loadPrices() : null;
     const price = prices ? prices[key] : undefined;
     const priceLabel = price != null ? fmtPrice(price) : '+ $';
     const priceClass = price != null ? 'price-btn has-value' : 'price-btn';
+    const safeText = text.replace(/"/g, '&quot;');
     return `
       <div class="item-row" data-row-key="${key}">
         <label class="item" for="${id}">
           <input type="checkbox" id="${id}" data-key="${key}" ${checked ? 'checked' : ''}>
-          <span class="item-text">${text}</span>
+          <span class="item-text">${text}${hint ? `<span class="item-hint">💡 ${hint}</span>` : ''}</span>
         </label>
-        ${showPrice ? `<button type="button" class="${priceClass}" data-price="${key}" aria-label="Set price for ${text.replace(/"/g, '&quot;')}">${priceLabel}</button>` : ''}
+        ${showPrice ? `<button type="button" class="${priceClass}" data-price="${key}" aria-label="Set price for ${safeText}">${priceLabel}</button>` : ''}
         ${pantryButton ? `<button type="button" class="pantry-btn" data-pantry="${pantryButton}" data-key="${key}">${pantryButton === 'add' ? 'have it' : 'need it'}</button>` : ''}
       </div>
     `;
@@ -890,15 +1084,16 @@
     const pantry = loadPantry();
     const container = document.getElementById('lists');
 
-    container.innerHTML = SHOPPING.map(list => {
+    container.innerHTML = shoppingLists().map(list => {
       const isPantryList = !!list.pantry;
       const groupsHtml = list.groups.map((g, gi) => {
         const itemsHtml = g.items.map((text, ii) => {
-          const key = itemKey(list.id, gi, ii);
+          const key = itemKeyForList(list, gi, ii);
           if (isPantryList && pantry[key]) return '';
           return itemRowHtml({
             key, text, checked: !!checks[key],
             pantryButton: isPantryList ? 'add' : null,
+            showPrice: true,
           });
         }).join('');
         return (g.label ? `<div class="subgroup">${g.label}</div>` : '') + itemsHtml;
@@ -908,7 +1103,7 @@
       if (isPantryList) {
         const stashed = [];
         list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
-          const key = itemKey(list.id, gi, ii);
+          const key = itemKeyForList(list, gi, ii);
           if (pantry[key]) stashed.push({ key, text });
         }));
         if (stashed.length) {
@@ -940,21 +1135,27 @@
   function pickTodayTrips() {
     const today = todayName();
     const ti = dayIdx(today);
-    const todays = SHOPPING.filter(l => l.when === today);
-    if (todays.length) return { trips: todays, label: `Today (${today})`, isToday: true };
-    // Find soonest future trip
-    const sorted = [...SHOPPING].sort((a, b) => dayIdx(a.when) - dayIdx(b.when));
-    const next = sorted.find(l => dayIdx(l.when) > ti);
-    if (next) return { trips: [next], label: `Next: ${next.when}`, isToday: false };
-    // Wrap to Monday
-    const first = sorted[0];
-    return { trips: [first], label: `Next: ${first.when}`, isToday: false };
+    const lists = shoppingLists();
+    const ad = lists.find(l => l.adhoc);
+    const realLists = lists.filter(l => !l.adhoc);
+    const todays = realLists.filter(l => l.when === today);
+    let result;
+    if (todays.length) result = { trips: todays, label: `Today (${today})`, isToday: true };
+    else {
+      const sorted = [...realLists].sort((a, b) => dayIdx(a.when) - dayIdx(b.when));
+      const next = sorted.find(l => dayIdx(l.when) > ti);
+      const pick = next || sorted[0];
+      result = pick ? { trips: [pick], label: `Next: ${pick.when}`, isToday: false } : { trips: [], label: '', isToday: false };
+    }
+    // Quick-add items always travel with the current focus trip.
+    if (ad) result.trips = [ad, ...result.trips];
+    return result;
   }
 
   function uncheckedItems(list, checks, pantry) {
     const out = [];
     list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
-      const key = itemKey(list.id, gi, ii);
+      const key = itemKeyForList(list, gi, ii);
       if (list.pantry && pantry[key]) return;
       if (checks[key]) return;
       out.push({ key, text, group: g.label });
@@ -964,10 +1165,10 @@
 
   function checkedItemsGrouped(checks, pantry) {
     const out = [];
-    SHOPPING.forEach(list => {
+    shoppingLists().forEach(list => {
       const items = [];
       list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
-        const key = itemKey(list.id, gi, ii);
+        const key = itemKeyForList(list, gi, ii);
         if (list.pantry && pantry[key]) return;
         if (checks[key]) items.push({ key, text });
       }));
@@ -999,6 +1200,7 @@
       key: it.key, text: it.text, checked: false,
       pantryButton: it.isPantryList || isPantryList ? 'add' : null,
       showPrice: true,
+      hint: storeId ? bestStoreHint(it.key, storeId) : null,
     })).join('');
     if (!store) return rows(items);
     return groupByAisle(items, store).map(g => `
@@ -1134,16 +1336,23 @@
       e.preventDefault();
       const key = priceBtn.dataset.price;
       const prices = loadPrices();
+      const storeId = loadStoreId();
       const current = prices[key];
-      const text = priceBtn.closest('.item-row')?.querySelector('.item-text')?.textContent || 'item';
-      const answer = prompt(`Price for "${text}"?\n\nEnter a number (e.g. 4.99) or leave blank to clear.`, current != null ? current : '');
+      const last = current == null ? lastPriceFor(key, storeId) : null;
+      const text = priceBtn.closest('.item-row')?.querySelector('.item-text')?.firstChild?.textContent?.trim() || 'item';
+      const hint = current != null
+        ? ''
+        : (last ? `\n\nLast at ${STORE_BY_ID[last.store]?.name || 'somewhere'}: ${fmtPrice(last.price)}` : '');
+      const defaultVal = current != null ? current : (last ? last.price : '');
+      const answer = prompt(`Price for "${text}"?\n\nEnter a number (e.g. 4.99) or leave blank to clear.${hint}`, defaultVal);
       if (answer === null) return;
-      const trimmed = answer.trim();
+      const trimmed = String(answer).trim();
       if (trimmed === '') delete prices[key];
       else {
         const num = parseFloat(trimmed.replace(/^\$/, ''));
         if (!isFinite(num) || num < 0) { alert('That doesn’t look like a price.'); return; }
         prices[key] = num;
+        recordPrice(key, num, storeId);
       }
       savePrices(prices);
       renderToday();
@@ -1230,9 +1439,184 @@
   }
 
   function resetAll() {
-    if (!confirm('Clear every checkbox and start fresh for a new week?\n\n(Pantry items stay marked.)')) return;
+    if (!confirm('Clear every checkbox and quick-add items, and start fresh for a new week?\n\n(Pantry, prices, and price history stay.)')) return;
     saveChecks({});
+    saveAdhoc([]);
     rerenderShopping();
+  }
+
+  /* ── Quick-add ── */
+  function addAdhocItem(text) {
+    const t = String(text || '').trim();
+    if (!t) return;
+    const items = loadAdhoc();
+    items.push({ key: `adhoc::${Date.now()}::${Math.random().toString(36).slice(2, 6)}`, text: t, ts: Date.now() });
+    saveAdhoc(items);
+    rerenderShopping();
+  }
+
+  /* ── Receipt OCR ── */
+  function setScanResult(msg, kind) {
+    const el = document.getElementById('scan-result');
+    if (!msg) { el.hidden = true; el.textContent = ''; el.classList.remove('ok','err'); return; }
+    el.textContent = msg;
+    el.hidden = false;
+    el.classList.remove('ok','err');
+    if (kind) el.classList.add(kind);
+  }
+  function ensureApiKey() {
+    let key = loadApiKey();
+    if (key) return key;
+    const explain = 'Paste an Anthropic API key (starts with sk-ant-).\n\nGet one at console.anthropic.com.\nThe key is stored only on this device, in your browser. You pay Anthropic for usage (≈ $0.005 per receipt).';
+    const v = prompt(explain, '');
+    if (v && /^sk-ant-/.test(v.trim())) { saveApiKey(v.trim()); return v.trim(); }
+    if (v != null) alert('That doesn’t look like an Anthropic key (should start with "sk-ant-").');
+    return '';
+  }
+  function clearApiKey() {
+    if (!confirm('Forget the API key on this device?')) return;
+    saveApiKey('');
+    updateKeyBtn();
+  }
+  function updateKeyBtn() {
+    document.getElementById('key-btn').hidden = !loadApiKey();
+  }
+
+  async function imageToDataURL(file, maxDim = 1600) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  const RECEIPT_SYSTEM_PROMPT = [
+    'You extract line items from a grocery receipt photo.',
+    '',
+    'Output STRICT JSON only — no markdown, no prose, no code fences. Schema:',
+    '',
+    '{"items":[{"name":string,"price":number}],"total":number|null,"store":string|null}',
+    '',
+    'Rules:',
+    '- name: product name as printed; expand obvious abbreviations (AVO HASS → Hass avocado).',
+    '  Drop SKUs, UPCs, weight modifiers, and quantity prefixes unless informative.',
+    '- price: line-item price in US dollars as a number (e.g. 4.99). For weight × price rows use the line total.',
+    '- Skip subtotals, tax, tips, totals, discounts, store coupons, bag fees, deposits, gift card balances.',
+    '- total: receipt grand total if visible, else null.',
+    '- store: store name from the top of the receipt if recognizable (e.g. "Trader Joe\'s"), else null.',
+    '- If the image is not a grocery receipt, return {"items":[],"total":null,"store":null}.',
+  ].join('\n');
+
+  async function callClaudeForReceipt(apiKey, dataUrl) {
+    const m = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+    if (!m) throw new Error('Bad image data URL');
+    const [, mediaType, b64] = m;
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: [{ type: 'text', text: RECEIPT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
+            { type: 'text', text: 'Parse this receipt.' },
+          ],
+        }],
+      }),
+    });
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      throw new Error(`API ${resp.status}: ${errText.slice(0, 160)}`);
+    }
+    const data = await resp.json();
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    // Tolerate accidental code fencing.
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  }
+
+  function shoppingItemsForMatching() {
+    const out = [];
+    shoppingLists().forEach(list => list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+      out.push({ key: itemKeyForList(list, gi, ii), text, listId: list.id });
+    })));
+    return out;
+  }
+  function matchReceiptItem(receiptName, candidates) {
+    const words = receiptName.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length >= 3);
+    if (!words.length) return null;
+    let best = null, bestScore = 0;
+    for (const c of candidates) {
+      const s = c.text.toLowerCase();
+      let score = 0;
+      for (const w of words) if (s.includes(w)) score++;
+      if (score > bestScore) { bestScore = score; best = c; }
+    }
+    return bestScore >= 1 ? { item: best, score: bestScore } : null;
+  }
+
+  async function handleScanFile(file) {
+    const apiKey = ensureApiKey();
+    if (!apiKey) return;
+    updateKeyBtn();
+    const btn = document.getElementById('scan-btn');
+    btn.disabled = true;
+    setScanResult('Reading receipt…');
+    try {
+      const dataUrl = await imageToDataURL(file);
+      setScanResult('Asking Claude to parse it…');
+      const parsed = await callClaudeForReceipt(apiKey, dataUrl);
+      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      if (!items.length) {
+        setScanResult('No items found — try a clearer photo or check it’s a receipt.', 'err');
+        return;
+      }
+      const candidates = shoppingItemsForMatching();
+      const checks = loadChecks();
+      const prices = loadPrices();
+      const storeId = loadStoreId();
+      let matched = 0, totalPaid = 0;
+      const skipped = [];
+      for (const r of items) {
+        const name = String(r.name || '').trim();
+        const price = Number(r.price);
+        if (!name || !isFinite(price) || price < 0) continue;
+        totalPaid += price;
+        const hit = matchReceiptItem(name, candidates);
+        if (hit) {
+          checks[hit.item.key] = true;
+          prices[hit.item.key] = price;
+          recordPrice(hit.item.key, price, storeId);
+          matched++;
+        } else {
+          skipped.push(name);
+        }
+      }
+      saveChecks(checks);
+      savePrices(prices);
+      const storeNote = parsed.store ? ` (${parsed.store})` : '';
+      const skipNote = skipped.length ? ` Skipped: ${skipped.slice(0, 4).join(', ')}${skipped.length > 4 ? '…' : ''}.` : '';
+      setScanResult(
+        `Matched ${matched} of ${items.length} items${storeNote}. Receipt total ≈ ${fmtPrice(totalPaid)}.${skipNote}`,
+        matched ? 'ok' : 'err'
+      );
+      rerenderShopping();
+    } catch (err) {
+      setScanResult(`Couldn’t parse — ${err.message || err}`, 'err');
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   function setView(name) {
@@ -1261,8 +1645,31 @@
     renderToday();
   });
   document.getElementById('locate-btn').addEventListener('click', detectStoreByLocation);
+  document.getElementById('quick-add-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('quick-add-input');
+    addAdhocItem(input.value);
+    input.value = '';
+    input.blur();
+  });
+  document.getElementById('scan-btn').addEventListener('click', () => {
+    document.getElementById('scan-input').click();
+  });
+  document.getElementById('scan-input').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (file) handleScanFile(file);
+  });
+  document.getElementById('key-btn').addEventListener('click', clearApiKey);
+  updateKeyBtn();
   document.body.addEventListener('change', handleChange);
   document.body.addEventListener('click', handleClick);
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/food/sw.js').catch(() => {});
+    });
+  }
 
   const saved = localStorage.getItem(VIEW_KEY);
   setView(saved || 'today');
