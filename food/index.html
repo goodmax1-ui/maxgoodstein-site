@@ -269,6 +269,135 @@
     .pantry-shelf-body { padding-bottom: 0.5rem; }
     .pantry-shelf .item-text { color: var(--text-muted); }
 
+    /* ── Store selector ── */
+    .store-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .store-bar-row {
+      display: flex;
+      gap: 0.4rem;
+      align-items: stretch;
+    }
+    .store-select {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      padding: 0.55rem 0.7rem;
+      min-height: 44px;
+      cursor: pointer;
+    }
+    .store-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .locate-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0 0.85rem;
+      min-height: 44px;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .locate-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .locate-btn:disabled { opacity: 0.55; cursor: progress; }
+    .locate-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .store-notes {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      padding: 0.1rem 0.1rem 0;
+    }
+    .store-status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .store-status.ok { color: var(--accent); }
+    .store-status.err { color: var(--danger); }
+
+    /* Running total bar */
+    .total-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      background: var(--accent-soft);
+      border: 1px solid rgba(45,106,79,0.25);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .total-bar .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .total-bar .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Aisle headers */
+    .aisle-head {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 0.6rem 0.65rem 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .aisle-head::before {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .aisle-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .aisle-head span { white-space: nowrap; padding: 0 0.2rem; }
+
+    /* Price affordance */
+    .price-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-height: 44px;
+      align-self: center;
+      transition: all 0.15s ease;
+      min-width: 44px;
+    }
+    .price-btn.has-value { color: var(--accent); }
+    .price-btn:hover { background: var(--accent-soft); color: var(--accent); }
+    .price-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
     /* ── Today view ── */
     .today-card {
       background: var(--card-bg);
@@ -419,7 +548,7 @@
       :root { --bg: #fff; --card-bg: #fff; --border: #ccc; }
       body { background: #fff; }
       .page { padding: 0.5in; max-width: none; }
-      .back-link, .actions, .today-badge, .tabs, .pantry-btn { display: none !important; }
+      .back-link, .actions, .today-badge, .tabs, .pantry-btn, .price-btn, .store-bar, .total-bar { display: none !important; }
       .panel[hidden] { display: block !important; }
       .day, .list-card, .tips, .today-card {
         border: none;
@@ -457,6 +586,14 @@
     </nav>
 
     <section class="panel" id="panel-today" role="tabpanel" aria-labelledby="tab-today" aria-label="Today's shopping">
+      <div class="store-bar" aria-label="Store selector">
+        <div class="store-bar-row">
+          <select id="store-select" class="store-select" aria-label="Choose a store"></select>
+          <button id="locate-btn" class="locate-btn" type="button" aria-label="Detect nearest store from my location" title="Use my location">📍</button>
+        </div>
+        <div id="store-status" class="store-status" hidden></div>
+        <div id="store-notes" class="store-notes" hidden></div>
+      </div>
       <div id="today"></div>
     </section>
 
@@ -606,13 +743,69 @@
     },
   ];
 
+  /*
+   * STORES: aisle order matches how you walk the store; the first matching
+   * keyword in `osmMatch` is used for geolocation auto-detect (it's tested
+   * against OpenStreetMap `name` tags for nearby supermarkets/butchers).
+   */
+  const STORES = [
+    { id: 'tj',   name: "Trader Joe's",         osmMatch: /trader\s*joe/i,
+      aisleOrder: ['produce','dairy','meat','pantry','canned','beverage'],
+      notes: "Get the 28-oz Greek yogurt; their ribeye is hit-or-miss. Ricer cauliflower in frozen if fresh is gone." },
+    { id: 'wf',   name: 'Whole Foods',          osmMatch: /whole\s*foods/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "365 brand is fine for staples; check the day-old produce rack." },
+    { id: 'cost', name: 'Costco',               osmMatch: /costco/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Bulk only — olive oil, almonds, eggs, chicken thighs are good buys here." },
+    { id: 'aldi', name: 'Aldi',                 osmMatch: /aldi/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Cheapest dairy and eggs; produce can be hit-or-miss — inspect before bagging." },
+    { id: 'bf',   name: 'Brooklyn Fare',        osmMatch: /brooklyn\s*fare/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Higher prices but great meat counter and fresh produce." },
+    { id: 'bam',  name: 'Big Apple Meat Market',osmMatch: /big\s*apple\s*meat/i,
+      aisleOrder: ['meat','dairy','produce','pantry','canned','beverage'],
+      notes: "Meat-focused. Ribeye, ground beef, sausage are the wins; limited produce." },
+    { id: 'other',name: 'Other store',          osmMatch: null,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "" },
+  ];
+  const STORE_BY_ID = Object.fromEntries(STORES.map(s => [s.id, s]));
+  const AISLE_LABEL = {
+    produce: 'Produce',
+    meat: 'Meat / fish',
+    dairy: 'Dairy / eggs',
+    pantry: 'Pantry / snacks',
+    canned: 'Canned / dry',
+    beverage: 'Beverages',
+  };
+
+  function categorize(text) {
+    const t = text.toLowerCase();
+    if (/bacon|salmon|ribeye|chicken|beef|turkey|shrimp|sausage|fish/.test(t)) return 'meat';
+    if (/avocado|asparagus|romaine|spinach|broccoli|greens|cucumber|tomato|parsley|cilantro|berries|salad|garlic|onion|lemon|celery|cauliflower|pepper|zucchini/.test(t)) return 'produce';
+    if (/butter|cream|cheese|cheddar|parmesan|yogurt|sour|egg/.test(t)) return 'dairy';
+    if (/tuna|canned/.test(t)) return 'canned';
+    if (/sparkling|water/.test(t)) return 'beverage';
+    return 'pantry';
+  }
+
   const CHECKS_KEY = 'food.checks.v1';
   const PANTRY_KEY = 'food.pantry.v1';
-  const VIEW_KEY = 'food.view.v1';
+  const PRICES_KEY = 'food.prices.v1';
+  const STORE_KEY  = 'food.store.v1';
+  const VIEW_KEY   = 'food.view.v1';
 
   const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   const todayName = () => DAY_ORDER[(new Date().getDay() + 6) % 7];
   const dayIdx = (name) => DAY_ORDER.indexOf(name);
+
+  const loadPrices = () => loadJSON(PRICES_KEY);
+  const savePrices = (s) => saveJSON(PRICES_KEY, s);
+  const loadStoreId = () => { try { return localStorage.getItem(STORE_KEY) || ''; } catch { return ''; } };
+  const saveStoreId = (id) => { try { localStorage.setItem(STORE_KEY, id || ''); } catch {} };
+  const fmtPrice = (n) => '$' + (Math.round(n * 100) / 100).toFixed(2);
 
   function loadJSON(key) {
     try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
@@ -673,14 +866,19 @@
   }
 
   /* ── Item row HTML (shared by Lists + Today) ── */
-  function itemRowHtml({ key, idAttr, text, checked, pantryButton }) {
+  function itemRowHtml({ key, idAttr, text, checked, pantryButton, showPrice }) {
     const id = idAttr || `chk-${key.replace(/::/g, '-')}`;
+    const prices = showPrice ? loadPrices() : null;
+    const price = prices ? prices[key] : undefined;
+    const priceLabel = price != null ? fmtPrice(price) : '+ $';
+    const priceClass = price != null ? 'price-btn has-value' : 'price-btn';
     return `
-      <div class="item-row">
+      <div class="item-row" data-row-key="${key}">
         <label class="item" for="${id}">
           <input type="checkbox" id="${id}" data-key="${key}" ${checked ? 'checked' : ''}>
           <span class="item-text">${text}</span>
         </label>
+        ${showPrice ? `<button type="button" class="${priceClass}" data-price="${key}" aria-label="Set price for ${text.replace(/"/g, '&quot;')}">${priceLabel}</button>` : ''}
         ${pantryButton ? `<button type="button" class="pantry-btn" data-pantry="${pantryButton}" data-key="${key}">${pantryButton === 'add' ? 'have it' : 'need it'}</button>` : ''}
       </div>
     `;
@@ -778,9 +976,42 @@
     return out;
   }
 
+  function groupByAisle(items, store) {
+    const buckets = {};
+    items.forEach(it => {
+      const cat = categorize(it.text);
+      (buckets[cat] = buckets[cat] || []).push(it);
+    });
+    return store.aisleOrder
+      .filter(a => buckets[a])
+      .map(a => ({ aisle: a, items: buckets[a] }))
+      .concat(
+        Object.keys(buckets)
+          .filter(a => !store.aisleOrder.includes(a))
+          .map(a => ({ aisle: a, items: buckets[a] }))
+      );
+  }
+
+  function renderFocusBody(items, storeId, opts) {
+    const isPantryList = opts.isPantryList;
+    const store = storeId ? STORE_BY_ID[storeId] : null;
+    const rows = (its) => its.map(it => itemRowHtml({
+      key: it.key, text: it.text, checked: false,
+      pantryButton: it.isPantryList || isPantryList ? 'add' : null,
+      showPrice: true,
+    })).join('');
+    if (!store) return rows(items);
+    return groupByAisle(items, store).map(g => `
+      <div class="aisle-head"><span>${AISLE_LABEL[g.aisle] || g.aisle}</span></div>
+      ${rows(g.items)}
+    `).join('');
+  }
+
   function renderToday() {
     const checks = loadChecks();
     const pantry = loadPantry();
+    const prices = loadPrices();
+    const storeId = loadStoreId();
     const today = todayName();
     const ti = dayIdx(today);
     const { trips, label } = pickTodayTrips();
@@ -795,10 +1026,20 @@
     const checkedGroups = checkedItemsGrouped(checks, pantry);
     const checkedCount = checkedGroups.reduce((n, g) => n + g.items.length, 0);
 
+    // Weekly total = sum of all prices for items currently checked off.
+    const weekTotal = Object.entries(prices).reduce((sum, [k, v]) => sum + (checks[k] ? Number(v) || 0 : 0), 0);
+
     const container = document.getElementById('today');
 
+    const totalHtml = weekTotal > 0 ? `
+      <div class="total-bar" aria-label="Spent this week">
+        <span class="label">Spent this week</span>
+        <span class="value">${fmtPrice(weekTotal)}</span>
+      </div>
+    ` : '';
+
     if (focusItems.length === 0 && carryover.length === 0 && checkedCount === 0) {
-      container.innerHTML = `<div class="today-allset">All caught up — nothing to buy right now.</div>`;
+      container.innerHTML = totalHtml + `<div class="today-allset">All caught up — nothing to buy right now.</div>`;
       return;
     }
 
@@ -808,12 +1049,7 @@
           <div class="today-eyebrow">${label}</div>
           <div class="today-title">${trips.map(t => t.title).join(' + ')}</div>
         </div>
-        <div class="list-body">${
-          focusItems.map(it => itemRowHtml({
-            key: it.key, text: it.text, checked: false,
-            pantryButton: it.isPantryList ? 'add' : null,
-          })).join('')
-        }</div>
+        <div class="list-body">${renderFocusBody(focusItems, storeId, { isPantryList: false })}</div>
       </section>
     ` : `<div class="today-allset">Nothing left for the next trip — nice.</div>`;
 
@@ -824,13 +1060,13 @@
           <div class="today-title">Carryover</div>
         </div>
         <div class="list-body">${
-          carryover.map(({ list, items }) => `
-            <div class="subgroup">${list.title}</div>
-            ${items.map(it => itemRowHtml({
-              key: it.key, text: it.text, checked: false,
-              pantryButton: list.pantry ? 'add' : null,
-            })).join('')}
-          `).join('')
+          carryover.map(({ list, items }) => {
+            const tagged = items.map(it => ({ ...it, isPantryList: !!list.pantry }));
+            return `
+              <div class="subgroup">${list.title}</div>
+              ${renderFocusBody(tagged, storeId, { isPantryList: !!list.pantry })}
+            `;
+          }).join('')
         }</div>
       </section>
     ` : '';
@@ -848,14 +1084,14 @@
             <div class="subgroup">${list.title}</div>
             ${items.map(it => itemRowHtml({
               key: it.key, text: it.text, checked: true,
-              pantryButton: null,
+              pantryButton: null, showPrice: true,
             })).join('')}
           `).join('')
         }</div>
       </details>
     ` : '';
 
-    container.innerHTML = focusHtml + carryoverHtml + checkedHtml;
+    container.innerHTML = totalHtml + focusHtml + carryoverHtml + checkedHtml;
   }
 
   /* ── Wiring ── */
@@ -876,22 +1112,121 @@
   }
 
   function handleClick(e) {
-    const btn = e.target.closest('.pantry-btn');
-    if (!btn) return;
-    e.preventDefault();
-    const key = btn.dataset.key;
-    const action = btn.dataset.pantry;
-    const pantry = loadPantry();
-    if (action === 'add') pantry[key] = true;
-    else delete pantry[key];
-    savePantry(pantry);
-    // Removing from pantry also unchecks the item so it shows up in shopping again.
-    if (action === 'remove') {
-      const checks = loadChecks();
-      delete checks[key];
-      saveChecks(checks);
+    const pantryBtn = e.target.closest('.pantry-btn');
+    if (pantryBtn) {
+      e.preventDefault();
+      const key = pantryBtn.dataset.key;
+      const action = pantryBtn.dataset.pantry;
+      const pantry = loadPantry();
+      if (action === 'add') pantry[key] = true;
+      else delete pantry[key];
+      savePantry(pantry);
+      if (action === 'remove') {
+        const checks = loadChecks();
+        delete checks[key];
+        saveChecks(checks);
+      }
+      rerenderShopping();
+      return;
     }
-    rerenderShopping();
+    const priceBtn = e.target.closest('.price-btn');
+    if (priceBtn) {
+      e.preventDefault();
+      const key = priceBtn.dataset.price;
+      const prices = loadPrices();
+      const current = prices[key];
+      const text = priceBtn.closest('.item-row')?.querySelector('.item-text')?.textContent || 'item';
+      const answer = prompt(`Price for "${text}"?\n\nEnter a number (e.g. 4.99) or leave blank to clear.`, current != null ? current : '');
+      if (answer === null) return;
+      const trimmed = answer.trim();
+      if (trimmed === '') delete prices[key];
+      else {
+        const num = parseFloat(trimmed.replace(/^\$/, ''));
+        if (!isFinite(num) || num < 0) { alert('That doesn’t look like a price.'); return; }
+        prices[key] = num;
+      }
+      savePrices(prices);
+      renderToday();
+    }
+  }
+
+  /* ── Stores + geolocation ── */
+  function populateStoreSelect() {
+    const sel = document.getElementById('store-select');
+    const current = loadStoreId();
+    sel.innerHTML = `<option value="">No store selected</option>` +
+      STORES.map(s => `<option value="${s.id}"${s.id === current ? ' selected' : ''}>${s.name}</option>`).join('');
+    updateStoreNotes();
+  }
+  function updateStoreNotes() {
+    const id = loadStoreId();
+    const store = id ? STORE_BY_ID[id] : null;
+    const notes = document.getElementById('store-notes');
+    if (store && store.notes) {
+      notes.textContent = store.notes;
+      notes.hidden = false;
+    } else {
+      notes.textContent = '';
+      notes.hidden = true;
+    }
+  }
+  function setStoreStatus(msg, kind) {
+    const el = document.getElementById('store-status');
+    if (!msg) { el.hidden = true; el.textContent = ''; el.classList.remove('ok','err'); return; }
+    el.textContent = msg;
+    el.hidden = false;
+    el.classList.remove('ok','err');
+    if (kind) el.classList.add(kind);
+  }
+  async function detectStoreByLocation() {
+    if (!navigator.geolocation) { setStoreStatus('Geolocation not available in this browser.', 'err'); return; }
+    const btn = document.getElementById('locate-btn');
+    btn.disabled = true;
+    setStoreStatus('Finding your location…');
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 })
+      );
+      const { latitude: lat, longitude: lon } = pos.coords;
+      setStoreStatus('Looking up nearby stores…');
+      const query = `[out:json][timeout:15];(node["shop"~"supermarket|convenience|grocery|wholesale|butcher"](around:300,${lat},${lon});way["shop"~"supermarket|convenience|grocery|wholesale|butcher"](around:300,${lat},${lon}););out center;`;
+      const resp = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query),
+      });
+      if (!resp.ok) throw new Error('OSM ' + resp.status);
+      const data = await resp.json();
+      const elements = data.elements || [];
+      let matched = null;
+      for (const el of elements) {
+        const name = el.tags && el.tags.name;
+        if (!name) continue;
+        for (const store of STORES) {
+          if (store.osmMatch && store.osmMatch.test(name)) { matched = { store, osmName: name }; break; }
+        }
+        if (matched) break;
+      }
+      if (matched) {
+        saveStoreId(matched.store.id);
+        document.getElementById('store-select').value = matched.store.id;
+        updateStoreNotes();
+        renderToday();
+        setStoreStatus(`Detected: ${matched.osmName}`, 'ok');
+      } else if (elements.length) {
+        const names = elements.map(e => e.tags && e.tags.name).filter(Boolean).slice(0, 3).join(', ');
+        setStoreStatus(`Nearby: ${names || 'unknown'} — none match your stores. Pick manually.`, 'err');
+      } else {
+        setStoreStatus('No grocery stores found within 300m. Pick manually.', 'err');
+      }
+    } catch (err) {
+      const code = err && err.code;
+      if (code === 1) setStoreStatus('Location permission denied.', 'err');
+      else if (code === 2 || code === 3) setStoreStatus('Couldn’t get your location. Try again outside.', 'err');
+      else setStoreStatus('Lookup failed — pick manually.', 'err');
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   function resetAll() {
@@ -912,12 +1247,20 @@
   }
 
   /* ── Init ── */
+  populateStoreSelect();
   renderWeek();
   rerenderShopping();
   document.getElementById('reset').addEventListener('click', resetAll);
   ['today','shopping','meals'].forEach(v => {
     document.getElementById(`tab-${v}`).addEventListener('click', () => setView(v));
   });
+  document.getElementById('store-select').addEventListener('change', e => {
+    saveStoreId(e.target.value);
+    setStoreStatus('');
+    updateStoreNotes();
+    renderToday();
+  });
+  document.getElementById('locate-btn').addEventListener('click', detectStoreByLocation);
   document.body.addEventListener('change', handleChange);
   document.body.addEventListener('click', handleClick);
 
