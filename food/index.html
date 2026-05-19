@@ -160,6 +160,7 @@
     }
     .item {
       flex: 1;
+      min-width: 0;
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -203,7 +204,7 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
-    .item-text { font-size: 0.95rem; color: var(--text); }
+    .item-text { font-size: 0.95rem; color: var(--text); overflow-wrap: anywhere; min-width: 0; }
     .item input:checked ~ .item-text {
       color: var(--text-muted);
       text-decoration: line-through;
@@ -314,7 +315,27 @@
       text-align: center;
       color: var(--accent);
       font-weight: 600;
+      margin-bottom: 1rem;
     }
+    .checked-card { padding: 0; }
+    .checked-card summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .checked-card summary::-webkit-details-marker { display: none; }
+    .checked-card summary::after {
+      content: '▸';
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+      padding-right: 0.25rem;
+    }
+    .checked-card[open] summary::after { transform: rotate(90deg); }
+    .checked-card .list-body .item-text { color: var(--text-muted); text-decoration: line-through; }
 
     /* ── Tips ── */
     .tips {
@@ -746,6 +767,20 @@
     return out;
   }
 
+  function checkedItemsGrouped(checks, pantry) {
+    const out = [];
+    SHOPPING.forEach(list => {
+      const items = [];
+      list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+        const key = itemKey(list.id, gi, ii);
+        if (list.pantry && pantry[key]) return;
+        if (checks[key]) items.push({ key, text });
+      }));
+      if (items.length) out.push({ list, items });
+    });
+    return out;
+  }
+
   function renderToday() {
     const checks = loadChecks();
     const pantry = loadPantry();
@@ -753,7 +788,6 @@
     const ti = dayIdx(today);
     const { trips, label } = pickTodayTrips();
 
-    // Carryover: any list whose `when` is strictly before today this week, with unchecked items.
     const carryover = SHOPPING
       .filter(l => dayIdx(l.when) < ti && !trips.includes(l))
       .map(l => ({ list: l, items: uncheckedItems(l, checks, pantry) }))
@@ -761,9 +795,12 @@
 
     const focusItems = trips.flatMap(l => uncheckedItems(l, checks, pantry).map(it => ({ ...it, listTitle: l.title, isPantryList: !!l.pantry })));
 
+    const checkedGroups = checkedItemsGrouped(checks, pantry);
+    const checkedCount = checkedGroups.reduce((n, g) => n + g.items.length, 0);
+
     const container = document.getElementById('today');
 
-    if (focusItems.length === 0 && carryover.length === 0) {
+    if (focusItems.length === 0 && carryover.length === 0 && checkedCount === 0) {
       container.innerHTML = `<div class="today-allset">All caught up — nothing to buy right now.</div>`;
       return;
     }
@@ -781,7 +818,7 @@
           })).join('')
         }</div>
       </section>
-    ` : '';
+    ` : `<div class="today-allset">Nothing left for the next trip — nice.</div>`;
 
     const carryoverHtml = carryover.length ? `
       <section class="today-card" aria-label="Still to buy from earlier this week">
@@ -801,7 +838,27 @@
       </section>
     ` : '';
 
-    container.innerHTML = focusHtml + carryoverHtml;
+    const checkedHtml = checkedCount ? `
+      <details class="today-card checked-card">
+        <summary class="today-head checked-summary">
+          <div>
+            <div class="today-eyebrow">Already checked off</div>
+            <div class="today-title">${checkedCount} item${checkedCount === 1 ? '' : 's'} — tap to undo</div>
+          </div>
+        </summary>
+        <div class="list-body">${
+          checkedGroups.map(({ list, items }) => `
+            <div class="subgroup">${list.title}</div>
+            ${items.map(it => itemRowHtml({
+              key: it.key, text: it.text, checked: true,
+              pantryButton: null,
+            })).join('')}
+          `).join('')
+        }</div>
+      </details>
+    ` : '';
+
+    container.innerHTML = focusHtml + carryoverHtml + checkedHtml;
   }
 
   /* ── Wiring ── */
