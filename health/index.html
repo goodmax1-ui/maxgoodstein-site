@@ -199,7 +199,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
-    font: 500 13px/1.5 'JetBrains Mono', ui-monospace, monospace;
+    font: 500 16px/1.5 'JetBrains Mono', ui-monospace, monospace;
     resize: vertical;
     -webkit-appearance: none;
   }
@@ -230,7 +230,10 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
-    font: 500 15px/1.4 inherit;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.4;
     -webkit-appearance: none;
   }
   input:focus { outline: none; border-color: var(--accent); }
@@ -262,7 +265,8 @@
   details.settings[open] summary { margin-bottom: 12px; }
   .settings-row { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 13px; }
   .settings-row label { color: var(--text-2); min-width: 130px; }
-  .settings-row input { flex: 1; padding: 8px 10px; font-size: 13px; }
+  .settings-row input { flex: 1; padding: 10px 12px; font-size: 16px; }
+  .settings-row select { flex: 1; padding: 10px 12px; font-size: 16px !important; }
 
   .days-list {
     max-height: 240px; overflow-y: auto;
@@ -385,7 +389,7 @@
       <div class="settings-row"><label>Worker URL</label><input type="text" id="c-url" placeholder="https://cut-tracker-vault.YOU.workers.dev"></div>
       <div class="settings-row"><label>Auth token</label><input type="password" id="c-token" placeholder="bearer token from wrangler secret"></div>
       <div class="settings-row"><label>Auto-push on save</label>
-        <select id="c-auto" style="flex:1; padding:8px 10px; font-size:13px; background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text)">
+        <select id="c-auto" style="flex:1; padding:10px 12px; font-size:16px; background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text)">
           <option value="1">On</option><option value="0">Off</option>
         </select>
       </div>
