@@ -906,7 +906,7 @@
         <div class="hero-stat-note" id="hero-day-note"></div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-label">Total loss</div>
+        <div class="hero-stat-label" id="hero-loss-label">Lost so far</div>
         <div class="hero-stat-value" id="hero-loss">—</div>
         <div class="hero-stat-note" id="hero-loss-note"></div>
       </div>
@@ -1809,23 +1809,29 @@ function renderHero() {
   const streak = computeStreak();
   $('hero-day-note').textContent = streak > 0 ? `${streak}-day streak` : 'log to start';
 
-  // Total loss (lb) vs baseline
+  // Lost so far (vs baseline). Always a non-negative number under the
+  // primary label; if currently above baseline, flip the label + note.
   const latestW = latest?.health?.weight_kg ?? null;
   const baseW = baseline.weight_kg;
+  const lossLabelEl = $('hero-loss-label');
   if (latestW != null) {
-    const dLb = (baseW - latestW) * KG_TO_LB;
-    $('hero-loss').innerHTML = `${fmtSigned(-dLb, 1)} <span class="hero-stat-unit">lb</span>`;
-    // Lean component: how much of the loss is lean
-    const lLb = latest.health?.lean_mass_kg != null ? (baseline.lean_mass_kg - latest.health.lean_mass_kg) * KG_TO_LB : null;
-    if (lLb != null && dLb > 0) {
-      const leanShare = Math.round((lLb / dLb) * 100);
-      $('hero-loss-note').textContent = `${leanShare}% from lean`;
-      $('hero-loss-note').className = 'hero-stat-note ' + (leanShare > 30 ? 'neg' : 'pos');
+    const lostLb = (baseW - latestW) * KG_TO_LB;
+    const daysSince = Math.max(0, daysBetween(baseline.date, latest.date));
+    if (lostLb >= -0.05) {
+      // Losing or flat
+      lossLabelEl.textContent = 'Lost so far';
+      $('hero-loss').innerHTML = `${lostLb.toFixed(1)} <span class="hero-stat-unit">lb</span>`;
+      $('hero-loss-note').textContent = daysSince > 0 ? `in ${daysSince} day${daysSince === 1 ? '' : 's'}` : 'vs baseline';
+      $('hero-loss-note').className = 'hero-stat-note pos';
     } else {
-      $('hero-loss-note').textContent = 'vs baseline';
-      $('hero-loss-note').className = 'hero-stat-note';
+      // Above baseline
+      lossLabelEl.textContent = 'Above baseline';
+      $('hero-loss').innerHTML = `+${(-lostLb).toFixed(1)} <span class="hero-stat-unit">lb</span>`;
+      $('hero-loss-note').textContent = daysSince > 0 ? `in ${daysSince} day${daysSince === 1 ? '' : 's'}` : 'vs baseline';
+      $('hero-loss-note').className = 'hero-stat-note neg';
     }
   } else {
+    lossLabelEl.textContent = 'Lost so far';
     $('hero-loss').textContent = '—';
     $('hero-loss-note').textContent = '';
   }
