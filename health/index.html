@@ -1182,6 +1182,40 @@ $('lock-btn').addEventListener('click', () => {
   $('gate-pass').focus();
 });
 
+// Auto-refresh when the tab comes back to foreground: pull newer vault from
+// cloud, then consume any pending Cronometer scrapes. Throttled to 1/min so
+// rapid tab-switching doesn't hammer the Worker.
+let lastFocusSync = 0;
+async function focusSync() {
+  if (!VAULT || !PASSPHRASE) return;
+  const now = Date.now();
+  if (now - lastFocusSync < 60_000) return;
+  lastFocusSync = now;
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return;
+  try {
+    const cloudWrap = await cloudFetchVault(cfg);
+    if (cloudWrap) {
+      const localRaw = localStorage.getItem(STORE_KEY);
+      const localWrap = localRaw ? JSON.parse(localRaw) : null;
+      if ((cloudWrap.updatedAt || 0) > (localWrap?.updatedAt || 0)) {
+        const cloudVault = await decryptVault(cloudWrap, PASSPHRASE);
+        VAULT.baseline = { ...DEFAULT_VAULT.baseline, ...cloudVault.baseline };
+        VAULT.targets = { ...DEFAULT_VAULT.targets, ...cloudVault.targets };
+        VAULT.days = cloudVault.days || [];
+        localStorage.setItem(STORE_KEY, JSON.stringify(cloudWrap));
+        render();
+      }
+    }
+  } catch (e) { /* offline / 404 / wrong-pass-vs-cloud — keep local */ }
+  const r = await consumePendingCron();
+  if (r.merged > 0) setSyncPill('ok', `+${r.merged} cron`);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') focusSync();
+});
+window.addEventListener('focus', focusSync);
+
 function extractJSON(raw) {
   let s = raw.trim();
   // Strip markdown code fences (```json ... ``` or ``` ... ```) that LLMs add despite instructions
