@@ -1982,6 +1982,18 @@ function renderToday() {
 
   renderMacroSplit(proteinG, fatG, carbsForSplit);
 
+  // 7-day rolling averages (skips null days, doesn't require 7 full days)
+  const avg7 = (picker) => {
+    const vals = days.slice(-7).map(picker).filter(v => v != null && !isNaN(v));
+    if (vals.length === 0) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  };
+  const proteinAvg = avg7(d => d.health?.protein_g);
+  const netCarbsAvg = avg7(d => d.cron?.nutrients?.carbs_net?.amount);
+  const totalCarbsAvg = avg7(d => d.cron?.nutrients?.carbs_total?.amount ?? d.health?.carbs_g);
+  const fatAvg = avg7(d => d.health?.fat_g);
+  const avgNote = (v, dec = 0) => v == null ? null : { text: `7d ${dec ? v.toFixed(dec) : Math.round(v)}g`, cls: 'flat' };
+
   const proteinPct = proteinG != null ? (proteinG / targets.protein_min) * 100 : null;
   const proteinCls = proteinG != null && proteinG < targets.protein_min ? 'warn' : 'ok';
   const carbsNet = cronNet ?? null;
@@ -1990,21 +2002,21 @@ function renderToday() {
   const carbsTotalCls = carbsTotal != null && carbsTotal > targets.carbs_total_max ? 'bad' : 'ok';
 
   macrosGrid.innerHTML = [
-    metricCard('Protein', fmtInt(proteinG), 'g', null, {
+    metricCard('Protein', fmtInt(proteinG), 'g', avgNote(proteinAvg), {
       pct: proteinPct, pctCls: proteinCls,
       cls: proteinG != null && proteinG < targets.protein_min - 15 ? 'warn' : '',
     }),
-    metricCard('Net Carbs', carbsNet != null ? fmt(carbsNet, 1) : '—', 'g', null, {
+    metricCard('Net Carbs', carbsNet != null ? fmt(carbsNet, 1) : '—', 'g', avgNote(netCarbsAvg, 1), {
       pct: carbsNet != null ? (carbsNet / targets.carbs_net_max) * 100 : null,
       pctCls: carbsNetCls,
       cls: carbsNetCls === 'bad' ? 'bad' : '',
     }),
-    metricCard('Total Carbs', carbsTotal != null ? fmt(carbsTotal, 1) : '—', 'g', null, {
+    metricCard('Total Carbs', carbsTotal != null ? fmt(carbsTotal, 1) : '—', 'g', avgNote(totalCarbsAvg, 1), {
       pct: carbsTotal != null ? (carbsTotal / targets.carbs_total_max) * 100 : null,
       pctCls: carbsTotalCls,
       cls: carbsTotalCls === 'bad' ? 'bad' : '',
     }),
-    metricCard('Fat', fmtInt(fatG), 'g'),
+    metricCard('Fat', fmtInt(fatG), 'g', avgNote(fatAvg)),
   ].join('');
   animateBars(macrosGrid);
 
