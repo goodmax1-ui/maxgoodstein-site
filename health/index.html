@@ -338,6 +338,15 @@
     <div class="read hidden" id="read"><div class="label">Read</div><div id="read-body"></div></div>
   </section>
 
+  <!-- Full micronutrient panel -->
+  <details class="card" id="micro-card" style="padding: 0">
+    <summary style="padding: 18px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3)">Full micronutrient panel</span>
+      <span id="micro-summary" style="font-size: 12px; color: var(--text-2); font-weight: 600"></span>
+    </summary>
+    <div style="padding: 0 18px 18px" id="micro-body"></div>
+  </details>
+
   <!-- Trends -->
   <section class="card" id="trends-card">
     <h2>Trends · 7-day rolling avg</h2>
@@ -921,6 +930,7 @@ function sparkline(values, opts = {}) {
 
 function render() {
   renderToday();
+  renderMicroPanel();
   renderTrends();
   renderBaseline();
   renderTargets();
@@ -1052,10 +1062,11 @@ function renderAlerts(latest, prev, baseline, targets) {
     al.push({ cls: 'warn', t: `Magnesium ${Math.round(c.magnesium.pct)}% — still climbing. Add pumpkin seeds or supp.` });
   }
 
-  // Protein
-  if (h.protein_g != null && h.protein_g < targets.protein_min) {
-    al.push({ cls: h.protein_g < targets.protein_min - 20 ? 'bad' : 'warn',
-      t: `Protein ${h.protein_g}g — under ${targets.protein_min}g floor. <b>Push up.</b> +1 scoop whey or +100g chicken closes the gap.` });
+  // Protein — prefer Apple Health, fall back to Cronometer
+  const proteinG = h.protein_g ?? c.protein?.amount;
+  if (proteinG != null && proteinG < targets.protein_min) {
+    al.push({ cls: proteinG < targets.protein_min - 20 ? 'bad' : 'warn',
+      t: `Protein ${proteinG.toFixed(0)}g — under ${targets.protein_min}g floor. <b>Push up.</b> +1 scoop whey or +100g chicken closes the gap.` });
   }
 
   // Net carbs
@@ -1088,6 +1099,55 @@ function renderAlerts(latest, prev, baseline, targets) {
   // kcal floor
   if (h.dietary_kcal != null && h.dietary_kcal < baseline.bmr) {
     al.push({ cls: 'warn', t: `Intake ${h.dietary_kcal} kcal — below resting BMR (${baseline.bmr}). Don't go this low for multiple days.` });
+  }
+
+  // Leucine — muscle preservation during cut. Threshold ~7.5g/day (2.5g × 3 meals for MPS).
+  if (c.leucine?.amount != null && c.leucine.amount < 7.5) {
+    al.push({ cls: c.leucine.amount < 5 ? 'bad' : 'warn',
+      t: `Leucine ${c.leucine.amount.toFixed(1)}g — under 7.5g floor for muscle preservation on a cut. <b>Eat more animal protein</b> (eggs, whey, beef have highest leucine density). Below 2.5g per meal = no MPS trigger.` });
+  }
+
+  // Vitamin D — testosterone, mood, recovery during deficit
+  if (c.vit_d?.pct != null && c.vit_d.pct < 50) {
+    al.push({ cls: c.vit_d.pct < 25 ? 'bad' : 'warn',
+      t: `Vitamin D ${Math.round(c.vit_d.pct)}% — low for cut recovery. Sun + 2000–4000 IU supp. Affects testosterone, sleep, mood.` });
+  }
+
+  // B12 — energy, neurological; common gap on lower-meat days
+  if (c.b12_cobalamin?.pct != null && c.b12_cobalamin.pct < 50) {
+    al.push({ cls: 'warn', t: `B12 ${Math.round(c.b12_cobalamin.pct)}% — energy and HRV will suffer. 200g beef or 3 eggs covers it.` });
+  }
+
+  // Iron — anemic = RHR up, HRV down (mimics overtraining)
+  if (c.iron?.pct != null && c.iron.pct < 50) {
+    al.push({ cls: 'warn', t: `Iron ${Math.round(c.iron.pct)}% — low iron looks identical to overtraining (high RHR, low HRV). Red meat, dark leafy greens, or supp if persistent.` });
+  }
+
+  // Zinc — testosterone, recovery
+  if (c.zinc?.pct != null && c.zinc.pct < 50) {
+    al.push({ cls: 'warn', t: `Zinc ${Math.round(c.zinc.pct)}% — supports testosterone, immune function. Pumpkin seeds and beef are dense. Bonus: pumpkin seeds also fix Mg.` });
+  }
+
+  // Omega-6 : Omega-3 ratio. Western diet typically 15-20:1, target <4:1.
+  if (c.omega_3?.amount != null && c.omega_6?.amount != null && c.omega_3.amount > 0) {
+    const ratio = c.omega_6.amount / c.omega_3.amount;
+    if (ratio > 10) {
+      al.push({ cls: ratio > 20 ? 'bad' : 'warn',
+        t: `Omega-6:Omega-3 ratio <b>${ratio.toFixed(1)}:1</b> — inflammation flag. Add fatty fish (salmon, sardines) or fish oil. Target under 4:1.` });
+    }
+  }
+
+  // Saturated vs total fat — context, not alert. Flag if SFA > 50% of fat AND chol > 300mg.
+  if (c.fat_saturated?.amount != null && c.fat?.amount != null && c.cholesterol?.amount != null) {
+    const sfaShare = c.fat_saturated.amount / c.fat.amount;
+    if (sfaShare > 0.5 && c.cholesterol.amount > 400) {
+      al.push({ cls: 'info', t: `Saturated fat ${Math.round(sfaShare*100)}% of total + cholesterol ${Math.round(c.cholesterol.amount)}mg. Not alarming on keto, but watch the trend if it persists.` });
+    }
+  }
+
+  // Fiber low (separate from net-carb pressure)
+  if (c.fiber?.amount != null && c.fiber.amount < 15) {
+    al.push({ cls: 'warn', t: `Fiber only ${c.fiber.amount.toFixed(1)}g — gut + satiety suffer below ~20g/day. Avocado, chia, flax, leafy greens are low-net-carb fiber.` });
   }
 
   // Water-weight context for early days
@@ -1130,6 +1190,140 @@ function renderRead(latest, baseline, targets) {
 
   $('read').classList.remove('hidden');
   $('read-body').innerHTML = `${read}<br>${fix}`;
+}
+
+// Curated display map for the expandable full-panel. Each entry:
+//   [internalKey, displayName, importantUnit]
+// Order is meaningful — most-actionable first within each group.
+const MICRO_GROUPS = [
+  ['Vitamins', [
+    ['vit_d', 'Vitamin D', 'mcg'],
+    ['b12_cobalamin', 'B12 (Cobalamin)', 'mcg'],
+    ['b9_folate', 'B9 (Folate)', 'mcg'],
+    ['vit_c', 'Vitamin C', 'mg'],
+    ['vit_a', 'Vitamin A', 'mcg'],
+    ['vit_e', 'Vitamin E', 'mg'],
+    ['vit_k', 'Vitamin K', 'mcg'],
+    ['b1_thiamine', 'B1 (Thiamine)', 'mg'],
+    ['b2_riboflavin', 'B2 (Riboflavin)', 'mg'],
+    ['b3_niacin', 'B3 (Niacin)', 'mg'],
+    ['b5_pantothenic', 'B5 (Pantothenic)', 'mg'],
+    ['b6_pyridoxine', 'B6 (Pyridoxine)', 'mg'],
+    ['b7_biotin', 'B7 (Biotin)', 'mcg'],
+  ]],
+  ['Minerals', [
+    ['magnesium', 'Magnesium', 'mg'],
+    ['potassium', 'Potassium', 'mg'],
+    ['sodium', 'Sodium', 'mg'],
+    ['iron', 'Iron', 'mg'],
+    ['zinc', 'Zinc', 'mg'],
+    ['calcium', 'Calcium', 'mg'],
+    ['selenium', 'Selenium', 'mcg'],
+    ['phosphorus', 'Phosphorus', 'mg'],
+    ['copper', 'Copper', 'mg'],
+    ['manganese', 'Manganese', 'mg'],
+    ['chloride', 'Chloride', 'mg'],
+    ['iodine', 'Iodine', 'mcg'],
+    ['chromium', 'Chromium', 'mcg'],
+    ['molybdenum', 'Molybdenum', 'mcg'],
+    ['fluoride', 'Fluoride', 'mcg'],
+  ]],
+  ['Lipid breakdown', [
+    ['fat_saturated', 'Saturated', 'g'],
+    ['fat_monounsaturated', 'Monounsaturated', 'g'],
+    ['fat_polyunsaturated', 'Polyunsaturated', 'g'],
+    ['fat_trans', 'Trans fats', 'g'],
+    ['omega_3', 'Omega-3', 'g'],
+    ['omega_6', 'Omega-6', 'g'],
+    ['cholesterol', 'Cholesterol', 'mg'],
+    ['ala', 'ALA', 'g'],
+    ['epa', 'EPA', 'mg'],
+    ['dha', 'DHA', 'mg'],
+    ['linoleic', 'Linoleic acid', 'g'],
+  ]],
+  ['Amino acids', [
+    ['leucine', 'Leucine', 'g'],
+    ['lysine', 'Lysine', 'g'],
+    ['isoleucine', 'Isoleucine', 'g'],
+    ['valine', 'Valine', 'g'],
+    ['threonine', 'Threonine', 'g'],
+    ['methionine', 'Methionine', 'g'],
+    ['phenylalanine', 'Phenylalanine', 'g'],
+    ['histidine', 'Histidine', 'g'],
+    ['tryptophan', 'Tryptophan', 'g'],
+    ['tyrosine', 'Tyrosine', 'g'],
+    ['cystine', 'Cystine', 'g'],
+    ['arginine', 'Arginine', 'g'],
+  ]],
+  ['Other', [
+    ['fiber', 'Fiber', 'g'],
+    ['sugars', 'Sugars', 'g'],
+    ['sugars_added', 'Added sugars', 'g'],
+    ['starch', 'Starch', 'g'],
+    ['caffeine', 'Caffeine', 'mg'],
+    ['alcohol', 'Alcohol', 'g'],
+    ['water', 'Water', 'g'],
+  ]],
+];
+
+function classifyPct(pct) {
+  if (pct == null) return '';
+  if (pct < 50) return 'bad';
+  if (pct < 80) return 'warn';
+  if (pct > 150) return 'info'; // over (e.g. sodium)
+  return 'ok';
+}
+
+function renderMicroPanel() {
+  const card = $('micro-card');
+  const body = $('micro-body');
+  const summary = $('micro-summary');
+  if (!card || !body) return;
+  const latest = VAULT.days[VAULT.days.length - 1];
+  const n = latest?.cron?.nutrients || {};
+  const total = Object.keys(n).length;
+  if (total === 0) {
+    body.innerHTML = `<p class="hint" style="margin: 0">No Cronometer data yet today. Either log meals in Cronometer (the scheduled task will pick them up at 7pm), or drop a CSV manually below.</p>`;
+    summary.textContent = '—';
+    return;
+  }
+  summary.textContent = `${total} captured`;
+
+  const groupHTML = MICRO_GROUPS.map(([groupName, items]) => {
+    const rows = items
+      .map(([key, label, unit]) => {
+        const v = n[key];
+        if (!v || v.amount == null || isNaN(v.amount)) return null;
+        const amt = v.amount < 10 ? v.amount.toFixed(1) : Math.round(v.amount);
+        const pct = v.pct;
+        const cls = classifyPct(pct);
+        const pctTxt = pct != null ? `${Math.round(pct)}%` : '—';
+        const barW = pct != null ? Math.min(100, pct) : 0;
+        const barColor = cls === 'bad' ? 'var(--bad)'
+                       : cls === 'warn' ? 'var(--warn)'
+                       : cls === 'info' ? 'var(--info)'
+                       : 'var(--ok)';
+        return `<div style="display: grid; grid-template-columns: 1.4fr auto 60px; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; font-variant-numeric: tabular-nums">
+          <span style="color: var(--text-2)">${label}</span>
+          <span style="font-weight: 700; color: var(--text); white-space: nowrap">${amt} ${unit}</span>
+          <span style="display: flex; align-items: center; gap: 6px; justify-content: flex-end">
+            <span style="flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; min-width: 24px">
+              ${pct != null ? `<span style="display: block; height: 100%; width: ${barW}%; background: ${barColor}"></span>` : ''}
+            </span>
+            <span style="font-size: 11px; font-weight: 700; color: ${pct != null ? barColor : 'var(--text-3)'}; min-width: 28px; text-align: right">${pctTxt}</span>
+          </span>
+        </div>`;
+      })
+      .filter(Boolean)
+      .join('');
+    if (!rows) return '';
+    return `<div style="margin-top: 14px">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 4px">${groupName}</div>
+      ${rows}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  body.innerHTML = groupHTML || `<p class="hint">No recognized nutrients in payload.</p>`;
 }
 
 function renderTrends() {
