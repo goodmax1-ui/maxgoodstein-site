@@ -34,6 +34,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const ALLOWED_ORIGINS = [
   'https://maxgoodstein.com',
+  'https://cronometer.com',
   'http://localhost:8081',
   'http://localhost:8080',
   'http://localhost:8092',
