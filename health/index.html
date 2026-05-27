@@ -1026,24 +1026,47 @@ function renderToday() {
     metricCard('Fat', fmtInt(h.fat_g), 'g'),
   ].join('');
 
-  // Micros (Cronometer)
+  // Micros (Cronometer). Show % when available, fall back to amount+unit.
+  // Targets used to derive pct when scraper missed it (adult male RDA / AI):
+  //   Mg 420mg, K 3400mg, Na 2300mg, Fiber 30g.
   const c = latest.cron?.nutrients || {};
-  const mgPct = c.magnesium?.pct;
-  const kPct = c.potassium?.pct;
-  const naPct = c.sodium?.pct;
-  const fiberG = c.fiber?.amount;
+  const RDA = { magnesium: 420, potassium: 3400, sodium: 2300, fiber: 30 };
+  function microCell(label, key, unit, classifyFn) {
+    const v = c[key];
+    if (!v || (v.amount == null && v.pct == null)) {
+      return metricCard(label, '—', '');
+    }
+    const pct = v.pct ?? (v.amount != null && RDA[key] ? (v.amount / RDA[key]) * 100 : null);
+    const value = pct != null ? `${fmtInt(pct)}%` : `${fmt(v.amount, v.amount < 10 ? 1 : 0)} ${unit}`;
+    const cls = classifyFn(pct, v.amount);
+    return metricCard(label, value, '', null, {
+      pct: pct != null ? Math.min(150, pct) : null,
+      pctCls: cls,
+      cls: (cls === 'bad' || cls === 'warn') ? cls : '',
+    });
+  }
   microsGrid.innerHTML = [
-    metricCard('Magnesium', mgPct != null ? fmtInt(mgPct) + '%' : '—', '', null, {
-      pct: mgPct, pctCls: mgPct == null ? '' : (mgPct < 50 ? 'bad' : mgPct < 80 ? 'warn' : 'ok'),
-      cls: mgPct != null && mgPct < 50 ? 'bad' : (mgPct != null && mgPct < 80 ? 'warn' : ''),
+    microCell('Magnesium', 'magnesium', 'mg', (p, a) => {
+      const eff = p ?? (a != null ? (a / 420) * 100 : null);
+      return eff == null ? '' : (eff < 50 ? 'bad' : eff < 80 ? 'warn' : 'ok');
     }),
-    metricCard('Potassium', kPct != null ? fmtInt(kPct) + '%' : '—', '', null, {
-      pct: kPct, pctCls: kPct == null ? '' : (kPct < 60 ? 'warn' : 'ok'),
+    microCell('Potassium', 'potassium', 'mg', (p, a) => {
+      const eff = p ?? (a != null ? (a / 3400) * 100 : null);
+      return eff == null ? '' : (eff < 60 ? 'warn' : 'ok');
     }),
-    metricCard('Sodium', naPct != null ? fmtInt(naPct) + '%' : '—', '', null, {
-      pct: Math.min(150, naPct ?? 0), pctCls: 'ok',
+    microCell('Sodium', 'sodium', 'mg', (p, a) => {
+      // Sodium high is the keto-normal case; don't paint warn/bad on the high side.
+      return 'ok';
     }),
-    metricCard('Fiber', fiberG != null ? fmt(fiberG, 1) + ' g' : '—', ''),
+    (function() {
+      const v = c.fiber;
+      if (!v || v.amount == null) return metricCard('Fiber', '—', '');
+      const pct = (v.amount / 30) * 100;
+      const cls = v.amount < 15 ? 'warn' : v.amount < 20 ? 'warn' : 'ok';
+      return metricCard('Fiber', `${fmt(v.amount, 1)} g`, '', null, {
+        pct: Math.min(150, pct), pctCls: cls, cls: cls === 'warn' ? 'warn' : '',
+      });
+    })(),
   ].join('');
 
   renderAlerts(latest, prev, baseline, targets);
@@ -1055,11 +1078,17 @@ function renderAlerts(latest, prev, baseline, targets) {
   const c = latest.cron?.nutrients || {};
   const h = latest.health || {};
 
+  // RDA fallback so alerts still fire when scraper didn't capture % of target.
+  // Adult male: Mg 420, K 3400, Na 2300, Iron 8, Zinc 11, Calcium 1000, Selenium 55, VitD 15mcg, B12 2.4mcg, Fiber 30, Leucine 7.5.
+  const pctOf = (n, rda) => (n?.pct ?? (n?.amount != null && rda ? (n.amount / rda) * 100 : null));
+
   // Magnesium priority
-  if (c.magnesium?.pct != null && c.magnesium.pct < targets.mg_min_pct) {
-    al.push({ cls: 'bad', t: `Magnesium ${Math.round(c.magnesium.pct)}% — under ${targets.mg_min_pct}% floor. <b>Fix first.</b> Pumpkin seeds, almonds, dark chocolate (85%+), spinach. Or supp 200–400 mg glycinate.` });
-  } else if (c.magnesium?.pct != null && c.magnesium.pct < 80) {
-    al.push({ cls: 'warn', t: `Magnesium ${Math.round(c.magnesium.pct)}% — still climbing. Add pumpkin seeds or supp.` });
+  const mgPct = pctOf(c.magnesium, 420);
+  if (mgPct != null && mgPct < targets.mg_min_pct) {
+    const amtTxt = c.magnesium?.amount != null ? ` (${Math.round(c.magnesium.amount)} mg)` : '';
+    al.push({ cls: 'bad', t: `Magnesium ${Math.round(mgPct)}%${amtTxt} — under ${targets.mg_min_pct}% floor. <b>Fix first.</b> Pumpkin seeds, almonds, dark chocolate (85%+), spinach. Or supp 200–400 mg glycinate.` });
+  } else if (mgPct != null && mgPct < 80) {
+    al.push({ cls: 'warn', t: `Magnesium ${Math.round(mgPct)}% — still climbing. Add pumpkin seeds or supp.` });
   }
 
   // Protein — prefer Apple Health, fall back to Cronometer
@@ -1108,24 +1137,28 @@ function renderAlerts(latest, prev, baseline, targets) {
   }
 
   // Vitamin D — testosterone, mood, recovery during deficit
-  if (c.vit_d?.pct != null && c.vit_d.pct < 50) {
-    al.push({ cls: c.vit_d.pct < 25 ? 'bad' : 'warn',
-      t: `Vitamin D ${Math.round(c.vit_d.pct)}% — low for cut recovery. Sun + 2000–4000 IU supp. Affects testosterone, sleep, mood.` });
+  const vdPct = pctOf(c.vit_d, 15);
+  if (vdPct != null && vdPct < 50) {
+    al.push({ cls: vdPct < 25 ? 'bad' : 'warn',
+      t: `Vitamin D ${Math.round(vdPct)}% — low for cut recovery. Sun + 2000–4000 IU supp. Affects testosterone, sleep, mood.` });
   }
 
   // B12 — energy, neurological; common gap on lower-meat days
-  if (c.b12_cobalamin?.pct != null && c.b12_cobalamin.pct < 50) {
-    al.push({ cls: 'warn', t: `B12 ${Math.round(c.b12_cobalamin.pct)}% — energy and HRV will suffer. 200g beef or 3 eggs covers it.` });
+  const b12Pct = pctOf(c.b12_cobalamin, 2.4);
+  if (b12Pct != null && b12Pct < 50) {
+    al.push({ cls: 'warn', t: `B12 ${Math.round(b12Pct)}% — energy and HRV will suffer. 200g beef or 3 eggs covers it.` });
   }
 
   // Iron — anemic = RHR up, HRV down (mimics overtraining)
-  if (c.iron?.pct != null && c.iron.pct < 50) {
-    al.push({ cls: 'warn', t: `Iron ${Math.round(c.iron.pct)}% — low iron looks identical to overtraining (high RHR, low HRV). Red meat, dark leafy greens, or supp if persistent.` });
+  const ironPct = pctOf(c.iron, 8);
+  if (ironPct != null && ironPct < 50) {
+    al.push({ cls: 'warn', t: `Iron ${Math.round(ironPct)}% — low iron looks identical to overtraining (high RHR, low HRV). Red meat, dark leafy greens, or supp if persistent.` });
   }
 
   // Zinc — testosterone, recovery
-  if (c.zinc?.pct != null && c.zinc.pct < 50) {
-    al.push({ cls: 'warn', t: `Zinc ${Math.round(c.zinc.pct)}% — supports testosterone, immune function. Pumpkin seeds and beef are dense. Bonus: pumpkin seeds also fix Mg.` });
+  const znPct = pctOf(c.zinc, 11);
+  if (znPct != null && znPct < 50) {
+    al.push({ cls: 'warn', t: `Zinc ${Math.round(znPct)}% — supports testosterone, immune function. Pumpkin seeds and beef are dense. Bonus: pumpkin seeds also fix Mg.` });
   }
 
   // Omega-6 : Omega-3 ratio. Western diet typically 15-20:1, target <4:1.
