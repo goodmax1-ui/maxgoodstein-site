@@ -659,6 +659,33 @@
   }
   .gate p { text-align: center; color: var(--text-2); margin: 0 0 22px; font-size: 14px; }
   .gate-err { color: var(--bad); font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+  .gate-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 10px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+  .gate-divider::before, .gate-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .biometric-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 12px;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+  }
+  .biometric-status {
+    flex: 1; font-size: 13px; font-weight: 600;
+    color: var(--text-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .biometric-status .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: var(--text-4);
+  }
+  .biometric-status.on .dot { background: var(--ok); }
 
   /* ---------- settings details ---------- */
   details.settings { margin-top: 12px; }
@@ -840,7 +867,14 @@
 <section id="gate" class="gate">
   <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
   <h2>Cut Tracker</h2>
-  <p>Passphrase unlocks your data.</p>
+  <p id="gate-sub">Passphrase unlocks your data.</p>
+
+  <button class="primary" id="gate-biometric" style="display:none; width:100%; padding:14px; display:none; align-items:center; justify-content:center; gap:10px">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 7.58 5.58 4 10 4s8 3.58 8 8"/><path d="M22 12c0 4.42-3.58 8-8 8s-8-3.58-8-8"/><path d="M8 14c1.5 2 4 3 4 3s2.5-1 4-3"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+    <span id="gate-biometric-label">Unlock with Face ID</span>
+  </button>
+  <div id="gate-divider" class="gate-divider" style="display:none"><span>or</span></div>
+
   <form id="gate-form" autocomplete="off">
     <input id="gate-pass" type="password" placeholder="Passphrase" autocomplete="current-password" autofocus />
     <div class="btn-row" style="margin-top:12px">
@@ -1024,8 +1058,12 @@
     </section>
 
     <section class="card">
-      <h2>Baseline (locked)</h2>
+      <h2>Baseline</h2>
       <div id="baseline-view" style="font-size:13px; color:var(--text-2); line-height:1.8"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="secondary" id="baseline-recompute">Recompute from peak weight day</button>
+      </div>
+      <p class="hint" id="baseline-msg">Scans your logged days, picks your highest weight as the cut start, fills BF/lean/fat from the earliest body-comp scan, computes BMR via Mifflin-St Jeor from age + height + weight.</p>
     </section>
 
     <section class="card">
@@ -1056,6 +1094,20 @@
         <button class="secondary" id="c-qr">Pair another device</button>
       </div>
       <p class="hint" id="c-msg">Vault is end-to-end encrypted with your passphrase before leaving the device. Cloudflare only sees ciphertext.</p>
+    </section>
+
+    <section class="card" id="biometric-card">
+      <h2>Biometric unlock <span class="h2-meta" id="biometric-meta"></span></h2>
+      <p class="hint">Use Face ID / Touch ID to unlock instead of typing your passphrase. The biometric prompt derives an AES key bound to this device's secure enclave — same crypto strength, way less friction.</p>
+      <div class="biometric-row">
+        <div class="biometric-status" id="biometric-status"><span class="dot"></span><span id="biometric-status-text">not set up on this device</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="primary" id="biometric-enable" style="display:none">Set up biometric unlock</button>
+        <button class="secondary" id="biometric-disable" style="display:none">Remove biometric unlock</button>
+      </div>
+      <p class="hint" id="biometric-msg"></p>
+      <p class="hint">Each device needs its own setup (or use iCloud Keychain passkey sync). Passphrase keeps working as backup.</p>
     </section>
 
     <section class="card">
@@ -1138,6 +1190,122 @@ async function decryptVault(wrap, passphrase) {
   return JSON.parse(dec.decode(plain));
 }
 
+// ----- WebAuthn biometric unlock (PRF extension) -----
+// Stores a passkey credential + a salt + the passphrase wrapped by a key
+// derived from the credential's PRF output. Unlock: WebAuthn assertion ->
+// PRF eval -> HKDF -> AES-GCM key -> decrypt wrappedPass -> existing
+// passphrase-based vault decrypt.
+const WEBAUTHN_KEY = 'cut-tracker-webauthn-v1';
+
+function webauthnSupported() {
+  return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
+}
+function biometricConfig() {
+  try { const raw = localStorage.getItem(WEBAUTHN_KEY); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
+}
+function clearBiometric() { localStorage.removeItem(WEBAUTHN_KEY); }
+
+async function deriveKeyFromPRF(prfOutput) {
+  const ikm = await crypto.subtle.importKey('raw', prfOutput, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: enc.encode('cut-tracker-vault-key-v1') },
+    ikm,
+    { name: 'AES-GCM', length: 256 },
+    false, ['encrypt', 'decrypt']
+  );
+}
+
+// Register a platform passkey and wrap the passphrase under the PRF-derived key.
+async function registerBiometric(passphrase) {
+  if (!webauthnSupported()) throw new Error('WebAuthn unavailable on this browser.');
+
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const userId = crypto.getRandomValues(new Uint8Array(16));
+  const cred = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name: 'Cut Tracker', id: location.hostname },
+      user: { id: userId, name: 'cut-tracker', displayName: 'Cut Tracker' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        userVerification: 'required',
+        residentKey: 'preferred',
+      },
+      extensions: { prf: {} },
+      timeout: 60000,
+    },
+  });
+  if (!cred) throw new Error('Registration cancelled.');
+
+  // Verify PRF is supported. Some browsers report enabled=true on create();
+  // others require the follow-up get() to confirm. We always do the get().
+  const credentialId = new Uint8Array(cred.rawId);
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+
+  let assertion;
+  try {
+    assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rpId: location.hostname,
+        allowCredentials: [{ type: 'public-key', id: credentialId }],
+        userVerification: 'required',
+        extensions: { prf: { eval: { first: salt } } },
+        timeout: 60000,
+      },
+    });
+  } catch (e) {
+    throw new Error('Biometric verify failed: ' + e.message);
+  }
+
+  const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
+  if (!prfOutput) {
+    throw new Error('Browser does not support PRF extension. Update Safari/Chrome.');
+  }
+
+  const wrapKey = await deriveKeyFromPRF(new Uint8Array(prfOutput));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const wrappedPass = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, wrapKey, enc.encode(passphrase)
+  );
+  localStorage.setItem(WEBAUTHN_KEY, JSON.stringify({
+    v: 1,
+    credentialId: b64e(credentialId),
+    salt: b64e(salt),
+    iv: b64e(iv),
+    ct: b64e(wrappedPass),
+    createdAt: Date.now(),
+  }));
+}
+
+// Trigger biometric prompt -> return the unwrapped passphrase.
+async function unlockBiometric() {
+  if (!webauthnSupported()) throw new Error('WebAuthn unavailable.');
+  const cfg = biometricConfig();
+  if (!cfg) throw new Error('Biometric not set up on this device.');
+
+  const assertion = await navigator.credentials.get({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rpId: location.hostname,
+      allowCredentials: [{ type: 'public-key', id: b64d(cfg.credentialId) }],
+      userVerification: 'required',
+      extensions: { prf: { eval: { first: b64d(cfg.salt) } } },
+      timeout: 60000,
+    },
+  });
+  const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
+  if (!prfOutput) throw new Error('PRF extension unavailable. Re-set up biometric.');
+
+  const wrapKey = await deriveKeyFromPRF(new Uint8Array(prfOutput));
+  const passBuf = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: b64d(cfg.iv) }, wrapKey, b64d(cfg.ct)
+  );
+  return dec.decode(passBuf);
+}
+
 // ----- Vault state -----
 let VAULT = null;
 let PASSPHRASE = null;
@@ -1151,6 +1319,7 @@ const DEFAULT_VAULT = {
     body_fat_pct: 24.3, lean_mass_kg: 63.2, fat_mass_kg: 20.3,
     resting_hr: 51, hrv_oura: 95, hrv_apple: 84,
     maintenance_kcal: 2800, bmr: 1786,
+    age: 32, height_cm: 177,
   },
   targets: {
     kcal: 1900, protein_min: 135, protein_max: 150,
@@ -1591,6 +1760,40 @@ function render() {
   renderTargets();
   renderDays();
   loadCloudIntoForm();
+  renderBiometric();
+}
+
+function renderBiometric() {
+  const supported = webauthnSupported();
+  const cfg = biometricConfig();
+  const statusText = $('biometric-status-text');
+  const statusEl = $('biometric-status');
+  const enableBtn = $('biometric-enable');
+  const disableBtn = $('biometric-disable');
+  const meta = $('biometric-meta');
+
+  if (!supported) {
+    statusText.textContent = 'not supported on this browser';
+    statusEl.classList.remove('on');
+    enableBtn.style.display = 'none';
+    disableBtn.style.display = 'none';
+    meta.innerHTML = '<span class="pill muted">unavailable</span>';
+    return;
+  }
+  if (cfg) {
+    const when = cfg.createdAt ? new Date(cfg.createdAt).toLocaleDateString() : '';
+    statusText.textContent = `enabled${when ? ` · set up ${when}` : ''}`;
+    statusEl.classList.add('on');
+    enableBtn.style.display = 'none';
+    disableBtn.style.display = 'inline-flex';
+    meta.innerHTML = '<span class="pill ok">on</span>';
+  } else {
+    statusText.textContent = 'not set up on this device';
+    statusEl.classList.remove('on');
+    enableBtn.style.display = 'inline-flex';
+    disableBtn.style.display = 'none';
+    meta.innerHTML = '<span class="pill muted">off</span>';
+  }
 }
 
 // ---------- HERO ----------
@@ -2500,8 +2703,57 @@ function renderBaseline() {
     Date: ${b.date} · Weight: ${b.weight_lb} lb<br>
     BF: ${b.body_fat_pct}% · Lean: ${leanLb} lb · Fat: ${fatLb} lb<br>
     RHR: ${b.resting_hr} · HRV (Apple/Oura): ${b.hrv_apple} / ${b.hrv_oura} ms<br>
-    Maintenance: ${b.maintenance_kcal} kcal · BMR: ${b.bmr} kcal
+    Maintenance: ${b.maintenance_kcal} kcal · BMR: ${b.bmr} kcal · Age ${b.age ?? '—'} · Height ${b.height_cm ?? '—'} cm
   `;
+}
+
+// Mifflin-St Jeor BMR for males. Female would be -161 instead of +5.
+function mifflinBMR(weight_kg, height_cm, age) {
+  return Math.round(10 * weight_kg + 6.25 * height_cm - 5 * age + 5);
+}
+
+function computeBaselineFromData() {
+  const withWeight = VAULT.days.filter(d => d.health?.weight_kg != null);
+  if (withWeight.length === 0) return null;
+
+  // Peak weight day = cut start
+  const peak = withWeight.reduce((a, b) => b.health.weight_kg > a.health.weight_kg ? b : a);
+
+  // Earliest day with BF% reading (used as best-known starting body comp)
+  const withBF = VAULT.days
+    .filter(d => d.health?.body_fat_pct != null)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const bfDay = withBF[0];
+  const bfPct = bfDay?.health?.body_fat_pct ?? VAULT.baseline.body_fat_pct;
+
+  // Derive lean/fat at the peak weight using the earliest known BF%
+  const wKg = peak.health.weight_kg;
+  const fatKg = bfPct != null ? wKg * (bfPct / 100) : VAULT.baseline.fat_mass_kg;
+  const leanKg = bfPct != null ? wKg * (1 - bfPct / 100) : VAULT.baseline.lean_mass_kg;
+
+  // RHR/HRV from the same peak day, or rolling-7d avg if missing
+  const rhr = peak.health.resting_hr ?? rollingAvg(VAULT.days.map(d => d.health?.resting_hr), 7) ?? VAULT.baseline.resting_hr;
+  const hrv = peak.health.hrv_ms ?? rollingAvg(VAULT.days.map(d => d.health?.hrv_ms), 7) ?? VAULT.baseline.hrv_apple;
+
+  const age = VAULT.baseline.age ?? 32;
+  const height_cm = VAULT.baseline.height_cm ?? 177;
+  const bmr = mifflinBMR(wKg, height_cm, age);
+  const maintenance = Math.round(bmr * 1.5);
+
+  return {
+    date: peak.date,
+    weight_kg: +wKg.toFixed(2),
+    weight_lb: +(wKg * KG_TO_LB).toFixed(1),
+    body_fat_pct: bfPct != null ? +bfPct.toFixed(2) : VAULT.baseline.body_fat_pct,
+    lean_mass_kg: +leanKg.toFixed(2),
+    fat_mass_kg: +fatKg.toFixed(2),
+    resting_hr: Math.round(rhr),
+    hrv_apple: Math.round(hrv),
+    hrv_oura: VAULT.baseline.hrv_oura,
+    maintenance_kcal: maintenance,
+    bmr,
+    age, height_cm,
+  };
 }
 
 function renderTargets() {
@@ -2541,23 +2793,66 @@ function renderDays() {
 // ============================================================
 //   WIRING
 // ============================================================
+async function completeUnlock(pass) {
+  await loadVault(pass);
+  $('gate').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  render();
+  consumePendingCron().then(r => {
+    if (r.merged > 0) setSyncPill('ok', `+${r.merged} cron`);
+  });
+  // Soft-prompt for biometric setup if device supports it and not yet configured
+  if (webauthnSupported() && !biometricConfig() && !sessionStorage.getItem('cut-tracker-bio-prompted')) {
+    sessionStorage.setItem('cut-tracker-bio-prompted', '1');
+    setTimeout(() => {
+      if (confirm('Set up Face ID / Touch ID unlock now? Faster next time, same crypto strength.')) {
+        document.querySelector('[data-tab="history"]').click();
+        setTimeout(() => {
+          $('biometric-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      }
+    }, 500);
+  }
+}
+
 $('gate-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const pass = $('gate-pass').value;
   $('gate-err').textContent = '';
   if (!pass || pass.length < 4) { $('gate-err').textContent = 'Passphrase must be at least 4 chars.'; return; }
+  try { await completeUnlock(pass); }
+  catch (err) { $('gate-err').textContent = 'Wrong passphrase, or vault corrupt.'; }
+});
+
+// ---------- Biometric gate button ----------
+function refreshGateBiometric() {
+  const has = biometricConfig();
+  const supported = webauthnSupported();
+  const btn = $('gate-biometric');
+  const divider = $('gate-divider');
+  const sub = $('gate-sub');
+  if (!has || !supported) {
+    btn.style.display = 'none';
+    divider.style.display = 'none';
+    sub.textContent = 'Passphrase unlocks your data.';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  divider.style.display = 'flex';
+  sub.textContent = 'Use Face ID / Touch ID, or your passphrase.';
+}
+$('gate-biometric').addEventListener('click', async () => {
+  $('gate-err').textContent = '';
+  $('gate-err').style.color = '';
   try {
-    await loadVault(pass);
-    $('gate').classList.add('hidden');
-    $('app').classList.remove('hidden');
-    render();
-    consumePendingCron().then(r => {
-      if (r.merged > 0) setSyncPill('ok', `+${r.merged} cron`);
-    });
+    const pass = await unlockBiometric();
+    await completeUnlock(pass);
   } catch (err) {
-    $('gate-err').textContent = 'Wrong passphrase, or vault corrupt.';
+    $('gate-err').style.color = 'var(--bad)';
+    $('gate-err').textContent = err.message || 'Biometric unlock failed.';
   }
 });
+refreshGateBiometric();
 
 $('lock-btn').addEventListener('click', () => {
   VAULT = null; PASSPHRASE = null;
@@ -2819,6 +3114,36 @@ $('targets-save').addEventListener('click', async () => {
   render();
 });
 
+$('baseline-recompute').addEventListener('click', async () => {
+  const msg = $('baseline-msg');
+  const proposed = computeBaselineFromData();
+  if (!proposed) {
+    msg.style.color = 'var(--bad)';
+    msg.textContent = 'No logged days with weight yet. Add Apple Health data first.';
+    return;
+  }
+  const old = VAULT.baseline;
+  const diff = [
+    ['Date', old.date, proposed.date],
+    ['Weight', `${old.weight_lb} lb`, `${proposed.weight_lb} lb`],
+    ['BF', `${old.body_fat_pct}%`, `${proposed.body_fat_pct}%`],
+    ['Lean', `${(old.lean_mass_kg*KG_TO_LB).toFixed(1)} lb`, `${(proposed.lean_mass_kg*KG_TO_LB).toFixed(1)} lb`],
+    ['Fat', `${(old.fat_mass_kg*KG_TO_LB).toFixed(1)} lb`, `${(proposed.fat_mass_kg*KG_TO_LB).toFixed(1)} lb`],
+    ['RHR', `${old.resting_hr}`, `${proposed.resting_hr}`],
+    ['HRV', `${old.hrv_apple} ms`, `${proposed.hrv_apple} ms`],
+    ['BMR', `${old.bmr} kcal`, `${proposed.bmr} kcal`],
+    ['Maint.', `${old.maintenance_kcal} kcal`, `${proposed.maintenance_kcal} kcal`],
+  ];
+  const lines = diff.map(([k, a, b]) => `  ${k}: ${a}  →  ${b}`).join('\n');
+  if (!confirm(`Replace baseline with values from your peak weight day?\n\n${lines}\n\nThis only changes the comparison anchor — your logged days are not touched.`)) return;
+
+  VAULT.baseline = { ...VAULT.baseline, ...proposed };
+  await saveVault();
+  render();
+  msg.style.color = 'var(--ok)';
+  msg.textContent = `✓ Baseline updated to ${proposed.date} / ${proposed.weight_lb} lb.`;
+});
+
 $('export-btn').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(VAULT, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2845,7 +3170,45 @@ $('change-pass-btn').addEventListener('click', async () => {
   if (!newPass || newPass.length < 4) return;
   PASSPHRASE = newPass;
   await saveVault();
-  alert('Passphrase changed. Re-lock and re-unlock with the new one. Push to cloud if other devices use the cloud copy.');
+  // Biometric config wraps the OLD passphrase; invalidate it.
+  if (biometricConfig()) {
+    clearBiometric();
+    renderBiometric();
+    refreshGateBiometric();
+    alert('Passphrase changed. Biometric unlock was disabled — re-enable it from the History tab if you want.');
+  } else {
+    alert('Passphrase changed. Re-lock and re-unlock with the new one. Push to cloud if other devices use the cloud copy.');
+  }
+});
+
+// ---------- Biometric setup wiring ----------
+$('biometric-enable').addEventListener('click', async () => {
+  $('biometric-msg').textContent = '';
+  $('biometric-msg').style.color = '';
+  if (!PASSPHRASE) {
+    $('biometric-msg').style.color = 'var(--bad)';
+    $('biometric-msg').textContent = 'Re-unlock with passphrase first (shouldn\'t happen — file a bug).';
+    return;
+  }
+  $('biometric-msg').textContent = 'Follow the Face ID / Touch ID prompt…';
+  try {
+    await registerBiometric(PASSPHRASE);
+    $('biometric-msg').style.color = 'var(--ok)';
+    $('biometric-msg').textContent = '✓ Enabled. Next time you open the app, tap Unlock with Face ID.';
+    renderBiometric();
+    refreshGateBiometric();
+  } catch (e) {
+    $('biometric-msg').style.color = 'var(--bad)';
+    $('biometric-msg').textContent = '✗ ' + (e.message || 'Setup failed.');
+  }
+});
+$('biometric-disable').addEventListener('click', () => {
+  if (!confirm('Remove biometric unlock on this device? Passphrase still works.')) return;
+  clearBiometric();
+  renderBiometric();
+  refreshGateBiometric();
+  $('biometric-msg').style.color = 'var(--text-3)';
+  $('biometric-msg').textContent = 'Removed from this device.';
 });
 
 // ---------- Cloud sync UI wiring ----------
@@ -2937,6 +3300,7 @@ $('wipe-btn').addEventListener('click', () => {
   if (!confirm('Wipe the entire vault on this device? Cannot undo.')) return;
   if (!confirm('Really sure?')) return;
   localStorage.removeItem(STORE_KEY);
+  clearBiometric();
   location.reload();
 });
 
