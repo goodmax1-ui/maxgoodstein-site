@@ -679,28 +679,86 @@ function parseCSVLine(line) {
 }
 
 const CRON_KEYS = {
+  // general
   energy: ['Energy', 'Calories', 'kcal'],
-  protein: ['Protein'],
-  carbs_total: ['Carbs', 'Carbohydrate', 'Carbohydrates'],
-  carbs_net: ['Net Carbs'],
-  fiber: ['Fiber'],
-  fat: ['Fat'],
-  sodium: ['Sodium'],
-  potassium: ['Potassium'],
-  magnesium: ['Magnesium'],
-  calcium: ['Calcium'],
-  iron: ['Iron'],
-  zinc: ['Zinc'],
-  vit_d: ['Vitamin D'],
-  vit_b12: ['B12', 'Vitamin B12'],
-  vit_c: ['Vitamin C'],
+  alcohol: ['Alcohol'],
   caffeine: ['Caffeine'],
   water: ['Water'],
+  ash: ['Ash'],
+  // carbs
+  carbs_total: ['Carbs', 'Carbohydrate', 'Carbohydrates', 'Total Carbs'],
+  carbs_net: ['Net Carbs'],
+  fiber: ['Fiber'],
+  starch: ['Starch'],
+  sugars: ['Sugars', 'Sugar'],
+  sugars_added: ['Added Sugars'],
+  // lipids
+  fat: ['Fat', 'Total Fat'],
+  fat_saturated: ['Saturated', 'Saturated Fat'],
+  fat_monounsaturated: ['Monounsaturated', 'Monounsaturated Fat'],
+  fat_polyunsaturated: ['Polyunsaturated', 'Polyunsaturated Fat'],
+  fat_trans: ['Trans-Fats', 'Trans Fat', 'Trans Fats'],
+  omega_3: ['Omega-3', 'Omega 3'],
+  omega_6: ['Omega-6', 'Omega 6'],
+  cholesterol: ['Cholesterol'],
+  ala: ['ALA', 'Alpha-Linolenic Acid'],
+  epa: ['EPA', 'Eicosapentaenoic Acid'],
+  dha: ['DHA', 'Docosahexaenoic Acid'],
+  linoleic: ['Linoleic Acid', 'Linoleic'],
+  // protein + amino acids
+  protein: ['Protein'],
+  cystine: ['Cystine', 'Cysteine'],
+  histidine: ['Histidine'],
+  isoleucine: ['Isoleucine'],
+  leucine: ['Leucine'],
+  lysine: ['Lysine'],
+  methionine: ['Methionine'],
+  phenylalanine: ['Phenylalanine'],
+  threonine: ['Threonine'],
+  tryptophan: ['Tryptophan'],
+  tyrosine: ['Tyrosine'],
+  valine: ['Valine'],
+  arginine: ['Arginine'],
+  // vitamins
+  vit_a: ['Vitamin A'],
+  b1_thiamine: ['B1', 'Thiamin', 'Thiamine'],
+  b2_riboflavin: ['B2', 'Riboflavin'],
+  b3_niacin: ['B3', 'Niacin'],
+  b5_pantothenic: ['B5', 'Pantothenic Acid'],
+  b6_pyridoxine: ['B6', 'Pyridoxine'],
+  b7_biotin: ['B7', 'Biotin'],
+  b9_folate: ['B9', 'Folate'],
+  b12_cobalamin: ['B12', 'Cobalamin', 'Vitamin B12'],
+  vit_c: ['Vitamin C'],
+  vit_d: ['Vitamin D'],
+  vit_e: ['Vitamin E'],
+  vit_k: ['Vitamin K'],
+  // minerals
+  calcium: ['Calcium'],
+  chloride: ['Chloride'],
+  chromium: ['Chromium'],
+  copper: ['Copper'],
+  fluoride: ['Fluoride'],
+  iodine: ['Iodine'],
+  iron: ['Iron'],
+  magnesium: ['Magnesium'],
+  manganese: ['Manganese'],
+  molybdenum: ['Molybdenum'],
+  phosphorus: ['Phosphorus'],
+  potassium: ['Potassium'],
+  selenium: ['Selenium'],
+  sodium: ['Sodium'],
+  zinc: ['Zinc'],
 };
 function matchKey(nutrient) {
   const n = nutrient.trim().toLowerCase();
+  // Exact match first (avoids "Protein" matching "Protein (g)" before "Net Carbs")
   for (const [k, names] of Object.entries(CRON_KEYS)) {
-    if (names.some(x => n === x.toLowerCase() || n.startsWith(x.toLowerCase()))) return k;
+    if (names.some(x => n === x.toLowerCase())) return k;
+  }
+  // Then prefix match
+  for (const [k, names] of Object.entries(CRON_KEYS)) {
+    if (names.some(x => n.startsWith(x.toLowerCase()))) return k;
   }
   return null;
 }
