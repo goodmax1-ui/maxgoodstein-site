@@ -1379,7 +1379,7 @@ async function saveVault(opts = {}) {
   localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
   const cfg = getCloudConfig();
   if (!opts.skipCloud && cfg && cfg.url && cfg.token && cfg.auto !== false) {
-    try { await cloudPutVault(cfg, wrap); setSyncPill('ok', 'synced'); }
+    try { await cloudPutVault(cfg, wrap); recordSync(); setSyncPill('ok', 'synced'); refreshSyncStatusText(); }
     catch (e) { setSyncPill('warn', 'local only'); }
   }
 }
@@ -1452,12 +1452,22 @@ async function cloudTest(cfg) {
   if (!res.ok) throw new Error('network: ' + res.status);
   return true;
 }
+const LAST_SYNC_KEY = 'cut-tracker-last-sync-v1';
+function recordSync() {
+  try { localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); } catch {}
+}
+function getLastSync() {
+  const v = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0', 10);
+  return v > 0 ? v : null;
+}
 function setSyncPill(cls, txt) {
   const p = $('sync-pill');
   if (!p) return;
   if (!txt) { p.style.display = 'none'; return; }
   p.className = 'pill ' + cls;
+  const ls = getLastSync();
   p.innerHTML = `<span class="pulse"></span>${txt}`;
+  if (ls && (cls === 'ok')) p.title = `Last synced ${fmtTimeStamp(ls)}`;
   p.style.display = 'inline-flex';
 }
 
@@ -1683,6 +1693,28 @@ function daysBetween(a, b) {
   return Math.round(ms / (24 * 3600 * 1000));
 }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// Format a UNIX ms timestamp as "4:23pm" if today, "May 24 4:23pm" otherwise.
+function fmtTimeStamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', '');
+  if (sameDay) return time;
+  const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${date} ${time}`;
+}
+
+// Format as relative time: "just now", "5m ago", "2h ago", "3d ago".
+function timeAgo(ts) {
+  if (!ts) return '';
+  const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (s < 30) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
 
 // ----- Number tween -----
 const tweenState = new WeakMap();
@@ -1931,7 +1963,8 @@ function renderToday() {
   $('read-card').classList.remove('hidden');
 
   const h = latest.health || {};
-  $('today-date').textContent = `${latest.date}${latest.cron ? ' · Health + Cronometer' : ' · Health only'}`;
+  const updated = latest.savedAt ? ` · updated ${fmtTimeStamp(latest.savedAt)}` : '';
+  $('today-date').textContent = `${latest.date}${latest.cron ? ' · Health + Cronometer' : ' · Health only'}${updated}`;
 
   // Energy balance
   renderEnergyBalance(h, VAULT.baseline, VAULT.targets);
@@ -3235,9 +3268,15 @@ function loadCloudIntoForm() {
   $('c-url').value = cfg.url || '';
   $('c-token').value = cfg.token || '';
   $('c-auto').value = cfg.auto === false ? '0' : '1';
+  refreshSyncStatusText();
+}
+function refreshSyncStatusText() {
+  const cfg = getCloudConfig() || {};
+  const ls = getLastSync();
+  const lastTxt = ls ? ` · last synced ${fmtTimeStamp(ls)}` : '';
   $('sync-status-text').textContent = !cfg.url || !cfg.token
     ? 'not configured'
-    : (cfg.auto === false ? 'manual sync' : 'auto-sync on');
+    : (cfg.auto === false ? 'manual sync' : 'auto-sync on') + lastTxt;
 }
 $('c-save').addEventListener('click', () => {
   const url = $('c-url').value.trim();
@@ -3265,8 +3304,10 @@ $('c-push').addEventListener('click', async () => {
     const wrap = await encryptVault(VAULT, PASSPHRASE);
     await cloudPutVault(cfg, wrap);
     localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
+    recordSync();
     setSyncPill('ok', 'synced');
-    $('c-msg').innerHTML = '<span style="color:var(--ok)">✓ Pushed to cloud.</span>';
+    refreshSyncStatusText();
+    $('c-msg').innerHTML = `<span style="color:var(--ok)">✓ Pushed to cloud at ${fmtTimeStamp(Date.now())}.</span>`;
   } catch (e) { $('c-msg').innerHTML = `<span style="color:var(--bad)">✗ ${e.message}</span>`; setSyncPill('bad', 'error'); }
 });
 function buildCronConfig() {
@@ -3306,9 +3347,11 @@ $('c-pull').addEventListener('click', async () => {
     VAULT.targets = { ...DEFAULT_VAULT.targets, ...obj.targets };
     VAULT.days = obj.days || [];
     localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
+    recordSync();
     render();
     setSyncPill('ok', 'pulled');
-    $('c-msg').innerHTML = '<span style="color:var(--ok)">✓ Pulled from cloud.</span>';
+    refreshSyncStatusText();
+    $('c-msg').innerHTML = `<span style="color:var(--ok)">✓ Pulled from cloud at ${fmtTimeStamp(Date.now())}.</span>`;
   } catch (e) {
     $('c-msg').innerHTML = `<span style="color:var(--bad)">✗ ${e.message} — passphrase must match the one used to push.</span>`;
   }
