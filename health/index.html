@@ -1178,12 +1178,33 @@ $('lock-btn').addEventListener('click', () => {
   $('gate-pass').focus();
 });
 
+function extractJSON(raw) {
+  let s = raw.trim();
+  // Strip markdown code fences (```json ... ``` or ``` ... ```) that LLMs add despite instructions
+  s = s.replace(/^```(?:json|JSON)?\s*\n?/i, '').replace(/\n?```\s*$/, '');
+  // Normalize smart quotes that iOS keyboards auto-insert
+  s = s.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+  // Strip leading prose ("Here's the JSON:") and trailing prose by extracting first { .. last }
+  const firstBrace = s.indexOf('{');
+  const lastBrace = s.lastIndexOf('}');
+  if (firstBrace > 0 || lastBrace < s.length - 1) {
+    if (firstBrace >= 0 && lastBrace > firstBrace) s = s.slice(firstBrace, lastBrace + 1);
+  }
+  // Strip trailing commas before } or ] — common LLM mistake
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  return JSON.parse(s);
+}
+
 $('health-save').addEventListener('click', async () => {
   const txt = $('health-input').value.trim();
   $('health-msg').textContent = '';
   if (!txt) { $('health-msg').textContent = 'Paste JSON first.'; return; }
   let obj;
-  try { obj = JSON.parse(txt); } catch { $('health-msg').textContent = 'Invalid JSON.'; return; }
+  try { obj = extractJSON(txt); }
+  catch (e) {
+    $('health-msg').innerHTML = `<span style="color:var(--bad)">Invalid JSON — ${e.message}.</span> Tell Claude: "reply with ONLY the JSON object, no prose, no code fences."`;
+    return;
+  }
   const date = obj.date || todayISO();
   // accept lb if no kg
   if (obj.weight_lb && !obj.weight_kg) obj.weight_kg = obj.weight_lb / 2.2046;
