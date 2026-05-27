@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
   :root {
     --bg: #eef1f4;
@@ -300,6 +301,20 @@
 </head>
 <body>
 
+<!-- ============ PAIR QR MODAL ============ -->
+<div id="qr-modal" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; padding:18px">
+  <div style="background:var(--bg-elev); border-radius:var(--radius); padding:24px; max-width:380px; width:100%; box-shadow:var(--shadow-md)">
+    <h2 style="margin:0 0 8px; font-size:18px; font-weight:800; letter-spacing:-0.02em">Pair another device</h2>
+    <p style="margin:0 0 16px; font-size:13px; color:var(--text-2); line-height:1.5">Open iPhone <b>Camera</b> app → point at the code → tap the banner. Auto-fills Worker URL + token. Then unlock /health with your passphrase.</p>
+    <div id="qr-container" style="display:flex; justify-content:center; padding:14px; background:#fff; border-radius:var(--radius-sm); margin-bottom:14px"></div>
+    <p style="margin:0 0 12px; font-size:11px; color:var(--bad); line-height:1.5"><b>Don't screenshot or share.</b> Anyone with this code can read/write your encrypted vault (still needs your passphrase to decrypt). Auto-hides in <span id="qr-countdown">90</span>s.</p>
+    <div class="btn-row">
+      <button class="secondary" id="qr-copy" style="flex:1">Copy link instead</button>
+      <button class="primary" id="qr-close" style="flex:1">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ GATE ============ -->
 <section id="gate" class="gate">
   <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
@@ -407,6 +422,7 @@
         <button class="secondary" id="c-push">Push to cloud</button>
         <button class="secondary" id="c-pull">Pull from cloud</button>
         <button class="secondary" id="c-test">Test connection</button>
+        <button class="secondary" id="c-qr">Pair another device</button>
       </div>
       <p class="hint" id="c-msg">Vault is end-to-end encrypted with your passphrase before leaving the device. Cloudflare only sees ciphertext.</p>
 
@@ -1735,6 +1751,90 @@ $('wipe-btn').addEventListener('click', () => {
   localStorage.removeItem(STORE_KEY);
   location.reload();
 });
+
+// ----- QR Pairing -----
+// Encodes worker URL + token in a one-shot URL. iPhone Camera scans → opens
+// /health?pair=base64(JSON) → page auto-fills cloud config before unlock.
+function buildPairURL() {
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return null;
+  const payload = btoa(JSON.stringify({ url: cfg.url, token: cfg.token }));
+  return `${location.origin}/health/?pair=${payload}`;
+}
+let qrTimer = null;
+function showPairQR() {
+  const url = buildPairURL();
+  if (!url) {
+    $('c-msg').innerHTML = '<span style="color:var(--bad)">Save sync config first.</span>';
+    return;
+  }
+  if (typeof qrcode === 'undefined') {
+    $('c-msg').innerHTML = '<span style="color:var(--bad)">QR library failed to load. Check internet, refresh page.</span>';
+    return;
+  }
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  // 4px module, 4-module quiet zone, fits ~260px box.
+  $('qr-container').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true });
+  // Make the SVG scale to container
+  const svg = $('qr-container').querySelector('svg');
+  if (svg) { svg.removeAttribute('width'); svg.removeAttribute('height'); svg.style.width = '100%'; svg.style.maxWidth = '260px'; svg.style.height = 'auto'; }
+  $('qr-modal').style.display = 'flex';
+  let remaining = 90;
+  $('qr-countdown').textContent = remaining;
+  clearInterval(qrTimer);
+  qrTimer = setInterval(() => {
+    remaining--;
+    $('qr-countdown').textContent = remaining;
+    if (remaining <= 0) hidePairQR();
+  }, 1000);
+  window.__pairURL = url; // for the copy button
+}
+function hidePairQR() {
+  clearInterval(qrTimer);
+  qrTimer = null;
+  $('qr-modal').style.display = 'none';
+  $('qr-container').innerHTML = '';
+  delete window.__pairURL;
+}
+$('c-qr').addEventListener('click', showPairQR);
+$('qr-close').addEventListener('click', hidePairQR);
+$('qr-copy').addEventListener('click', async () => {
+  if (!window.__pairURL) return;
+  try {
+    await navigator.clipboard.writeText(window.__pairURL);
+    $('qr-copy').textContent = 'Copied ✓';
+    setTimeout(() => { $('qr-copy').textContent = 'Copy link instead'; }, 1500);
+  } catch {
+    $('qr-copy').textContent = 'Copy failed';
+  }
+});
+
+// Page-load pair handler: if /health was opened with ?pair=BASE64, decode it
+// and auto-populate cloud config. Runs BEFORE the gate so unlock pulls from
+// cloud cleanly. Cleans the URL afterward so the token isn't in browser
+// history.
+(function handlePairOnLoad() {
+  try {
+    const u = new URL(window.location.href);
+    const p = u.searchParams.get('pair');
+    if (!p) return;
+    const cfg = JSON.parse(atob(p));
+    if (cfg && cfg.url && cfg.token) {
+      setCloudConfig({ url: cfg.url, token: cfg.token, auto: true });
+      u.searchParams.delete('pair');
+      history.replaceState(null, '', u.toString());
+      // Soft notice once the user unlocks
+      const orig = $('gate-err').textContent;
+      $('gate-err').style.color = 'var(--ok)';
+      $('gate-err').textContent = 'Paired ✓ — unlock with your passphrase.';
+    }
+  } catch (e) {
+    $('gate-err').style.color = 'var(--bad)';
+    $('gate-err').textContent = 'Pair link malformed — paste manually.';
+  }
+})();
 
 </script>
 </body>
