@@ -30,6 +30,8 @@ self.addEventListener('fetch', e => {
   if (url.hostname.endsWith('en.wikipedia.org')) return;
   if (url.hostname === 'parks-proxy.goodmax1.workers.dev') return;
   if (url.hostname === 'tree-map.nycgovparks.org') return;
+  // Map tiles — too many/too large to cache; let the browser handle them.
+  if (url.hostname.endsWith('basemaps.cartocdn.com')) return;
 
   const isShell = e.request.mode === 'navigate' ||
     url.pathname === '/parks/' ||

@@ -177,7 +177,7 @@
   .back-btn:hover { border-color: var(--accent); color: var(--accent); }
   .back-btn:active { transform: scale(0.92); background: var(--accent-soft); }
   .back-btn svg { width: 18px; height: 18px; }
-  body.detail .back-btn { display: inline-flex; }
+  body.detail .back-btn, body.mapview .back-btn { display: inline-flex; }
   body.detail h1 .header-title { display: none; }
   .header-park-name {
     display: none;
@@ -2073,6 +2073,75 @@
     display: inline-block;
   }
 
+  /* Restroom map */
+  .map-cta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.15s var(--ease-spring), border-color 0.15s;
+  }
+  .map-cta:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .map-cta:active { transform: scale(0.99); }
+  .map-cta-icon {
+    width: 46px; height: 46px; flex-shrink: 0;
+    border-radius: 13px;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 16px -6px var(--accent-glow);
+  }
+  .map-cta-icon svg { width: 22px; height: 22px; }
+  .map-cta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .map-cta-title { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
+  .map-cta-sub { font-size: 12px; color: var(--text-3); font-weight: 500; }
+  .map-cta-arrow { color: var(--accent); font-size: 20px; font-weight: 800; flex-shrink: 0; }
+
+  #mapView { padding: 0; }
+  .map-bar {
+    display: flex; align-items: baseline; gap: 10px;
+    max-width: 760px; margin: 0 auto;
+    padding: 4px 4px 14px;
+  }
+  .map-title { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.02em; }
+  .map-count {
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  #mapCanvas {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    height: calc(100vh - 150px);
+    min-height: 380px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  .leaflet-container { background: var(--bg-soft); font-family: 'Inter', sans-serif; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--bg-elev);
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+  }
+  .map-popup { display: flex; flex-direction: column; gap: 8px; padding: 2px; min-width: 150px; }
+  .map-popup strong { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .map-popup-btn {
+    align-self: flex-start;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+
   .hidden { display: none !important; }
   [hidden] { display: none !important; }
   .error {
@@ -2136,6 +2205,15 @@
         </div>
       </div>
     </div>
+
+    <a class="home-card reveal map-cta" id="restroomMapCard" href="#/map">
+      <span class="map-cta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="5" r="1.8"/><path d="M5.5 9.5h4l-1 6.5h1.5V22h-3v-6h-1.5"/><circle cx="16.5" cy="5" r="1.8"/><path d="M14 10.5h5l-2 5.5h2V22h-3v-5h-2"/></svg></span>
+      <span class="map-cta-text">
+        <span class="map-cta-title">Restroom map</span>
+        <span class="map-cta-sub">Every public bathroom in NYC parks</span>
+      </span>
+      <span class="map-cta-arrow">&rarr;</span>
+    </a>
 
     <div class="home-card reveal d1" id="featuredCardWrap">
       <div class="featured-card" id="featuredCard"></div>
@@ -2285,6 +2363,15 @@
       </div>
       <div class="links-grid" id="links"></div>
     </div>
+  </div>
+
+  <!-- Restroom map view -->
+  <div id="mapView" class="hidden">
+    <div class="map-bar">
+      <h2 class="map-title">Park Restrooms</h2>
+      <span class="map-count" id="mapCount"></span>
+    </div>
+    <div id="mapCanvas"></div>
   </div>
 </main>
 
@@ -2467,10 +2554,17 @@ function clearBoroughTheme() {
 }
 
 // ---- View switching ----
+function setActiveView(view) {
+  $('searchView').classList.toggle('hidden', view !== 'search');
+  $('detailView').classList.toggle('hidden', view !== 'detail');
+  const mv = $('mapView');
+  if (mv) mv.classList.toggle('hidden', view !== 'map');
+  document.body.classList.toggle('detail', view === 'detail');
+  document.body.classList.toggle('mapview', view === 'map');
+}
+
 function showSearch() {
-  document.body.classList.remove('detail');
-  $('searchView').classList.remove('hidden');
-  $('detailView').classList.add('hidden');
+  setActiveView('search');
   if ($('headerParkName')) $('headerParkName').textContent = '';
   clearBoroughTheme();
   renderRecent();
@@ -2769,11 +2863,96 @@ function renderNearMe(parkRes, treeRes, walkingParks) {
   });
 }
 function showDetail() {
-  document.body.classList.add('detail');
-  $('searchView').classList.add('hidden');
-  $('detailView').classList.remove('hidden');
+  setActiveView('detail');
   window.scrollTo({ top: 0, behavior: 'instant' });
   setupReveal();
+}
+
+// ---- Restroom map (Leaflet, lazy-loaded) ----
+let _leafletPromise = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (_leafletPromise) return _leafletPromise;
+  _leafletPromise = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    const js = document.createElement('script');
+    js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    js.onload = () => resolve();
+    js.onerror = reject;
+    document.head.appendChild(js);
+  });
+  return _leafletPromise;
+}
+
+let mapInstance = null;
+let restroomLayerLoaded = false;
+
+async function showMap() {
+  setActiveView('map');
+  clearBoroughTheme();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if ($('headerParkName')) $('headerParkName').textContent = 'Park Restrooms';
+  try {
+    await loadLeaflet();
+  } catch {
+    $('mapCount').textContent = 'Map failed to load';
+    return;
+  }
+  if (!mapInstance) {
+    mapInstance = L.map('mapCanvas', { zoomControl: true, attributionControl: true })
+      .setView([40.7128, -73.96], 11);
+    const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const tileUrl = dark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    L.tileLayer(tileUrl, {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      subdomains: 'abcd', maxZoom: 19,
+    }).addTo(mapInstance);
+  }
+  // The container had zero size while hidden; recompute now that it's visible.
+  setTimeout(() => mapInstance.invalidateSize(), 80);
+  if (!restroomLayerLoaded) {
+    restroomLayerLoaded = true;
+    loadRestroomMarkers();
+  }
+}
+
+async function loadRestroomMarkers() {
+  const countEl = $('mapCount');
+  countEl.textContent = 'Loading restrooms…';
+  try {
+    const rows = await cachedFetchJSON(
+      'restrooms-all',
+      `${SOCRATA}/n8q6-i44s.json?$where=${encodeURIComponent('public_restroom=true')}&$select=gispropnum,description,multipolygon&$limit=1200`,
+      24 * 60 * 60 * 1000
+    );
+    let n = 0;
+    const layer = L.layerGroup();
+    for (const r of rows) {
+      const c = centroidFromMultipolygon(r.multipolygon);
+      if (!c) continue;
+      n++;
+      const desc = r.description || 'Public restroom';
+      const id = r.gispropnum || '';
+      const marker = L.circleMarker([c.lat, c.lng], {
+        radius: 5, color: '#ffffff', weight: 1.2, fillColor: '#52b788', fillOpacity: 0.92,
+      });
+      marker.bindPopup(
+        `<div class="map-popup"><strong>${escapeHTML(desc)}</strong>` +
+        (id ? `<a class="map-popup-btn" href="#/p/${escapeHTML(id)}">Open park &rarr;</a>` : '') +
+        `</div>`
+      );
+      marker.addTo(layer);
+    }
+    layer.addTo(mapInstance);
+    countEl.textContent = `${n} restrooms`;
+  } catch (e) {
+    countEl.textContent = 'Could not load restrooms';
+  }
 }
 
 function normalize(s) {
@@ -5484,6 +5663,9 @@ async function init() {
   }, { passive: true });
 
   window.addEventListener('popstate', handleRoute);
+  // hashchange lets in-app anchor links (e.g. map popups linking to #/p/{id}) route
+  // without a full reload. handleRoute guards against re-loading the current park.
+  window.addEventListener('hashchange', handleRoute);
 
   renderRecent();
   handleRoute();
@@ -5501,10 +5683,17 @@ async function init() {
 function handleRoute() {
   const match = window.location.hash.match(/^#\/p\/(.+)$/);
   if (match) {
-    loadDetailByGispropnum(decodeURIComponent(match[1]), true);
-  } else {
-    showSearch();
+    const id = decodeURIComponent(match[1]);
+    // Skip if this park is already open (prevents double-load from our own pushState).
+    if (currentPark && currentPark.gispropnum === id && document.body.classList.contains('detail')) return;
+    loadDetailByGispropnum(id, true);
+    return;
   }
+  if (window.location.hash === '#/map') {
+    showMap();
+    return;
+  }
+  showSearch();
 }
 
 init();
