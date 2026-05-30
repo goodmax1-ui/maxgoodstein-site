@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food — Max Goodstein</title>
+  <meta name="description" content="Keto meal planner and grocery shopping companion">
+  <link rel="manifest" href="/food/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/food/icon.svg">
+  <link rel="apple-touch-icon" href="/food/apple-touch-icon.png">
+  <meta name="theme-color" content="#2d6a4f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Food">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #2d6a4f;
+      --accent-hover: #40916c;
+      --accent-soft: #e8f1ec;
+      --bg: #fafafa;
+      --text: #1a1a1a;
+      --text-secondary: #555555;
+      --text-muted: #888888;
+      --border: #e0e0e0;
+      --card-bg: #ffffff;
+      --danger: #b54545;
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .page { max-width: 720px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+
+    header.top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .back-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .back-link:hover { color: var(--accent); }
+    h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+    .subtitle { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.75rem; }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Week view ── */
+    .week {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .day {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+    .day.today {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 1px 4px rgba(45, 106, 79, 0.08);
+    }
+    .day-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .day-name { font-weight: 600; font-size: 1rem; }
+    .today-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--accent);
+      color: white;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+    }
+    .meals {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 0.25rem 0.75rem;
+      font-size: 0.92rem;
+    }
+    .meal-label {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      align-self: start;
+      padding-top: 0.15rem;
+    }
+    .meal-text { color: var(--text); }
+    .meal-text .macros {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .day-totals {
+      margin-top: 0.6rem;
+      padding-top: 0.55rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .day-totals strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .day-totals .carbs { color: var(--accent); font-weight: 600; }
+    .day.today .day-totals { border-top-color: rgba(45,106,79,0.3); }
+
+    /* ── Shopping lists ── */
+    .lists { display: flex; flex-direction: column; gap: 1.25rem; }
+    .list-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .list-head {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+    }
+    .list-title { font-size: 1rem; font-weight: 600; }
+    .list-when { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .list-body { padding: 0.25rem 0.5rem 0.5rem; }
+
+    /* Row wrap holds checkbox-label and the optional pantry button */
+    .item-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0.25rem;
+    }
+    .item {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      min-height: 44px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item:hover { background: #f4f4f4; }
+    .item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .item input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 6px;
+      height: 12px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .item input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .item-text { font-size: 0.95rem; color: var(--text); overflow-wrap: anywhere; min-width: 0; }
+    .item input:checked ~ .item-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    /* Pantry "have it" / "need it" button */
+    .pantry-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      padding: 0 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-height: 44px;
+      align-self: center;
+      transition: all 0.15s ease;
+    }
+    .pantry-btn:hover {
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .pantry-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .subgroup {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.85rem 0.65rem 0.3rem;
+    }
+
+    /* Pantry shelf — collapsed section at bottom of Initial list */
+    .pantry-shelf {
+      margin: 0.6rem 0.5rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+    }
+    .pantry-shelf summary {
+      cursor: pointer;
+      padding: 0.6rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      list-style: none;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .pantry-shelf summary::-webkit-details-marker { display: none; }
+    .pantry-shelf summary::before {
+      content: '▸';
+      margin-right: 0.4rem;
+      transition: transform 0.15s ease;
+    }
+    .pantry-shelf[open] summary::before { transform: rotate(90deg); display: inline-block; }
+    .pantry-shelf-body { padding-bottom: 0.5rem; }
+    .pantry-shelf .item-text { color: var(--text-muted); }
+
+    /* ── Store selector ── */
+    .store-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .store-bar-row {
+      display: flex;
+      gap: 0.4rem;
+      align-items: stretch;
+    }
+    .store-select {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      padding: 0.55rem 0.7rem;
+      min-height: 44px;
+      cursor: pointer;
+    }
+    .store-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .locate-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0 0.85rem;
+      min-height: 44px;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .locate-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .locate-btn:disabled { opacity: 0.55; cursor: progress; }
+    .locate-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .store-notes {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      padding: 0.1rem 0.1rem 0;
+    }
+    .store-status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .store-status.ok { color: var(--accent); }
+    .store-status.err { color: var(--danger); }
+
+    /* Running total bar */
+    .total-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      background: var(--accent-soft);
+      border: 1px solid rgba(45,106,79,0.25);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .total-bar .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .total-bar .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Aisle headers */
+    .aisle-head {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 0.6rem 0.65rem 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .aisle-head::before {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .aisle-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .aisle-head span { white-space: nowrap; padding: 0 0.2rem; }
+
+    /* Quick-add */
+    .quick-add {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .quick-add input {
+      flex: 1;
+      min-width: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      min-height: 44px;
+    }
+    .quick-add input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-color: var(--accent);
+    }
+    .quick-add button {
+      background: var(--accent);
+      color: white;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 0 1.1rem;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      min-height: 44px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .quick-add button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .quick-add button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Receipt scan */
+    .receipt-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .btn-scan {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .btn-scan:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .btn-scan:disabled { opacity: 0.55; cursor: progress; }
+    .btn-key {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0.3rem 0.4rem;
+      text-decoration: underline;
+    }
+    .btn-key:hover { color: var(--accent); }
+    .scan-result {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      padding: 0.4rem 0.1rem 0;
+      line-height: 1.5;
+    }
+    .scan-result.ok { color: var(--accent); }
+    .scan-result.err { color: var(--danger); }
+
+    /* Best-store hint */
+    .item-hint {
+      font-size: 0.74rem;
+      color: var(--accent);
+      margin-top: 0.15rem;
+      display: block;
+    }
+
+    /* Price affordance */
+    .price-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-height: 44px;
+      align-self: center;
+      transition: all 0.15s ease;
+      min-width: 44px;
+    }
+    .price-btn.has-value { color: var(--accent); }
+    .price-btn:hover { background: var(--accent-soft); color: var(--accent); }
+    .price-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Today view ── */
+    .today-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .today-card.primary {
+      border-color: var(--accent);
+      box-shadow: 0 1px 4px rgba(45,106,79,0.08);
+    }
+    .today-head {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .today-card.primary .today-head {
+      background: var(--accent-soft);
+      border-bottom-color: rgba(45,106,79,0.2);
+    }
+    .today-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .today-card.primary .today-eyebrow { color: var(--accent); }
+    .today-title { font-size: 1rem; font-weight: 600; margin-top: 0.15rem; }
+    .today-empty {
+      padding: 1.25rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .today-allset {
+      background: var(--accent-soft);
+      border: 1px solid rgba(45,106,79,0.25);
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .checked-card { padding: 0; }
+    .checked-card summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .checked-card summary::-webkit-details-marker { display: none; }
+    .checked-card summary::after {
+      content: '▸';
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+      padding-right: 0.25rem;
+    }
+    .checked-card[open] summary::after { transform: rotate(90deg); }
+    .checked-card .list-body .item-text { color: var(--text-muted); text-decoration: line-through; }
+
+    /* ── Tips ── */
+    .tips {
+      margin-top: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+    .tips h2 { margin-bottom: 0.5rem; }
+    .tips ul { list-style: disc; padding-left: 1.25rem; color: var(--text-secondary); font-size: 0.92rem; }
+    .tips li { margin-bottom: 0.3rem; }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+    .btn-reset {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--danger);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.7rem 1.1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 44px;
+      transition: all 0.15s ease;
+    }
+    .btn-reset:hover { border-color: var(--danger); background: #fdf3f3; }
+    .btn-reset:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+    /* ── Tab bar ── */
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      padding: 0.5rem 0 0.75rem;
+      margin: 0 0 1rem;
+      display: flex;
+      gap: 0.4rem;
+    }
+    .tabs::before {
+      content: '';
+      position: absolute;
+      inset: -1.5rem -1.25rem 0;
+      background: var(--bg);
+      z-index: -1;
+    }
+    .tab {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.7rem 0.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 44px;
+      transition: all 0.15s ease;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .panel[hidden] { display: none; }
+
+    @media (min-width: 600px) {
+      .week { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 2rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      :root { --bg: #fff; --card-bg: #fff; --border: #ccc; }
+      body { background: #fff; }
+      .page { padding: 0.5in; max-width: none; }
+      .back-link, .actions, .today-badge, .tabs, .pantry-btn, .price-btn, .store-bar, .total-bar, .quick-add, .item-hint { display: none !important; }
+      .panel[hidden] { display: block !important; }
+      .day, .list-card, .tips, .today-card {
+        border: none;
+        box-shadow: none;
+        background: #fff;
+        page-break-inside: avoid;
+      }
+      .day.today, .today-card.primary .today-head { background: #fff; }
+      .list-head, .today-head { position: static; border-bottom: 1px solid #ccc; padding-left: 0; }
+      .list-body { padding: 0; }
+      .item { padding: 0.15rem 0; min-height: 0; }
+      .item::before { content: '•'; margin-right: 0.4rem; color: #000; }
+      .item input[type="checkbox"] { display: none; }
+      .item input:checked ~ .item-text { color: #000; text-decoration: none; }
+      .subgroup { padding: 0.4rem 0 0.1rem; }
+      .pantry-shelf, .pantry-shelf[open] { display: none !important; }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1rem; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <h1>Food</h1>
+      <a class="back-link" href="/">← home</a>
+    </header>
+    <p class="subtitle">Keto meal plan + grocery shopping companion.</p>
+
+    <nav class="tabs" role="tablist" aria-label="View">
+      <button class="tab" id="tab-today" role="tab" aria-controls="panel-today" aria-selected="true" type="button">Today</button>
+      <button class="tab" id="tab-shopping" role="tab" aria-controls="panel-shopping" aria-selected="false" type="button">All lists</button>
+      <button class="tab" id="tab-meals" role="tab" aria-controls="panel-meals" aria-selected="false" type="button">Meals</button>
+    </nav>
+
+    <section class="panel" id="panel-today" role="tabpanel" aria-labelledby="tab-today" aria-label="Today's shopping">
+      <div class="store-bar" aria-label="Store selector">
+        <div class="store-bar-row">
+          <select id="store-select" class="store-select" aria-label="Choose a store"></select>
+          <button id="locate-btn" class="locate-btn" type="button" aria-label="Detect nearest store from my location" title="Use my location">📍</button>
+        </div>
+        <div id="store-status" class="store-status" hidden></div>
+        <div id="store-notes" class="store-notes" hidden></div>
+        <div class="receipt-bar">
+          <button id="scan-btn" class="btn-scan" type="button">📷 Scan receipt</button>
+          <input id="scan-input" type="file" accept="image/*" capture="environment" hidden>
+          <button id="key-btn" class="btn-key" type="button" hidden>Edit API key</button>
+        </div>
+        <div id="scan-result" class="scan-result" hidden></div>
+      </div>
+      <form id="quick-add-form" class="quick-add" autocomplete="off">
+        <input id="quick-add-input" type="text" placeholder="Add an item to this week…" aria-label="Add an item">
+        <button type="submit">Add</button>
+      </form>
+      <div id="today"></div>
+    </section>
+
+    <section class="panel" id="panel-shopping" role="tabpanel" aria-labelledby="tab-shopping" aria-label="All shopping lists" hidden>
+      <div class="lists" id="lists"></div>
+    </section>
+
+    <section class="panel" id="panel-meals" role="tabpanel" aria-labelledby="tab-meals" aria-label="Weekly meal plan" hidden>
+      <h2>This week</h2>
+      <div class="week" id="week"></div>
+    </section>
+
+    <aside class="tips" aria-label="Storage tips">
+      <h2>Tips</h2>
+      <ul>
+        <li>Wash all greens once when you get home; dry well, store with a paper towel.</li>
+        <li>Keep avocados on the counter until they yield to gentle pressure, then move to the fridge.</li>
+        <li>Cook fresh fish within 1–2 days of buying; freeze if it'll sit longer.</li>
+        <li>Pre-cook the chicken thighs and ribeye on the day you buy them — leftovers carry the week.</li>
+        <li>Hard-boil a few eggs on Sunday for fast salad protein.</li>
+      </ul>
+    </aside>
+
+    <div class="actions">
+      <button class="btn-reset" id="reset" type="button">Start new week</button>
+    </div>
+  </main>
+
+  <script>
+  /*
+   * ── How to edit ──
+   * MEAL_PLAN: 7 entries, one per day. Each meal is { name, cal, c, p, f }
+   *            where c/p/f are grams of net carbs / protein / fat. Add a top-level
+   *            `note` string for callouts (e.g. "save half for Thursday").
+   * SHOPPING:  array of lists. Each list has:
+   *              id     — stable slug; do NOT change after first use (localStorage key prefix).
+   *              title  — heading shown on the card.
+   *              when   — day name; used to figure out which trip is "today/next".
+   *              groups — array of { label?, items[] }.
+   *              pantry — set to true on the Initial list so items show a "have it" button.
+   * Renaming or reordering items will lose their checked state because keys are
+   * list.id + groupIdx + itemIdx. Adding items at the end is safe.
+   */
+
+  const MEAL_PLAN = [
+    { day: 'Monday', meals: {
+      breakfast: { name: 'Eggs + bacon + avocado', cal: 520, c: 5, p: 27, f: 42 },
+      lunch:     { name: 'Tuna salad in lettuce cups', cal: 340, c: 3, p: 30, f: 22 },
+      dinner:    { name: 'Pan-seared salmon with asparagus', cal: 480, c: 5, p: 38, f: 32 },
+    }},
+    { day: 'Tuesday', meals: {
+      breakfast: { name: 'Greek yogurt + walnuts', cal: 410, c: 7, p: 18, f: 32 },
+      lunch:     { name: 'Turkey-and-cheese roll-ups with olives', cal: 430, c: 4, p: 32, f: 30 },
+      dinner:    { name: 'Ribeye with garlic butter and roasted broccoli', cal: 720, c: 6, p: 50, f: 52 },
+    }, note: 'Save half the ribeye for Thursday lunch.' },
+    { day: 'Wednesday', meals: {
+      breakfast: { name: 'Cheese-and-spinach omelet', cal: 430, c: 3, p: 28, f: 32 },
+      lunch:     { name: 'Chef salad (greens, turkey, cheese, egg, olives)', cal: 480, c: 6, p: 32, f: 34 },
+      dinner:    { name: 'Chicken thighs with cauliflower mash', cal: 560, c: 8, p: 42, f: 38 },
+    }, note: 'Cook all the chicken thighs at once for leftovers.' },
+    { day: 'Thursday', meals: {
+      breakfast: { name: 'Eggs + bacon + avocado', cal: 520, c: 5, p: 27, f: 42 },
+      lunch:     { name: 'Leftover ribeye over greens', cal: 450, c: 4, p: 28, f: 34 },
+      dinner:    { name: 'Ground beef taco bowls (beef, cheese, salsa, sour cream, avocado over romaine)', cal: 680, c: 8, p: 38, f: 52 },
+    }},
+    { day: 'Friday', meals: {
+      breakfast: { name: 'Greek yogurt + walnuts + chia', cal: 450, c: 9, p: 19, f: 35 },
+      lunch:     { name: 'Tuna lettuce cups', cal: 340, c: 3, p: 30, f: 22 },
+      dinner:    { name: 'Zoodles with shrimp scampi', cal: 440, c: 8, p: 36, f: 26 },
+    }},
+    { day: 'Saturday', meals: {
+      breakfast: { name: 'Cheese-and-spinach omelet', cal: 430, c: 3, p: 28, f: 32 },
+      lunch:     { name: 'Chef salad', cal: 480, c: 6, p: 32, f: 34 },
+      dinner:    { name: 'Sheet-pan sausage and peppers', cal: 620, c: 9, p: 28, f: 50 },
+    }},
+    { day: 'Sunday', meals: {
+      breakfast: { name: 'Eggs + bacon + avocado', cal: 520, c: 5, p: 27, f: 42 },
+      lunch:     { name: 'Leftover sausage and peppers (or chef salad)', cal: 480, c: 7, p: 26, f: 36 },
+      dinner:    { name: 'Reheated chicken thighs with a fresh salad', cal: 520, c: 5, p: 38, f: 36 },
+    }},
+  ];
+
+  const SHOPPING = [
+    {
+      id: 'initial',
+      title: 'Initial shop — pantry + staples',
+      when: 'Monday',
+      pantry: true,
+      groups: [
+        { label: 'Pantry / fats', items: [
+          'Olive oil', 'Avocado oil', 'Apple cider vinegar', 'Dijon mustard', 'Mayo',
+          'Jarred olives', 'Dill pickles', 'Sugar-free salsa', 'Caesar dressing',
+          'Taco seasoning (or cumin / chili / paprika / garlic powder / onion powder / salt / pepper)',
+          'Almonds', 'Walnuts', 'Chia seeds', 'Pork rinds',
+        ]},
+        { label: 'Dairy', items: [
+          'Butter (1 lb)', 'Heavy cream (1 pt)', 'Cream cheese (8 oz)', 'Block cheddar (8 oz)',
+          'Shredded Parmesan', 'String cheese', 'Sour cream', 'Plain full-fat Greek yogurt (16 oz)',
+        ]},
+        { label: 'Long-lasting produce', items: [
+          '1 head garlic', '1 small yellow onion', '1 lemon', '1 bunch celery',
+          '1 head cauliflower', '2–3 bell peppers', '2 zucchini',
+        ]},
+        { label: 'Other', items: [
+          '2 dozen eggs', '2 cans tuna', 'Sparkling water (optional)',
+        ]},
+      ],
+    },
+    {
+      id: 'shop1-mon',
+      title: 'Shop 1 — Mon → Tue',
+      when: 'Monday',
+      groups: [{ items: [
+        'Bacon (1 lb)', 'Salmon fillet (6–8 oz)', 'Ribeye (10–12 oz)',
+        '1 bunch asparagus', '2 avocados', '1 romaine heart', '1 bag baby spinach',
+      ]}],
+    },
+    {
+      id: 'shop2-wed',
+      title: 'Shop 2 — Wed → Thu',
+      when: 'Wednesday',
+      groups: [{ items: [
+        'Chicken thighs, boneless skinless (~1.5 lb)', 'Ground beef 80/20 (1 lb)',
+        'Deli turkey (½ lb)', '1 head broccoli', '1 clamshell mixed greens',
+        '2 avocados', '1 cucumber',
+      ]}],
+    },
+    {
+      id: 'shop3-fri',
+      title: 'Shop 3 — Fri → Sat',
+      when: 'Friday',
+      groups: [{ items: [
+        'Shrimp, peeled (½ lb)', 'Italian sausage links (½ lb)',
+        '1 pint cherry tomatoes', '1 bunch parsley or cilantro',
+        '1 clamshell mixed greens', '1 avocado',
+      ]}],
+    },
+    {
+      id: 'shop4-sun',
+      title: 'Shop 4 — light top-up',
+      when: 'Sunday',
+      groups: [{ items: [
+        '1 avocado', '1 small bag salad greens',
+        'Eggs (if low)', 'Bacon (if low)', 'Butter (if low)',
+        'Berries — raspberries or blackberries (optional)',
+      ]}],
+    },
+  ];
+
+  /*
+   * STORES: aisle order matches how you walk the store; the first matching
+   * keyword in `osmMatch` is used for geolocation auto-detect (it's tested
+   * against OpenStreetMap `name` tags for nearby supermarkets/butchers).
+   */
+  const STORES = [
+    { id: 'tj',   name: "Trader Joe's",         osmMatch: /trader\s*joe/i,
+      aisleOrder: ['produce','dairy','meat','pantry','canned','beverage'],
+      notes: "Get the 28-oz Greek yogurt; their ribeye is hit-or-miss. Ricer cauliflower in frozen if fresh is gone." },
+    { id: 'wf',   name: 'Whole Foods',          osmMatch: /whole\s*foods/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "365 brand is fine for staples; check the day-old produce rack." },
+    { id: 'cost', name: 'Costco',               osmMatch: /costco/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Bulk only — olive oil, almonds, eggs, chicken thighs are good buys here." },
+    { id: 'aldi', name: 'Aldi',                 osmMatch: /aldi/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Cheapest dairy and eggs; produce can be hit-or-miss — inspect before bagging." },
+    { id: 'bf',   name: 'Brooklyn Fare',        osmMatch: /brooklyn\s*fare/i,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "Higher prices but great meat counter and fresh produce." },
+    { id: 'bam',  name: 'Big Apple Meat Market',osmMatch: /big\s*apple\s*meat/i,
+      aisleOrder: ['meat','dairy','produce','pantry','canned','beverage'],
+      notes: "Meat-focused. Ribeye, ground beef, sausage are the wins; limited produce." },
+    { id: 'other',name: 'Other store',          osmMatch: null,
+      aisleOrder: ['produce','meat','dairy','pantry','canned','beverage'],
+      notes: "" },
+  ];
+  const STORE_BY_ID = Object.fromEntries(STORES.map(s => [s.id, s]));
+  const AISLE_LABEL = {
+    produce: 'Produce',
+    meat: 'Meat / fish',
+    dairy: 'Dairy / eggs',
+    pantry: 'Pantry / snacks',
+    canned: 'Canned / dry',
+    beverage: 'Beverages',
+  };
+
+  function categorize(text) {
+    const t = text.toLowerCase();
+    if (/bacon|salmon|ribeye|chicken|beef|turkey|shrimp|sausage|fish/.test(t)) return 'meat';
+    if (/avocado|asparagus|romaine|spinach|broccoli|greens|cucumber|tomato|parsley|cilantro|berries|berry|salad|garlic|onion|lemon|lime|celery|cauliflower|pepper|zucchini|sprout|brussels|kale|arugula|carrot|radish|mushroom|squash|fennel|leek|herb|basil|mint|ginger|scallion|leaf|fruit|apple|banana|orange|grape|melon/.test(t)) return 'produce';
+    if (/butter|cream|cheese|cheddar|parmesan|yogurt|sour|egg/.test(t)) return 'dairy';
+    if (/tuna|canned/.test(t)) return 'canned';
+    if (/sparkling|water/.test(t)) return 'beverage';
+    return 'pantry';
+  }
+
+  const CHECKS_KEY    = 'food.checks.v1';
+  const PANTRY_KEY    = 'food.pantry.v1';
+  const PRICES_KEY    = 'food.prices.v1';
+  const STORE_KEY     = 'food.store.v1';
+  const VIEW_KEY      = 'food.view.v1';
+  const ADHOC_KEY     = 'food.adhoc.v1';      // [{ key, text, ts }]
+  const PRICEHIST_KEY = 'food.pricehist.v1';  // [{ key, price, store, ts }] append-only
+  const APIKEY_KEY    = 'food.apikey.v1';     // string (Anthropic API key)
+
+  const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const todayName = () => DAY_ORDER[(new Date().getDay() + 6) % 7];
+  const dayIdx = (name) => DAY_ORDER.indexOf(name);
+
+  const loadPrices = () => loadJSON(PRICES_KEY);
+  const savePrices = (s) => saveJSON(PRICES_KEY, s);
+  const loadStoreId = () => { try { return localStorage.getItem(STORE_KEY) || ''; } catch { return ''; } };
+  const saveStoreId = (id) => { try { localStorage.setItem(STORE_KEY, id || ''); } catch {} };
+  const fmtPrice = (n) => '$' + (Math.round(n * 100) / 100).toFixed(2);
+
+  function loadAdhoc() {
+    try { const v = JSON.parse(localStorage.getItem(ADHOC_KEY)); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  }
+  function saveAdhoc(arr) {
+    try { localStorage.setItem(ADHOC_KEY, JSON.stringify(arr)); } catch {}
+  }
+  function loadPriceHist() {
+    try { const v = JSON.parse(localStorage.getItem(PRICEHIST_KEY)); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  }
+  function recordPrice(key, price, storeId) {
+    const hist = loadPriceHist();
+    hist.push({ key, price, store: storeId || '', ts: Date.now() });
+    // Trim runaway history at 2000 entries.
+    while (hist.length > 2000) hist.shift();
+    try { localStorage.setItem(PRICEHIST_KEY, JSON.stringify(hist)); } catch {}
+  }
+  function lastPriceFor(key, storeId) {
+    const hist = loadPriceHist();
+    for (let i = hist.length - 1; i >= 0; i--) {
+      const h = hist[i];
+      if (h.key === key && (!storeId || h.store === storeId)) return h;
+    }
+    if (!storeId) return null;
+    for (let i = hist.length - 1; i >= 0; i--) {
+      if (hist[i].key === key) return hist[i];
+    }
+    return null;
+  }
+  function avgPricesByStore(key) {
+    const sums = {}, counts = {};
+    loadPriceHist().forEach(h => {
+      if (h.key !== key || !h.store) return;
+      sums[h.store] = (sums[h.store] || 0) + Number(h.price);
+      counts[h.store] = (counts[h.store] || 0) + 1;
+    });
+    return Object.keys(sums).map(s => ({ store: s, avg: sums[s] / counts[s], count: counts[s] }));
+  }
+  function bestStoreHint(key, currentStoreId) {
+    // Need at least 2 stores with 2+ entries each to recommend a swap.
+    const stats = avgPricesByStore(key).filter(s => s.count >= 2);
+    if (stats.length < 2) return null;
+    stats.sort((a, b) => a.avg - b.avg);
+    const cheapest = stats[0];
+    if (cheapest.store === currentStoreId) return null;
+    const here = stats.find(s => s.store === currentStoreId);
+    const cheapName = STORE_BY_ID[cheapest.store]?.name || 'another store';
+    if (here && cheapest.avg >= here.avg * 0.95) return null; // not meaningfully cheaper
+    return `Cheaper at ${cheapName}: ${fmtPrice(cheapest.avg)} avg`;
+  }
+  const loadApiKey = () => { try { return localStorage.getItem(APIKEY_KEY) || ''; } catch { return ''; } };
+  const saveApiKey = (v) => { try { v ? localStorage.setItem(APIKEY_KEY, v) : localStorage.removeItem(APIKEY_KEY); } catch {} };
+
+  function loadJSON(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
+  }
+  function saveJSON(key, state) {
+    try { localStorage.setItem(key, JSON.stringify(state)); } catch {}
+  }
+  const loadChecks = () => loadJSON(CHECKS_KEY);
+  const saveChecks = (s) => saveJSON(CHECKS_KEY, s);
+  const loadPantry = () => loadJSON(PANTRY_KEY);
+  const savePantry = (s) => saveJSON(PANTRY_KEY, s);
+
+  function itemKey(listId, groupIdx, itemIdx) {
+    return `${listId}::${groupIdx}::${itemIdx}`;
+  }
+
+  /* Adhoc items become an ephemeral SHOPPING list at the front of the trips. */
+  function adhocList() {
+    const items = loadAdhoc();
+    if (!items.length) return null;
+    return {
+      id: 'adhoc',
+      title: 'Quick-add — this week',
+      when: todayName(),
+      adhoc: true,
+      groups: [{ items: items.map(a => a.text) }],
+      _adhocKeys: items.map(a => a.key),
+    };
+  }
+  function shoppingLists() {
+    const ad = adhocList();
+    return ad ? [ad, ...SHOPPING] : SHOPPING.slice();
+  }
+  // adhoc list uses its own keys keyed by stable id rather than position so
+  // adding/removing items doesn't shuffle check state.
+  function itemKeyForList(list, gi, ii) {
+    if (list.adhoc && list._adhocKeys) return list._adhocKeys[ii];
+    return itemKey(list.id, gi, ii);
+  }
+
+  function fmtMacros(m) {
+    return `${m.cal} cal · ${m.c}g carbs · ${m.p}p · ${m.f}f`;
+  }
+
+  /* ── Meals ── */
+  function renderWeek() {
+    const today = todayName();
+    const container = document.getElementById('week');
+    container.innerHTML = MEAL_PLAN.map(d => {
+      const isToday = d.day === today;
+      const meals = ['breakfast','lunch','dinner'];
+      const totals = meals.reduce((t, k) => {
+        const m = d.meals[k];
+        return { cal: t.cal + m.cal, c: t.c + m.c, p: t.p + m.p, f: t.f + m.f };
+      }, { cal: 0, c: 0, p: 0, f: 0 });
+
+      const mealRows = meals.map(k => {
+        const m = d.meals[k];
+        const label = k[0].toUpperCase() + k.slice(1);
+        return `<span class="meal-label">${label}</span><span class="meal-text">${m.name}<span class="macros">${fmtMacros(m)}</span></span>`;
+      }).join('');
+
+      return `
+        <article class="day${isToday ? ' today' : ''}"${isToday ? ' aria-current="date"' : ''}>
+          <div class="day-head">
+            <span class="day-name">${d.day}</span>
+            ${isToday ? '<span class="today-badge">Today</span>' : ''}
+          </div>
+          <div class="meals">
+            ${mealRows}
+            ${d.note ? `<span class="meal-label">Note</span><span class="meal-text" style="color:var(--text-secondary);font-style:italic">${d.note}</span>` : ''}
+          </div>
+          <div class="day-totals" aria-label="Daily totals">
+            <span><strong>${totals.cal}</strong> cal</span>
+            <span class="carbs">${totals.c}g net carbs</span>
+            <span>${totals.p}g protein</span>
+            <span>${totals.f}g fat</span>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  /* ── Item row HTML (shared by Lists + Today) ── */
+  function itemRowHtml({ key, idAttr, text, checked, pantryButton, showPrice, hint }) {
+    const id = idAttr || `chk-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
+    const prices = showPrice ? loadPrices() : null;
+    const price = prices ? prices[key] : undefined;
+    const priceLabel = price != null ? fmtPrice(price) : '+ $';
+    const priceClass = price != null ? 'price-btn has-value' : 'price-btn';
+    const safeText = text.replace(/"/g, '&quot;');
+    return `
+      <div class="item-row" data-row-key="${key}">
+        <label class="item" for="${id}">
+          <input type="checkbox" id="${id}" data-key="${key}" ${checked ? 'checked' : ''}>
+          <span class="item-text">${text}${hint ? `<span class="item-hint">💡 ${hint}</span>` : ''}</span>
+        </label>
+        ${showPrice ? `<button type="button" class="${priceClass}" data-price="${key}" aria-label="Set price for ${safeText}">${priceLabel}</button>` : ''}
+        ${pantryButton ? `<button type="button" class="pantry-btn" data-pantry="${pantryButton}" data-key="${key}">${pantryButton === 'add' ? 'have it' : 'need it'}</button>` : ''}
+      </div>
+    `;
+  }
+
+  /* ── All lists view ── */
+  function renderLists() {
+    const checks = loadChecks();
+    const pantry = loadPantry();
+    const container = document.getElementById('lists');
+
+    container.innerHTML = shoppingLists().map(list => {
+      const isPantryList = !!list.pantry;
+      const groupsHtml = list.groups.map((g, gi) => {
+        const itemsHtml = g.items.map((text, ii) => {
+          const key = itemKeyForList(list, gi, ii);
+          if (isPantryList && pantry[key]) return '';
+          return itemRowHtml({
+            key, text, checked: !!checks[key],
+            pantryButton: isPantryList ? 'add' : null,
+            showPrice: true,
+          });
+        }).join('');
+        return (g.label ? `<div class="subgroup">${g.label}</div>` : '') + itemsHtml;
+      }).join('');
+
+      let pantryShelfHtml = '';
+      if (isPantryList) {
+        const stashed = [];
+        list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+          const key = itemKeyForList(list, gi, ii);
+          if (pantry[key]) stashed.push({ key, text });
+        }));
+        if (stashed.length) {
+          const rows = stashed.map(({ key, text }) => itemRowHtml({
+            key, text, checked: false, pantryButton: 'remove',
+          })).join('');
+          pantryShelfHtml = `
+            <details class="pantry-shelf">
+              <summary>In pantry (${stashed.length}) — already at home</summary>
+              <div class="pantry-shelf-body">${rows}</div>
+            </details>
+          `;
+        }
+      }
+
+      return `
+        <section class="list-card" aria-label="${list.title}">
+          <header class="list-head">
+            <div class="list-title">${list.title}</div>
+            <div class="list-when">${list.when}</div>
+          </header>
+          <div class="list-body">${groupsHtml}${pantryShelfHtml}</div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  /* ── Today view ── */
+  function pickTodayTrips() {
+    const today = todayName();
+    const ti = dayIdx(today);
+    const lists = shoppingLists();
+    const ad = lists.find(l => l.adhoc);
+    const realLists = lists.filter(l => !l.adhoc);
+    const todays = realLists.filter(l => l.when === today);
+    let result;
+    if (todays.length) result = { trips: todays, label: `Today (${today})`, isToday: true };
+    else {
+      const sorted = [...realLists].sort((a, b) => dayIdx(a.when) - dayIdx(b.when));
+      const next = sorted.find(l => dayIdx(l.when) > ti);
+      const pick = next || sorted[0];
+      result = pick ? { trips: [pick], label: `Next: ${pick.when}`, isToday: false } : { trips: [], label: '', isToday: false };
+    }
+    // Quick-add items always travel with the current focus trip.
+    if (ad) result.trips = [ad, ...result.trips];
+    return result;
+  }
+
+  function uncheckedItems(list, checks, pantry) {
+    const out = [];
+    list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+      const key = itemKeyForList(list, gi, ii);
+      if (list.pantry && pantry[key]) return;
+      if (checks[key]) return;
+      out.push({ key, text, group: g.label });
+    }));
+    return out;
+  }
+
+  function checkedItemsGrouped(checks, pantry) {
+    const out = [];
+    shoppingLists().forEach(list => {
+      const items = [];
+      list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+        const key = itemKeyForList(list, gi, ii);
+        if (list.pantry && pantry[key]) return;
+        if (checks[key]) items.push({ key, text });
+      }));
+      if (items.length) out.push({ list, items });
+    });
+    return out;
+  }
+
+  function groupByAisle(items, store) {
+    const buckets = {};
+    items.forEach(it => {
+      const cat = categorize(it.text);
+      (buckets[cat] = buckets[cat] || []).push(it);
+    });
+    return store.aisleOrder
+      .filter(a => buckets[a])
+      .map(a => ({ aisle: a, items: buckets[a] }))
+      .concat(
+        Object.keys(buckets)
+          .filter(a => !store.aisleOrder.includes(a))
+          .map(a => ({ aisle: a, items: buckets[a] }))
+      );
+  }
+
+  function renderFocusBody(items, storeId, opts) {
+    const isPantryList = opts.isPantryList;
+    const store = storeId ? STORE_BY_ID[storeId] : null;
+    const rows = (its) => its.map(it => itemRowHtml({
+      key: it.key, text: it.text, checked: false,
+      pantryButton: it.isPantryList || isPantryList ? 'add' : null,
+      showPrice: true,
+      hint: storeId ? bestStoreHint(it.key, storeId) : null,
+    })).join('');
+    if (!store) return rows(items);
+    return groupByAisle(items, store).map(g => `
+      <div class="aisle-head"><span>${AISLE_LABEL[g.aisle] || g.aisle}</span></div>
+      ${rows(g.items)}
+    `).join('');
+  }
+
+  function renderToday() {
+    const checks = loadChecks();
+    const pantry = loadPantry();
+    const prices = loadPrices();
+    const storeId = loadStoreId();
+    const today = todayName();
+    const ti = dayIdx(today);
+    const { trips, label } = pickTodayTrips();
+
+    const carryover = SHOPPING
+      .filter(l => dayIdx(l.when) < ti && !trips.includes(l))
+      .map(l => ({ list: l, items: uncheckedItems(l, checks, pantry) }))
+      .filter(x => x.items.length);
+
+    const focusItems = trips.flatMap(l => uncheckedItems(l, checks, pantry).map(it => ({ ...it, listTitle: l.title, isPantryList: !!l.pantry })));
+
+    const checkedGroups = checkedItemsGrouped(checks, pantry);
+    const checkedCount = checkedGroups.reduce((n, g) => n + g.items.length, 0);
+
+    // Weekly total = sum of all prices for items currently checked off.
+    const weekTotal = Object.entries(prices).reduce((sum, [k, v]) => sum + (checks[k] ? Number(v) || 0 : 0), 0);
+
+    const container = document.getElementById('today');
+
+    const totalHtml = weekTotal > 0 ? `
+      <div class="total-bar" aria-label="Spent this week">
+        <span class="label">Spent this week</span>
+        <span class="value">${fmtPrice(weekTotal)}</span>
+      </div>
+    ` : '';
+
+    if (focusItems.length === 0 && carryover.length === 0 && checkedCount === 0) {
+      container.innerHTML = totalHtml + `<div class="today-allset">All caught up — nothing to buy right now.</div>`;
+      return;
+    }
+
+    const focusHtml = focusItems.length ? `
+      <section class="today-card primary" aria-label="${label}">
+        <div class="today-head">
+          <div class="today-eyebrow">${label}</div>
+          <div class="today-title">${trips.map(t => t.title).join(' + ')}</div>
+        </div>
+        <div class="list-body">${renderFocusBody(focusItems, storeId, { isPantryList: false })}</div>
+      </section>
+    ` : `<div class="today-allset">Nothing left for the next trip — nice.</div>`;
+
+    const carryoverHtml = carryover.length ? `
+      <section class="today-card" aria-label="Still to buy from earlier this week">
+        <div class="today-head">
+          <div class="today-eyebrow">Still to buy from earlier</div>
+          <div class="today-title">Carryover</div>
+        </div>
+        <div class="list-body">${
+          carryover.map(({ list, items }) => {
+            const tagged = items.map(it => ({ ...it, isPantryList: !!list.pantry }));
+            return `
+              <div class="subgroup">${list.title}</div>
+              ${renderFocusBody(tagged, storeId, { isPantryList: !!list.pantry })}
+            `;
+          }).join('')
+        }</div>
+      </section>
+    ` : '';
+
+    const checkedHtml = checkedCount ? `
+      <details class="today-card checked-card">
+        <summary class="today-head checked-summary">
+          <div>
+            <div class="today-eyebrow">Already checked off</div>
+            <div class="today-title">${checkedCount} item${checkedCount === 1 ? '' : 's'} — tap to undo</div>
+          </div>
+        </summary>
+        <div class="list-body">${
+          checkedGroups.map(({ list, items }) => `
+            <div class="subgroup">${list.title}</div>
+            ${items.map(it => itemRowHtml({
+              key: it.key, text: it.text, checked: true,
+              pantryButton: null, showPrice: true,
+            })).join('')}
+          `).join('')
+        }</div>
+      </details>
+    ` : '';
+
+    container.innerHTML = totalHtml + focusHtml + carryoverHtml + checkedHtml;
+  }
+
+  /* ── Wiring ── */
+  function rerenderShopping() {
+    renderToday();
+    renderLists();
+  }
+
+  function handleChange(e) {
+    const cb = e.target;
+    if (!(cb instanceof HTMLInputElement) || cb.type !== 'checkbox') return;
+    const next = loadChecks();
+    if (cb.checked) next[cb.dataset.key] = true;
+    else delete next[cb.dataset.key];
+    saveChecks(next);
+    // Re-render Today so the item disappears from the focus list immediately.
+    renderToday();
+  }
+
+  function handleClick(e) {
+    const pantryBtn = e.target.closest('.pantry-btn');
+    if (pantryBtn) {
+      e.preventDefault();
+      const key = pantryBtn.dataset.key;
+      const action = pantryBtn.dataset.pantry;
+      const pantry = loadPantry();
+      if (action === 'add') pantry[key] = true;
+      else delete pantry[key];
+      savePantry(pantry);
+      if (action === 'remove') {
+        const checks = loadChecks();
+        delete checks[key];
+        saveChecks(checks);
+      }
+      rerenderShopping();
+      return;
+    }
+    const priceBtn = e.target.closest('.price-btn');
+    if (priceBtn) {
+      e.preventDefault();
+      const key = priceBtn.dataset.price;
+      const prices = loadPrices();
+      const storeId = loadStoreId();
+      const current = prices[key];
+      const last = current == null ? lastPriceFor(key, storeId) : null;
+      const text = priceBtn.closest('.item-row')?.querySelector('.item-text')?.firstChild?.textContent?.trim() || 'item';
+      const hint = current != null
+        ? ''
+        : (last ? `\n\nLast at ${STORE_BY_ID[last.store]?.name || 'somewhere'}: ${fmtPrice(last.price)}` : '');
+      const defaultVal = current != null ? current : (last ? last.price : '');
+      const answer = prompt(`Price for "${text}"?\n\nEnter a number (e.g. 4.99) or leave blank to clear.${hint}`, defaultVal);
+      if (answer === null) return;
+      const trimmed = String(answer).trim();
+      if (trimmed === '') delete prices[key];
+      else {
+        const num = parseFloat(trimmed.replace(/^\$/, ''));
+        if (!isFinite(num) || num < 0) { alert('That doesn’t look like a price.'); return; }
+        prices[key] = num;
+        recordPrice(key, num, storeId);
+      }
+      savePrices(prices);
+      renderToday();
+    }
+  }
+
+  /* ── Stores + geolocation ── */
+  function populateStoreSelect() {
+    const sel = document.getElementById('store-select');
+    const current = loadStoreId();
+    sel.innerHTML = `<option value="">No store selected</option>` +
+      STORES.map(s => `<option value="${s.id}"${s.id === current ? ' selected' : ''}>${s.name}</option>`).join('');
+    updateStoreNotes();
+  }
+  function updateStoreNotes() {
+    const id = loadStoreId();
+    const store = id ? STORE_BY_ID[id] : null;
+    const notes = document.getElementById('store-notes');
+    if (store && store.notes) {
+      notes.textContent = store.notes;
+      notes.hidden = false;
+    } else {
+      notes.textContent = '';
+      notes.hidden = true;
+    }
+  }
+  function setStoreStatus(msg, kind) {
+    const el = document.getElementById('store-status');
+    if (!msg) { el.hidden = true; el.textContent = ''; el.classList.remove('ok','err'); return; }
+    el.textContent = msg;
+    el.hidden = false;
+    el.classList.remove('ok','err');
+    if (kind) el.classList.add(kind);
+  }
+  async function detectStoreByLocation() {
+    if (!navigator.geolocation) { setStoreStatus('Geolocation not available in this browser.', 'err'); return; }
+    const btn = document.getElementById('locate-btn');
+    btn.disabled = true;
+    setStoreStatus('Finding your location…');
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 })
+      );
+      const { latitude: lat, longitude: lon } = pos.coords;
+      setStoreStatus('Looking up nearby stores…');
+      const query = `[out:json][timeout:15];(node["shop"~"supermarket|convenience|grocery|wholesale|butcher"](around:300,${lat},${lon});way["shop"~"supermarket|convenience|grocery|wholesale|butcher"](around:300,${lat},${lon}););out center;`;
+      const resp = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query),
+      });
+      if (!resp.ok) throw new Error('OSM ' + resp.status);
+      const data = await resp.json();
+      const elements = data.elements || [];
+      let matched = null;
+      for (const el of elements) {
+        const name = el.tags && el.tags.name;
+        if (!name) continue;
+        for (const store of STORES) {
+          if (store.osmMatch && store.osmMatch.test(name)) { matched = { store, osmName: name }; break; }
+        }
+        if (matched) break;
+      }
+      if (matched) {
+        saveStoreId(matched.store.id);
+        document.getElementById('store-select').value = matched.store.id;
+        updateStoreNotes();
+        renderToday();
+        setStoreStatus(`Detected: ${matched.osmName}`, 'ok');
+      } else if (elements.length) {
+        const names = elements.map(e => e.tags && e.tags.name).filter(Boolean).slice(0, 3).join(', ');
+        setStoreStatus(`Nearby: ${names || 'unknown'} — none match your stores. Pick manually.`, 'err');
+      } else {
+        setStoreStatus('No grocery stores found within 300m. Pick manually.', 'err');
+      }
+    } catch (err) {
+      const code = err && err.code;
+      if (code === 1) setStoreStatus('Location permission denied.', 'err');
+      else if (code === 2 || code === 3) setStoreStatus('Couldn’t get your location. Try again outside.', 'err');
+      else setStoreStatus('Lookup failed — pick manually.', 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Clear every checkbox and quick-add items, and start fresh for a new week?\n\n(Pantry, prices, and price history stay.)')) return;
+    saveChecks({});
+    saveAdhoc([]);
+    rerenderShopping();
+  }
+
+  /* ── Quick-add ── */
+  function addAdhocItem(text) {
+    const t = String(text || '').trim();
+    if (!t) return;
+    const items = loadAdhoc();
+    items.push({ key: `adhoc::${Date.now()}::${Math.random().toString(36).slice(2, 6)}`, text: t, ts: Date.now() });
+    saveAdhoc(items);
+    rerenderShopping();
+  }
+
+  /* ── Receipt OCR ── */
+  function setScanResult(msg, kind) {
+    const el = document.getElementById('scan-result');
+    if (!msg) { el.hidden = true; el.textContent = ''; el.classList.remove('ok','err'); return; }
+    el.textContent = msg;
+    el.hidden = false;
+    el.classList.remove('ok','err');
+    if (kind) el.classList.add(kind);
+  }
+  function ensureApiKey() {
+    let key = loadApiKey();
+    if (key) return key;
+    const explain = 'Paste an Anthropic API key (starts with sk-ant-).\n\nGet one at console.anthropic.com.\nThe key is stored only on this device, in your browser. You pay Anthropic for usage (≈ $0.005 per receipt).';
+    const v = prompt(explain, '');
+    if (v && /^sk-ant-/.test(v.trim())) { saveApiKey(v.trim()); return v.trim(); }
+    if (v != null) alert('That doesn’t look like an Anthropic key (should start with "sk-ant-").');
+    return '';
+  }
+  function clearApiKey() {
+    if (!confirm('Forget the API key on this device?')) return;
+    saveApiKey('');
+    updateKeyBtn();
+  }
+  function updateKeyBtn() {
+    document.getElementById('key-btn').hidden = !loadApiKey();
+  }
+
+  async function imageToDataURL(file, maxDim = 1600) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  const RECEIPT_SYSTEM_PROMPT = [
+    'You extract line items from a grocery receipt photo.',
+    '',
+    'Output STRICT JSON only — no markdown, no prose, no code fences. Schema:',
+    '',
+    '{"items":[{"name":string,"price":number}],"total":number|null,"store":string|null}',
+    '',
+    'Rules:',
+    '- name: product name as printed; expand obvious abbreviations (AVO HASS → Hass avocado).',
+    '  Drop SKUs, UPCs, weight modifiers, and quantity prefixes unless informative.',
+    '- price: line-item price in US dollars as a number (e.g. 4.99). For weight × price rows use the line total.',
+    '- Skip subtotals, tax, tips, totals, discounts, store coupons, bag fees, deposits, gift card balances.',
+    '- total: receipt grand total if visible, else null.',
+    '- store: store name from the top of the receipt if recognizable (e.g. "Trader Joe\'s"), else null.',
+    '- If the image is not a grocery receipt, return {"items":[],"total":null,"store":null}.',
+  ].join('\n');
+
+  async function callClaudeForReceipt(apiKey, dataUrl) {
+    const m = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+    if (!m) throw new Error('Bad image data URL');
+    const [, mediaType, b64] = m;
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: [{ type: 'text', text: RECEIPT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
+            { type: 'text', text: 'Parse this receipt.' },
+          ],
+        }],
+      }),
+    });
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      throw new Error(`API ${resp.status}: ${errText.slice(0, 160)}`);
+    }
+    const data = await resp.json();
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    // Tolerate accidental code fencing.
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  }
+
+  function shoppingItemsForMatching() {
+    const out = [];
+    shoppingLists().forEach(list => list.groups.forEach((g, gi) => g.items.forEach((text, ii) => {
+      out.push({ key: itemKeyForList(list, gi, ii), text, listId: list.id });
+    })));
+    return out;
+  }
+  function matchReceiptItem(receiptName, candidates) {
+    const words = receiptName.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length >= 3);
+    if (!words.length) return null;
+    let best = null, bestScore = 0;
+    for (const c of candidates) {
+      const s = c.text.toLowerCase();
+      let score = 0;
+      for (const w of words) if (s.includes(w)) score++;
+      if (score > bestScore) { bestScore = score; best = c; }
+    }
+    return bestScore >= 1 ? { item: best, score: bestScore } : null;
+  }
+
+  async function handleScanFile(file) {
+    const apiKey = ensureApiKey();
+    if (!apiKey) return;
+    updateKeyBtn();
+    const btn = document.getElementById('scan-btn');
+    btn.disabled = true;
+    setScanResult('Reading receipt…');
+    try {
+      const dataUrl = await imageToDataURL(file);
+      setScanResult('Asking Claude to parse it…');
+      const parsed = await callClaudeForReceipt(apiKey, dataUrl);
+      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      if (!items.length) {
+        setScanResult('No items found — try a clearer photo or check it’s a receipt.', 'err');
+        return;
+      }
+      const candidates = shoppingItemsForMatching();
+      const checks = loadChecks();
+      const prices = loadPrices();
+      const storeId = loadStoreId();
+      let matched = 0, totalPaid = 0;
+      const skipped = [];
+      for (const r of items) {
+        const name = String(r.name || '').trim();
+        const price = Number(r.price);
+        if (!name || !isFinite(price) || price < 0) continue;
+        totalPaid += price;
+        const hit = matchReceiptItem(name, candidates);
+        if (hit) {
+          checks[hit.item.key] = true;
+          prices[hit.item.key] = price;
+          recordPrice(hit.item.key, price, storeId);
+          matched++;
+        } else {
+          skipped.push(name);
+        }
+      }
+      saveChecks(checks);
+      savePrices(prices);
+      const storeNote = parsed.store ? ` (${parsed.store})` : '';
+      const skipNote = skipped.length ? ` Skipped: ${skipped.slice(0, 4).join(', ')}${skipped.length > 4 ? '…' : ''}.` : '';
+      setScanResult(
+        `Matched ${matched} of ${items.length} items${storeNote}. Receipt total ≈ ${fmtPrice(totalPaid)}.${skipNote}`,
+        matched ? 'ok' : 'err'
+      );
+      rerenderShopping();
+    } catch (err) {
+      setScanResult(`Couldn’t parse — ${err.message || err}`, 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function setView(name) {
+    const valid = ['today','shopping','meals'].includes(name) ? name : 'today';
+    ['today','shopping','meals'].forEach(v => {
+      const isOn = v === valid;
+      document.getElementById(`panel-${v}`).hidden = !isOn;
+      document.getElementById(`tab-${v}`).setAttribute('aria-selected', String(isOn));
+    });
+    try { localStorage.setItem(VIEW_KEY, valid); } catch {}
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+
+  /* ── Init ── */
+  populateStoreSelect();
+  renderWeek();
+  rerenderShopping();
+  document.getElementById('reset').addEventListener('click', resetAll);
+  ['today','shopping','meals'].forEach(v => {
+    document.getElementById(`tab-${v}`).addEventListener('click', () => setView(v));
+  });
+  document.getElementById('store-select').addEventListener('change', e => {
+    saveStoreId(e.target.value);
+    setStoreStatus('');
+    updateStoreNotes();
+    renderToday();
+  });
+  document.getElementById('locate-btn').addEventListener('click', detectStoreByLocation);
+  document.getElementById('quick-add-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('quick-add-input');
+    addAdhocItem(input.value);
+    input.value = '';
+    input.blur();
+  });
+  document.getElementById('scan-btn').addEventListener('click', () => {
+    document.getElementById('scan-input').click();
+  });
+  document.getElementById('scan-input').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (file) handleScanFile(file);
+  });
+  document.getElementById('key-btn').addEventListener('click', clearApiKey);
+  updateKeyBtn();
+  document.body.addEventListener('change', handleChange);
+  document.body.addEventListener('click', handleClick);
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/food/sw.js').catch(() => {});
+    });
+  }
+
+  const saved = localStorage.getItem(VIEW_KEY);
+  setView(saved || 'today');
+  </script>
+</body>
+</html>

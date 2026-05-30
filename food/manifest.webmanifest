@@ -1,0 +1,14 @@
+{
+  "name": "Food — Max Goodstein",
+  "short_name": "Food",
+  "description": "Keto meal planner and grocery shopping companion",
+  "start_url": "/food/",
+  "scope": "/food/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#2d6a4f",
+  "icons": [
+    { "src": "/food/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/food/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,3444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#2d6a4f" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0a0c11" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Cut" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Cut Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #eef1f4;
+    --bg-grad: radial-gradient(1400px 700px at 50% -240px, #dde9e1 0%, #eef1f4 55%);
+    --bg-elev: #ffffff;
+    --bg-elev-2: #fafbfc;
+    --bg-soft: #f4f6f8;
+    --text: #0b1220;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --text-4: #cbd5e1;
+    --border: #e6e8ec;
+    --border-strong: #d5d9df;
+    --accent: #2d6a4f;
+    --accent-2: #40916c;
+    --accent-3: #52b788;
+    --accent-soft: #d8eee2;
+    --accent-glow: rgba(45,106,79,0.22);
+    --accent-grad: linear-gradient(135deg, #1b4332 0%, #2d6a4f 40%, #52b788 100%);
+    --hero-grad: linear-gradient(140deg, #143524 0%, #1b4332 35%, #2d6a4f 75%, #40916c 100%);
+    --chart-1: #2d6a4f;
+    --chart-2: #d97706;
+    --chart-3: #2563eb;
+    --chart-4: #a855f7;
+    --chart-5: #dc2626;
+    --ok: #16a34a; --ok-soft: #dcfce7;
+    --warn: #d97706; --warn-soft: #fef3c7;
+    --bad: #dc2626; --bad-soft: #fee2e2;
+    --info: #2563eb; --info-soft: #dbeafe;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.04);
+    --shadow-md: 0 6px 20px -6px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.04);
+    --shadow-lg: 0 24px 48px -12px rgba(15,23,42,0.18), 0 4px 12px rgba(15,23,42,0.06);
+    --shadow-hero: 0 24px 40px -16px rgba(20,53,36,0.45), 0 2px 6px rgba(15,23,42,0.06);
+    --radius: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-emph: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #07090e;
+      --bg-grad: radial-gradient(1400px 700px at 50% -240px, #112218 0%, #07090e 55%);
+      --bg-elev: #11141b;
+      --bg-elev-2: #141821;
+      --bg-soft: #161a23;
+      --text: #f1f5f9;
+      --text-2: #cbd5e1;
+      --text-3: #64748b;
+      --text-4: #475569;
+      --border: #1d2230;
+      --border-strong: #2a3142;
+      --accent: #52b788;
+      --accent-2: #74c69d;
+      --accent-3: #95d5b2;
+      --accent-soft: rgba(82,183,136,0.16);
+      --accent-glow: rgba(82,183,136,0.28);
+      --hero-grad: linear-gradient(140deg, #0e251a 0%, #143524 35%, #1b4332 75%, #2d6a4f 100%);
+      --chart-1: #52b788;
+      --chart-2: #f59e0b;
+      --chart-3: #60a5fa;
+      --chart-4: #c084fc;
+      --chart-5: #f87171;
+      --ok: #22c55e; --ok-soft: rgba(34,197,94,0.18);
+      --warn: #f59e0b; --warn-soft: rgba(245,158,11,0.18);
+      --bad: #f87171; --bad-soft: rgba(248,113,113,0.18);
+      --info: #60a5fa; --info-soft: rgba(96,165,250,0.18);
+      --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+      --shadow-hero: 0 24px 60px -20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.3);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    background-image: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    padding-bottom: 96px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    padding: env(safe-area-inset-top) 0 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    header { background: rgba(17,20,27,0.78); border-bottom: 1px solid rgba(255,255,255,0.04); }
+  }
+  .header-inner {
+    max-width: 820px; margin: 0 auto;
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h1 {
+    margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em;
+    flex: 1; display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: var(--accent-grad);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px -4px var(--accent-glow);
+    flex-shrink: 0;
+  }
+  .logo-mark svg { width: 16px; height: 16px; color: #fff; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 11px;
+    border: 1px solid var(--border); background: var(--bg-elev);
+    color: var(--text-2); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: color 0.18s, border-color 0.18s, transform 0.12s;
+  }
+  .icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .icon-btn:active { transform: scale(0.94); }
+  .icon-btn svg { width: 17px; height: 17px; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 16px 18px; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    background: var(--hero-grad);
+    color: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hero);
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s var(--ease) both;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -40%; right: -10%;
+    width: 60%; height: 180%;
+    background: radial-gradient(closest-side, rgba(149,213,178,0.22), transparent);
+    pointer-events: none;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    position: relative;
+  }
+  @media (min-width: 560px) {
+    .hero-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .hero-stat {
+    display: flex; flex-direction: column; gap: 2px;
+    min-width: 0;
+  }
+  .hero-stat-label {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.65);
+  }
+  .hero-stat-value {
+    font-size: 26px; font-weight: 800; letter-spacing: -0.025em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .hero-stat-unit { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); }
+  .hero-stat-note {
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    margin-top: 1px;
+  }
+  .hero-stat-note.pos { color: #d8f3dc; }
+  .hero-stat-note.neg { color: #fecaca; }
+
+  /* ---------- tabs ---------- */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .tab {
+    flex: 1;
+    border: none; background: transparent;
+    color: var(--text-2);
+    font: 700 13px/1 'Inter', sans-serif;
+    padding: 10px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: color 0.18s, background 0.22s var(--ease);
+    position: relative;
+    z-index: 1;
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab.active {
+    color: #fff;
+    background: var(--accent-grad);
+    box-shadow: 0 3px 10px -3px var(--accent-glow);
+  }
+
+  .tab-panel {
+    animation: panelIn 0.32s var(--ease) both;
+  }
+  .tab-panel.hidden { display: none !important; }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
+    margin-bottom: 14px;
+    transition: box-shadow 0.25s, transform 0.25s;
+    animation: fadeUp 0.5s var(--ease) both;
+  }
+  .tab-panel .card:nth-child(1) { animation-delay: 0.02s; }
+  .tab-panel .card:nth-child(2) { animation-delay: 0.06s; }
+  .tab-panel .card:nth-child(3) { animation-delay: 0.10s; }
+  .tab-panel .card:nth-child(4) { animation-delay: 0.14s; }
+  .tab-panel .card:nth-child(5) { animation-delay: 0.18s; }
+  .tab-panel .card:nth-child(6) { animation-delay: 0.22s; }
+  .tab-panel .card:nth-child(7) { animation-delay: 0.26s; }
+  .tab-panel .card:nth-child(8) { animation-delay: 0.30s; }
+
+  .card h2 {
+    margin: 0 0 14px;
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-3);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h2 .h2-meta {
+    font-size: 11px; font-weight: 600; letter-spacing: 0;
+    color: var(--text-3); text-transform: none;
+    margin-left: auto;
+  }
+  .card h2 .pill { margin-left: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ---------- grid ---------- */
+  .grid { display: grid; gap: 10px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 560px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+  /* ---------- metric ---------- */
+  .metric {
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    padding: 12px 12px 14px;
+    position: relative;
+    border: 1px solid transparent;
+    transition: transform 0.18s var(--ease), border-color 0.18s, background 0.18s;
+  }
+  .metric:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+  }
+  .metric-label {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .metric-value {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .metric-unit { font-size: 12px; font-weight: 700; color: var(--text-2); margin-left: 2px; }
+  .metric-delta {
+    font-size: 11px; font-weight: 700;
+    margin-top: 3px; font-variant-numeric: tabular-nums;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .metric-delta.up { color: var(--bad); }
+  .metric-delta.down { color: var(--ok); }
+  .metric-delta.flat { color: var(--text-3); }
+  .metric.warn { background: var(--warn-soft); }
+  .metric.bad { background: var(--bad-soft); }
+  .metric.ok { background: var(--ok-soft); }
+
+  /* ---------- bars ---------- */
+  .pct-bar {
+    height: 4px; border-radius: 999px;
+    background: var(--border);
+    margin-top: 8px; overflow: hidden;
+  }
+  .pct-bar > span {
+    display: block; height: 100%;
+    background: var(--accent);
+    width: 0;
+    border-radius: inherit;
+    transition: width 0.7s var(--ease-emph);
+  }
+  .pct-bar.warn > span { background: var(--warn); }
+  .pct-bar.bad > span { background: var(--bad); }
+  .pct-bar.ok > span { background: var(--ok); }
+
+  /* ---------- energy balance ---------- */
+  .energy-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .energy-cell {
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .energy-cell .label {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-3);
+  }
+  .energy-cell .val {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .energy-cell .sub { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+  .energy-cell.deficit { background: var(--accent-soft); }
+  .energy-cell.deficit .val { color: var(--accent); }
+
+  .energy-bar {
+    display: flex; height: 10px;
+    border-radius: 999px; overflow: hidden;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+  }
+  .energy-bar > span {
+    height: 100%;
+    transition: width 0.8s var(--ease-emph);
+  }
+  .energy-bar .seg-in { background: linear-gradient(90deg, var(--accent-2), var(--accent-3)); }
+  .energy-bar .seg-out { background: linear-gradient(90deg, var(--warn), #fbbf24); }
+  .energy-legend {
+    display: flex; gap: 14px; margin-top: 10px;
+    font-size: 11px; color: var(--text-2);
+  }
+  .energy-legend .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 999px; margin-right: 6px;
+    vertical-align: middle;
+  }
+  .energy-legend .dot.in { background: var(--accent-2); }
+  .energy-legend .dot.out { background: var(--warn); }
+
+  /* ---------- macro split ---------- */
+  .macro-split-bar {
+    display: flex; height: 14px;
+    border-radius: 999px; overflow: hidden;
+    background: var(--bg-soft);
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .macro-split-bar > span {
+    height: 100%;
+    transition: width 0.8s var(--ease-emph);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.95);
+    letter-spacing: 0.03em;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .macro-split-bar .p { background: linear-gradient(90deg, #2d6a4f, #52b788); }
+  .macro-split-bar .f { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .macro-split-bar .c { background: linear-gradient(90deg, #dc2626, #f87171); }
+  .macro-split-legend {
+    display: flex; gap: 14px;
+    font-size: 11px; color: var(--text-2);
+  }
+  .macro-split-legend .swatch {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 3px; margin-right: 6px;
+    vertical-align: middle;
+  }
+  .macro-split-legend .sw-p { background: #52b788; }
+  .macro-split-legend .sw-f { background: #fbbf24; }
+  .macro-split-legend .sw-c { background: #f87171; }
+
+  /* ---------- alerts ---------- */
+  .alerts { display: flex; flex-direction: column; gap: 8px; }
+  .alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.45;
+    border: 1px solid transparent;
+    animation: slideIn 0.4s var(--ease) both;
+  }
+  .alert.bad { background: var(--bad-soft); color: var(--bad); border-color: rgba(220,38,38,0.15); }
+  .alert.warn { background: var(--warn-soft); color: var(--warn); border-color: rgba(217,119,6,0.15); }
+  .alert.ok { background: var(--ok-soft); color: var(--ok); border-color: rgba(22,163,74,0.15); }
+  .alert.info { background: var(--info-soft); color: var(--info); border-color: rgba(37,99,235,0.15); }
+  .alert b { font-weight: 800; }
+  .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alerts-empty {
+    padding: 14px; border-radius: var(--radius-sm);
+    background: var(--ok-soft); color: var(--ok);
+    font-size: 13px; font-weight: 700;
+    text-align: center;
+  }
+
+  /* ---------- read / insight ---------- */
+  .read {
+    font-size: 15px; line-height: 1.55;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--accent-soft), rgba(82,183,136,0.06));
+    border: 1px solid rgba(82,183,136,0.18);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+  }
+  .read .label {
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent); margin-bottom: 6px;
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(82,183,136,0.18);
+    border-radius: 999px;
+  }
+  .read-line { display: block; margin-top: 6px; }
+  .read-fix { font-weight: 600; }
+  .read-fix b { color: var(--accent); }
+
+  /* ---------- chart ---------- */
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .chart-svg {
+    width: 100%; display: block;
+    overflow: visible;
+  }
+  .chart-svg .axis-line { stroke: var(--border); stroke-width: 1; }
+  .chart-svg .gridline { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.7; }
+  .chart-svg .tick-text { fill: var(--text-3); font: 600 10px 'Inter', sans-serif; }
+  .chart-svg .line {
+    fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 1500;
+    stroke-dashoffset: 1500;
+    animation: drawLine 1.1s var(--ease-emph) forwards;
+  }
+  .chart-svg .area { opacity: 0.10; }
+  .chart-svg .end-dot {
+    opacity: 0;
+    animation: popIn 0.35s var(--ease) forwards;
+    animation-delay: 0.9s;
+  }
+  .chart-svg .hover-line { stroke: var(--text-3); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+  .chart-svg .hover-dot { opacity: 0; }
+  .chart-svg.has-hover .hover-line,
+  .chart-svg.has-hover .hover-dot { opacity: 1; }
+  .chart-legend {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-top: 8px;
+    font-size: 11px; color: var(--text-2);
+  }
+  .chart-legend .swatch {
+    display: inline-block; width: 10px; height: 3px;
+    border-radius: 999px; margin-right: 6px;
+    vertical-align: middle;
+  }
+  .chart-tip {
+    position: absolute;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    padding: 8px 10px;
+    font-size: 11px;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    z-index: 5;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  .chart-tip.visible { opacity: 1; }
+  .chart-tip .tip-date {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-3); margin-bottom: 4px;
+  }
+  .chart-tip .tip-row {
+    display: flex; align-items: center; gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-tip .tip-row .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+  }
+  .chart-tip .tip-label { color: var(--text-2); margin-right: 8px; }
+  .chart-tip .tip-val { color: var(--text); font-weight: 700; }
+
+  .spark { width: 100%; height: 40px; display: block; }
+
+  /* ---------- range selector ---------- */
+  .range-bar {
+    display: flex; gap: 4px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+  .range-bar button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font: 700 12px/1 'Inter', sans-serif;
+    padding: 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: color 0.18s, background 0.2s var(--ease);
+    letter-spacing: 0.02em;
+  }
+  .range-bar button:hover:not(.active) { color: var(--text); }
+  .range-bar button.active {
+    background: var(--bg-elev);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- recent days table ---------- */
+  .recent-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+  }
+  .recent-table th {
+    text-align: left;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-3);
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .recent-table td {
+    padding: 9px 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 600;
+  }
+  .recent-table tr:last-child td { border-bottom: none; }
+  .recent-table .date-cell { color: var(--text-2); font-weight: 700; white-space: nowrap; }
+  .recent-table .flag-cell { display: flex; gap: 3px; }
+  .recent-table .flag {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 999px;
+    background: var(--text-4);
+  }
+  .recent-table .flag.h { background: var(--accent-3); }
+  .recent-table .flag.c { background: var(--info); }
+  .recent-table tr { transition: background 0.15s; }
+  .recent-table tbody tr:hover { background: var(--bg-soft); }
+  .recent-table-wrap { overflow-x: auto; margin: 0 -4px; }
+
+  /* ---------- buttons + inputs ---------- */
+  button.primary, button.secondary {
+    font: 700 14px/1 'Inter', sans-serif;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+    letter-spacing: 0.01em;
+    transition: transform 0.12s, box-shadow 0.2s, border-color 0.18s, color 0.18s;
+  }
+  button.primary {
+    background: var(--accent-grad); color: #fff;
+    box-shadow: 0 4px 12px -4px var(--accent-glow);
+  }
+  button.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -4px var(--accent-glow); }
+  button.primary:active { transform: translateY(0); }
+  button.secondary {
+    background: var(--bg-elev); color: var(--text); border-color: var(--border);
+  }
+  button.secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+  input[type=text], input[type=password], input[type=number], input[type=date] {
+    width: 100%; padding: 11px 13px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.4;
+    transition: border-color 0.18s, background 0.18s;
+    -webkit-appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--accent); background: var(--bg-elev); }
+
+  textarea {
+    width: 100%; min-height: 110px;
+    padding: 12px 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font: 500 14px/1.5 'JetBrains Mono', ui-monospace, monospace;
+    resize: vertical;
+    transition: border-color 0.18s, background 0.18s;
+    -webkit-appearance: none;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); background: var(--bg-elev); }
+  textarea::placeholder { color: var(--text-3); }
+
+  /* ---------- gate ---------- */
+  .gate {
+    max-width: 380px; margin: 80px auto 0;
+    padding: 18px;
+    animation: fadeUp 0.6s var(--ease) both;
+  }
+  .gate .logo-mark { width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 20px; display: flex; }
+  .gate .logo-mark svg { width: 28px; height: 28px; }
+  .gate h2 {
+    text-align: center; margin: 0 0 8px;
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    text-transform: none; color: var(--text);
+  }
+  .gate p { text-align: center; color: var(--text-2); margin: 0 0 22px; font-size: 14px; }
+  .gate-err { color: var(--bad); font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+  .gate-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 10px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+  .gate-divider::before, .gate-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .biometric-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 12px;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+  }
+  .biometric-status {
+    flex: 1; font-size: 13px; font-weight: 600;
+    color: var(--text-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .biometric-status .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: var(--text-4);
+  }
+  .biometric-status.on .dot { background: var(--ok); }
+
+  /* ---------- settings details ---------- */
+  details.settings { margin-top: 12px; }
+  details.settings > summary {
+    cursor: pointer; padding: 12px 14px;
+    background: var(--bg-soft); border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 700; color: var(--text-2);
+    list-style: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.18s;
+  }
+  details.settings > summary:hover { background: var(--border); }
+  details.settings > summary::-webkit-details-marker { display: none; }
+  details.settings > summary::before {
+    content: '+'; font-weight: 800; color: var(--text-3);
+    transition: transform 0.22s var(--ease);
+  }
+  details.settings[open] > summary::before { transform: rotate(45deg); }
+  details.settings[open] > summary { margin-bottom: 12px; }
+  .settings-row { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 13px; }
+  .settings-row label { color: var(--text-2); min-width: 130px; font-weight: 600; }
+  .settings-row input { flex: 1; padding: 10px 12px; font-size: 16px; }
+  .settings-row select { flex: 1; padding: 10px 12px; font-size: 16px; }
+
+  /* ---------- days list ---------- */
+  .days-list {
+    max-height: 260px; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg-soft);
+  }
+  .day-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-variant-numeric: tabular-nums;
+  }
+  .day-row:last-child { border: none; }
+  .day-row .d { color: var(--text-3); font-weight: 700; }
+  .day-row button { padding: 4px 10px; font-size: 11px; }
+
+  /* ---------- pills + utility ---------- */
+  .hidden { display: none !important; }
+  .hint { font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+  .hint code { background: var(--bg-soft); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); }
+  .pill.muted { background: var(--bg-soft); color: var(--text-3); }
+  .pill .pulse {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 999px;
+    background: currentColor;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* ---------- floating add button ---------- */
+  .fab {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: 22px;
+    width: 56px; height: 56px;
+    border-radius: 999px;
+    background: var(--accent-grad);
+    border: none;
+    color: #fff;
+    box-shadow: 0 10px 26px -6px var(--accent-glow), 0 4px 10px rgba(15,23,42,0.18);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 20;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s;
+  }
+  .fab:hover { transform: scale(1.08) rotate(8deg); }
+  .fab:active { transform: scale(0.96); }
+  .fab svg { width: 26px; height: 26px; stroke-width: 2.5; }
+
+  /* ---------- micro panel ---------- */
+  .micro-group { margin-top: 16px; }
+  .micro-group:first-child { margin-top: 0; }
+  .micro-group-label {
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-3); margin-bottom: 6px;
+  }
+  .micro-row {
+    display: grid;
+    grid-template-columns: 1.4fr auto 70px;
+    gap: 10px; align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+    font-size: 13px; font-variant-numeric: tabular-nums;
+  }
+  .micro-row .label { color: var(--text-2); font-weight: 600; }
+  .micro-row .amt { font-weight: 700; color: var(--text); white-space: nowrap; }
+  .micro-row .bar-wrap {
+    display: flex; align-items: center; gap: 6px;
+    justify-content: flex-end;
+  }
+  .micro-row .bar {
+    flex: 1; height: 4px;
+    background: var(--border);
+    border-radius: 999px; overflow: hidden;
+    min-width: 28px;
+  }
+  .micro-row .bar > span {
+    display: block; height: 100%;
+    border-radius: inherit;
+    transition: width 0.7s var(--ease-emph);
+  }
+  .micro-row .pct {
+    font-size: 10px; font-weight: 800;
+    min-width: 30px; text-align: right;
+  }
+
+  /* ---------- animations ---------- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.4); transform-origin: center; }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, var(--bg-soft) 0%, var(--border) 50%, var(--bg-soft) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ PAIR QR MODAL ============ -->
+<div id="qr-modal" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; padding:18px">
+  <div style="background:var(--bg-elev); border-radius:var(--radius); padding:24px; max-width:380px; width:100%; box-shadow:var(--shadow-md)">
+    <h2 style="margin:0 0 8px; font-size:18px; font-weight:800; letter-spacing:-0.02em">Pair another device</h2>
+    <p style="margin:0 0 16px; font-size:13px; color:var(--text-2); line-height:1.5">Open iPhone <b>Camera</b> app → point at the code → tap the banner. Auto-fills Worker URL + token. Then unlock /health with your passphrase.</p>
+    <div id="qr-container" style="display:flex; justify-content:center; padding:14px; background:#fff; border-radius:var(--radius-sm); margin-bottom:14px"></div>
+    <p style="margin:0 0 12px; font-size:11px; color:var(--bad); line-height:1.5"><b>Don't screenshot or share.</b> Anyone with this code can read/write your encrypted vault (still needs your passphrase to decrypt). Auto-hides in <span id="qr-countdown">90</span>s.</p>
+    <div class="btn-row">
+      <button class="secondary" id="qr-copy" style="flex:1">Copy link instead</button>
+      <button class="primary" id="qr-close" style="flex:1">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GATE ============ -->
+<section id="gate" class="gate">
+  <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h2>Cut Tracker</h2>
+  <p id="gate-sub">Passphrase unlocks your data.</p>
+
+  <button class="primary" id="gate-biometric" style="display:none; width:100%; padding:14px; display:none; align-items:center; justify-content:center; gap:10px">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 7.58 5.58 4 10 4s8 3.58 8 8"/><path d="M22 12c0 4.42-3.58 8-8 8s-8-3.58-8-8"/><path d="M8 14c1.5 2 4 3 4 3s2.5-1 4-3"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+    <span id="gate-biometric-label">Unlock with Face ID</span>
+  </button>
+  <div id="gate-divider" class="gate-divider" style="display:none"><span>or</span></div>
+
+  <form id="gate-form" autocomplete="off">
+    <input id="gate-pass" type="password" placeholder="Passphrase" autocomplete="current-password" autofocus />
+    <div class="btn-row" style="margin-top:12px">
+      <button class="primary" type="submit" style="flex:1">Unlock</button>
+    </div>
+    <div class="gate-err" id="gate-err"></div>
+  </form>
+  <p class="hint" style="text-align:center; margin-top:18px">First time? Type a strong passphrase to initialize an empty vault. Lose it = lose the data. Encrypted in localStorage on this device.</p>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+<header>
+  <div class="header-inner">
+    <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    <h1>Cut Tracker</h1>
+    <span id="sync-pill" class="pill" style="display:none"></span>
+    <button class="icon-btn" id="lock-btn" title="Lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <!-- ====== HERO ====== -->
+  <section class="hero" id="hero">
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Day of cut</div>
+        <div class="hero-stat-value" id="hero-day">—</div>
+        <div class="hero-stat-note" id="hero-day-note"></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label" id="hero-loss-label">Lost so far</div>
+        <div class="hero-stat-value" id="hero-loss">—</div>
+        <div class="hero-stat-note" id="hero-loss-note"></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">7d rate</div>
+        <div class="hero-stat-value" id="hero-rate">—</div>
+        <div class="hero-stat-note" id="hero-rate-note"></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Today deficit</div>
+        <div class="hero-stat-value" id="hero-deficit">—</div>
+        <div class="hero-stat-note" id="hero-deficit-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TABS ====== -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="today" role="tab">Today</button>
+    <button class="tab" data-tab="trends" role="tab">Trends</button>
+    <button class="tab" data-tab="micros" role="tab">Micros</button>
+    <button class="tab" data-tab="history" role="tab">History</button>
+  </nav>
+
+  <!-- ====== TODAY TAB ====== -->
+  <div class="tab-panel" data-panel="today">
+
+    <section class="card" id="energy-card">
+      <h2>Energy balance <span class="h2-meta" id="today-date"></span></h2>
+      <div id="energy-balance"></div>
+    </section>
+
+    <section class="card">
+      <h2>Body composition</h2>
+      <div class="grid grid-4" id="today-body-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Vitals</h2>
+      <div class="grid grid-4" id="today-vitals-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Macros · energy split</h2>
+      <div id="macro-split"></div>
+      <div class="grid grid-4" id="today-macros-grid" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card">
+      <h2>Top micros</h2>
+      <div class="grid grid-4" id="today-micros-grid"></div>
+    </section>
+
+    <section class="card" id="read-card">
+      <h2>Read of the day</h2>
+      <div class="read" id="read"><span class="label">Read</span><div id="read-body"></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Alerts <span class="h2-meta" id="alerts-count"></span></h2>
+      <div class="alerts" id="alerts"></div>
+    </section>
+  </div>
+
+  <!-- ====== TRENDS TAB ====== -->
+  <div class="tab-panel hidden" data-panel="trends">
+
+    <section class="card">
+      <h2>Range</h2>
+      <div class="range-bar" id="range-bar">
+        <button data-range="7" class="active">7d</button>
+        <button data-range="14">14d</button>
+        <button data-range="30">30d</button>
+        <button data-range="all">All</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Body composition <span class="h2-meta">lb</span></h2>
+      <div class="chart-wrap" id="chart-body"></div>
+    </section>
+
+    <section class="card">
+      <h2>Body fat % <span class="h2-meta">vs baseline</span></h2>
+      <div class="chart-wrap" id="chart-bf"></div>
+    </section>
+
+    <section class="card">
+      <h2>Energy <span class="h2-meta">kcal in vs out</span></h2>
+      <div class="chart-wrap" id="chart-energy"></div>
+    </section>
+
+    <section class="card">
+      <h2>Recovery <span class="h2-meta">RHR + HRV</span></h2>
+      <div class="chart-wrap" id="chart-recovery"></div>
+    </section>
+
+    <section class="card">
+      <h2>Macros <span class="h2-meta">protein + net carbs</span></h2>
+      <div class="chart-wrap" id="chart-macros"></div>
+    </section>
+
+    <section class="card">
+      <h2>Magnesium <span class="h2-meta">% of target</span></h2>
+      <div class="chart-wrap" id="chart-mg"></div>
+    </section>
+
+    <p class="hint" id="trends-hint">Tip: drag/hover over any chart to scrub through dates. Early lb drops are glycogen+water — read the 7-day average, not yesterday vs today.</p>
+  </div>
+
+  <!-- ====== MICROS TAB ====== -->
+  <div class="tab-panel hidden" data-panel="micros">
+    <section class="card" id="micro-card">
+      <h2>Full micronutrient panel <span class="h2-meta" id="micro-summary"></span></h2>
+      <div id="micro-body"></div>
+    </section>
+  </div>
+
+  <!-- ====== HISTORY TAB ====== -->
+  <div class="tab-panel hidden" data-panel="history">
+
+    <section class="card">
+      <h2>Recent days</h2>
+      <div class="recent-table-wrap"><div id="recent-table"></div></div>
+    </section>
+
+    <section class="card" id="intake-health">
+      <h2>Add Apple Health <span class="pill info">Claude iOS</span></h2>
+      <p class="hint">Single day, or an array of days for backfill. Paste either shape — the save button auto-detects.</p>
+      <textarea id="health-input" placeholder='Single day: { "date": "2026-05-27", "weight_kg": 83.1, ... }&#10;&#10;Or array: [ { "date": "2026-03-01", ... }, { "date": "2026-03-02", ... }, ... ]'></textarea>
+      <div class="btn-row">
+        <button class="primary" id="health-save">Save Health JSON</button>
+        <button class="secondary" id="health-prompt-copy">Copy today's prompt</button>
+        <button class="secondary" id="health-history-prompt-copy">Copy 90-day backfill prompt</button>
+      </div>
+      <p class="hint" id="health-msg"></p>
+    </section>
+
+    <section class="card" id="intake-cron">
+      <h2>Add Cronometer <span class="pill info">CSV</span></h2>
+      <p class="hint">Cronometer → Settings → Account → Export → "Servings &amp; Nutrients" or "Daily Nutrition Report" CSV. Paste contents, or drag the file into the box.</p>
+      <textarea id="cron-input" placeholder="paste CSV here, or drop a .csv file"></textarea>
+      <div class="btn-row">
+        <button class="primary" id="cron-save">Save Cronometer CSV</button>
+        <input type="file" id="cron-file" accept=".csv,text/csv" style="display:none">
+        <button class="secondary" id="cron-file-btn">Choose file…</button>
+      </div>
+      <p class="hint" id="cron-msg"></p>
+    </section>
+
+    <section class="card">
+      <h2>Baseline</h2>
+      <div id="baseline-view" style="font-size:13px; color:var(--text-2); line-height:1.8"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="secondary" id="baseline-recompute">Recompute from peak weight day</button>
+      </div>
+      <p class="hint" id="baseline-msg">Scans your logged days, picks your highest weight as the cut start, fills BF/lean/fat from the earliest body-comp scan, computes BMR via Mifflin-St Jeor from age + height + weight.</p>
+    </section>
+
+    <section class="card">
+      <h2>Targets</h2>
+      <div class="settings-row"><label>kcal/day</label><input type="number" id="t-kcal"></div>
+      <div class="settings-row"><label>Protein g (min)</label><input type="number" id="t-protein-min"></div>
+      <div class="settings-row"><label>Protein g (max)</label><input type="number" id="t-protein-max"></div>
+      <div class="settings-row"><label>Net carbs g (max)</label><input type="number" id="t-carbs-net"></div>
+      <div class="settings-row"><label>Total carbs g (max)</label><input type="number" id="t-carbs-total"></div>
+      <div class="settings-row"><label>Magnesium % min</label><input type="number" id="t-mg-min"></div>
+      <div class="btn-row"><button class="primary" id="targets-save">Save targets</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Cloud sync <span class="h2-meta" id="sync-status-text"></span></h2>
+      <div class="settings-row"><label>Worker URL</label><input type="text" id="c-url" placeholder="https://cut-tracker-vault.YOU.workers.dev"></div>
+      <div class="settings-row"><label>Auth token</label><input type="password" id="c-token" placeholder="bearer token from wrangler secret"></div>
+      <div class="settings-row"><label>Auto-push on save</label>
+        <select id="c-auto" style="flex:1; padding:10px 12px; font-size:16px; background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text)">
+          <option value="1">On</option><option value="0">Off</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="primary" id="c-save">Save sync config</button>
+        <button class="secondary" id="c-push">Push to cloud</button>
+        <button class="secondary" id="c-pull">Pull from cloud</button>
+        <button class="secondary" id="c-test">Test connection</button>
+        <button class="secondary" id="c-qr">Pair another device</button>
+      </div>
+      <p class="hint" id="c-msg">Vault is end-to-end encrypted with your passphrase before leaving the device. Cloudflare only sees ciphertext.</p>
+    </section>
+
+    <section class="card" id="biometric-card">
+      <h2>Biometric unlock <span class="h2-meta" id="biometric-meta"></span></h2>
+      <p class="hint">Use Face ID / Touch ID to unlock instead of typing your passphrase. The biometric prompt derives an AES key bound to this device's secure enclave — same crypto strength, way less friction.</p>
+      <div class="biometric-row">
+        <div class="biometric-status" id="biometric-status"><span class="dot"></span><span id="biometric-status-text">not set up on this device</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="primary" id="biometric-enable" style="display:none">Set up biometric unlock</button>
+        <button class="secondary" id="biometric-disable" style="display:none">Remove biometric unlock</button>
+      </div>
+      <p class="hint" id="biometric-msg"></p>
+      <p class="hint">Each device needs its own setup (or use iCloud Keychain passkey sync). Passphrase keeps working as backup.</p>
+    </section>
+
+    <section class="card">
+      <h2>Cronometer auto-pull</h2>
+      <p class="hint">Scheduled task <code>cut-tracker-cron-pull</code> runs daily at ~8am, opens Cronometer in your Chrome, scrapes nutrient totals, posts them here. Requires (a) cloud sync configured above, (b) Cronometer logged in in Chrome, (c) Claude in Chrome extension.</p>
+      <div class="btn-row">
+        <button class="secondary" id="cron-config-show">Show config file contents</button>
+        <button class="secondary" id="cron-config-dl">Download config.json</button>
+      </div>
+      <pre id="cron-config-block" style="display:none; font: 500 12px/1.5 'JetBrains Mono', ui-monospace, monospace; background:var(--bg-soft); padding:12px; border-radius:var(--radius-sm); margin-top:10px; overflow-x:auto; border:1px solid var(--border)"></pre>
+      <p class="hint" id="cron-config-msg">Save to <code>~/.config/cut-tracker/config.json</code>.</p>
+    </section>
+
+    <section class="card">
+      <h2>Logged days</h2>
+      <div class="days-list" id="days-list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Data</h2>
+      <div class="btn-row">
+        <button class="secondary" id="export-btn">Export JSON</button>
+        <button class="secondary" id="import-btn">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" style="display:none">
+        <button class="secondary" id="change-pass-btn">Change passphrase</button>
+        <button class="secondary" id="wipe-btn" style="color:var(--bad); border-color:var(--bad)">Wipe vault</button>
+      </div>
+      <p class="hint">Vault is encrypted in this browser's localStorage. Lose the passphrase = lose the data.</p>
+    </section>
+  </div>
+
+  <!-- FAB: quick-add jumps to History → intake -->
+  <button class="fab" id="fab" title="Add data">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</main>
+</div>
+
+<script>
+// ============================================================
+//   CUT TRACKER · single-file dashboard
+//   Vault: AES-GCM with PBKDF2 key from passphrase, in localStorage.
+// ============================================================
+
+const STORE_KEY = 'cut-tracker-vault-v1';
+const CLOUD_CFG_KEY = 'cut-tracker-cloud-v1';
+const PBKDF2_ITERS = 250_000;
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+// ----- Crypto -----
+async function deriveKey(passphrase, salt) {
+  const baseKey = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERS, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false, ['encrypt', 'decrypt']
+  );
+}
+function b64e(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b64d(str) { return Uint8Array.from(atob(str), c => c.charCodeAt(0)); }
+
+async function encryptVault(obj, passphrase) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(passphrase, salt);
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(obj))
+  );
+  return { v: 1, salt: b64e(salt), iv: b64e(iv), ct: b64e(ciphertext), updatedAt: Date.now() };
+}
+async function decryptVault(wrap, passphrase) {
+  const key = await deriveKey(passphrase, b64d(wrap.salt));
+  const plain = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: b64d(wrap.iv) }, key, b64d(wrap.ct)
+  );
+  return JSON.parse(dec.decode(plain));
+}
+
+// ----- WebAuthn biometric unlock (PRF extension) -----
+// Stores a passkey credential + a salt + the passphrase wrapped by a key
+// derived from the credential's PRF output. Unlock: WebAuthn assertion ->
+// PRF eval -> HKDF -> AES-GCM key -> decrypt wrappedPass -> existing
+// passphrase-based vault decrypt.
+const WEBAUTHN_KEY = 'cut-tracker-webauthn-v1';
+
+function webauthnSupported() {
+  return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
+}
+function biometricConfig() {
+  try { const raw = localStorage.getItem(WEBAUTHN_KEY); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
+}
+function clearBiometric() { localStorage.removeItem(WEBAUTHN_KEY); }
+
+async function deriveKeyFromPRF(prfOutput) {
+  const ikm = await crypto.subtle.importKey('raw', prfOutput, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: enc.encode('cut-tracker-vault-key-v1') },
+    ikm,
+    { name: 'AES-GCM', length: 256 },
+    false, ['encrypt', 'decrypt']
+  );
+}
+
+// Register a platform passkey and wrap the passphrase under the PRF-derived key.
+async function registerBiometric(passphrase) {
+  if (!webauthnSupported()) throw new Error('WebAuthn unavailable on this browser.');
+
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const userId = crypto.getRandomValues(new Uint8Array(16));
+  const cred = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name: 'Cut Tracker', id: location.hostname },
+      user: { id: userId, name: 'cut-tracker', displayName: 'Cut Tracker' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        userVerification: 'required',
+        residentKey: 'preferred',
+      },
+      extensions: { prf: {} },
+      timeout: 60000,
+    },
+  });
+  if (!cred) throw new Error('Registration cancelled.');
+
+  // Verify PRF is supported. Some browsers report enabled=true on create();
+  // others require the follow-up get() to confirm. We always do the get().
+  const credentialId = new Uint8Array(cred.rawId);
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+
+  let assertion;
+  try {
+    assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rpId: location.hostname,
+        allowCredentials: [{ type: 'public-key', id: credentialId }],
+        userVerification: 'required',
+        extensions: { prf: { eval: { first: salt } } },
+        timeout: 60000,
+      },
+    });
+  } catch (e) {
+    throw new Error('Biometric verify failed: ' + e.message);
+  }
+
+  const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
+  if (!prfOutput) {
+    throw new Error('Browser does not support PRF extension. Update Safari/Chrome.');
+  }
+
+  const wrapKey = await deriveKeyFromPRF(new Uint8Array(prfOutput));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const wrappedPass = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, wrapKey, enc.encode(passphrase)
+  );
+  localStorage.setItem(WEBAUTHN_KEY, JSON.stringify({
+    v: 1,
+    credentialId: b64e(credentialId),
+    salt: b64e(salt),
+    iv: b64e(iv),
+    ct: b64e(wrappedPass),
+    createdAt: Date.now(),
+  }));
+}
+
+// Trigger biometric prompt -> return the unwrapped passphrase.
+async function unlockBiometric() {
+  if (!webauthnSupported()) throw new Error('WebAuthn unavailable.');
+  const cfg = biometricConfig();
+  if (!cfg) throw new Error('Biometric not set up on this device.');
+
+  const assertion = await navigator.credentials.get({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rpId: location.hostname,
+      allowCredentials: [{ type: 'public-key', id: b64d(cfg.credentialId) }],
+      userVerification: 'required',
+      extensions: { prf: { eval: { first: b64d(cfg.salt) } } },
+      timeout: 60000,
+    },
+  });
+  const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
+  if (!prfOutput) throw new Error('PRF extension unavailable. Re-set up biometric.');
+
+  const wrapKey = await deriveKeyFromPRF(new Uint8Array(prfOutput));
+  const passBuf = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: b64d(cfg.iv) }, wrapKey, b64d(cfg.ct)
+  );
+  return dec.decode(passBuf);
+}
+
+// ----- Vault state -----
+let VAULT = null;
+let PASSPHRASE = null;
+let RANGE = 7; // current trend range
+let ACTIVE_TAB = 'today';
+
+const DEFAULT_VAULT = {
+  baseline: {
+    date: '2026-05-26',
+    weight_kg: 83.5, weight_lb: 184,
+    body_fat_pct: 24.3, lean_mass_kg: 63.2, fat_mass_kg: 20.3,
+    resting_hr: 51, hrv_oura: 95, hrv_apple: 84,
+    maintenance_kcal: 2800, bmr: 1786,
+    age: 32, height_cm: 177,
+  },
+  targets: {
+    kcal: 1900, protein_min: 135, protein_max: 150,
+    carbs_net_max: 20, carbs_total_max: 50,
+    mg_min_pct: 50,
+  },
+  days: [],
+};
+
+async function loadVault(passphrase) {
+  let local = null, localWrap = null;
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) {
+    try {
+      localWrap = JSON.parse(raw);
+      local = await decryptVault(localWrap, passphrase);
+    } catch (e) { local = null; }
+  }
+
+  let cloud = null, cloudWrap = null;
+  const cfg = getCloudConfig();
+  if (cfg && cfg.url && cfg.token) {
+    try {
+      cloudWrap = await cloudFetchVault(cfg);
+      if (cloudWrap) cloud = await decryptVault(cloudWrap, passphrase);
+    } catch (e) { cloud = null; }
+  }
+
+  if (local && cloud) {
+    VAULT = (cloudWrap.updatedAt || 0) > (localWrap.updatedAt || 0) ? cloud : local;
+  } else if (local) {
+    VAULT = local;
+  } else if (cloud) {
+    VAULT = cloud;
+  } else if (!raw && !cloudWrap) {
+    VAULT = structuredClone(DEFAULT_VAULT);
+    PASSPHRASE = passphrase;
+    await saveVault();
+    return;
+  } else {
+    throw new Error('decryption failed');
+  }
+
+  PASSPHRASE = passphrase;
+  VAULT.baseline = { ...DEFAULT_VAULT.baseline, ...VAULT.baseline };
+  VAULT.targets = { ...DEFAULT_VAULT.targets, ...VAULT.targets };
+  VAULT.days = VAULT.days || [];
+
+  if (cloud && (!local || (cloudWrap.updatedAt || 0) > (localWrap?.updatedAt || 0))) {
+    await saveVault({ skipCloud: true });
+  }
+}
+
+async function saveVault(opts = {}) {
+  if (!VAULT || !PASSPHRASE) return;
+  const wrap = await encryptVault(VAULT, PASSPHRASE);
+  localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
+  const cfg = getCloudConfig();
+  if (!opts.skipCloud && cfg && cfg.url && cfg.token && cfg.auto !== false) {
+    try { await cloudPutVault(cfg, wrap); recordSync(); setSyncPill('ok', 'synced'); refreshSyncStatusText(); }
+    catch (e) { setSyncPill('warn', 'local only'); }
+  }
+}
+
+// ----- Cloud sync -----
+function getCloudConfig() {
+  try { const raw = localStorage.getItem(CLOUD_CFG_KEY); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
+}
+function setCloudConfig(cfg) {
+  if (!cfg) localStorage.removeItem(CLOUD_CFG_KEY);
+  else localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cfg));
+}
+function cloudUrl(cfg, path) { return cfg.url.replace(/\/+$/, '') + path; }
+async function cloudFetchVault(cfg) {
+  const res = await fetch(cloudUrl(cfg, '/vault'), { headers: { 'Authorization': 'Bearer ' + cfg.token } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('GET /vault ' + res.status);
+  return await res.json();
+}
+async function cloudPutVault(cfg, wrap) {
+  const res = await fetch(cloudUrl(cfg, '/vault'), {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + cfg.token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(wrap),
+  });
+  if (!res.ok) throw new Error('PUT /vault ' + res.status);
+  return await res.json();
+}
+async function cloudFetchPending(cfg) {
+  const res = await fetch(cloudUrl(cfg, '/pending-cron'), { headers: { 'Authorization': 'Bearer ' + cfg.token } });
+  if (!res.ok) throw new Error('GET /pending-cron ' + res.status);
+  return await res.json();
+}
+async function cloudDeletePending(cfg, date) {
+  const res = await fetch(cloudUrl(cfg, '/pending-cron?date=' + encodeURIComponent(date)), {
+    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + cfg.token },
+  });
+  if (!res.ok) throw new Error('DELETE /pending-cron ' + res.status);
+  return await res.json();
+}
+async function consumePendingCron() {
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return { merged: 0 };
+  let entries;
+  try { entries = await cloudFetchPending(cfg); }
+  catch (e) { console.warn('pending-cron fetch failed', e); return { merged: 0 }; }
+  if (!Array.isArray(entries) || entries.length === 0) return { merged: 0 };
+
+  let merged = 0;
+  for (const e of entries) {
+    if (!e || !e.date || !e.nutrients) continue;
+    upsertDay(e.date, { cron: { date: e.date, nutrients: e.nutrients } });
+    merged++;
+  }
+  if (merged > 0) {
+    await saveVault();
+    render();
+  }
+  for (const e of entries) {
+    try { await cloudDeletePending(cfg, e.date); }
+    catch (err) { console.warn('pending-cron delete failed', e.date, err); }
+  }
+  return { merged };
+}
+async function cloudTest(cfg) {
+  const res = await fetch(cloudUrl(cfg, '/healthz'), { headers: { 'Authorization': 'Bearer ' + cfg.token } });
+  const authRes = await fetch(cloudUrl(cfg, '/vault'), { headers: { 'Authorization': 'Bearer ' + cfg.token } });
+  if (authRes.status === 401) throw new Error('auth: bad token');
+  if (!res.ok) throw new Error('network: ' + res.status);
+  return true;
+}
+const LAST_SYNC_KEY = 'cut-tracker-last-sync-v1';
+function recordSync() {
+  try { localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); } catch {}
+}
+function getLastSync() {
+  const v = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0', 10);
+  return v > 0 ? v : null;
+}
+function setSyncPill(cls, txt) {
+  const p = $('sync-pill');
+  if (!p) return;
+  if (!txt) { p.style.display = 'none'; return; }
+  p.className = 'pill ' + cls;
+  const ls = getLastSync();
+  p.innerHTML = `<span class="pulse"></span>${txt}`;
+  if (ls && (cls === 'ok')) p.title = `Last synced ${fmtTimeStamp(ls)}`;
+  p.style.display = 'inline-flex';
+}
+
+// ----- Cronometer CSV parser -----
+function parseCSVLine(line) {
+  const out = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else cur += c;
+    } else {
+      if (c === ',') { out.push(cur); cur = ''; }
+      else if (c === '"' && cur === '') inQ = true;
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+const CRON_KEYS = {
+  energy: ['Energy', 'Calories', 'kcal'],
+  alcohol: ['Alcohol'],
+  caffeine: ['Caffeine'],
+  water: ['Water'],
+  ash: ['Ash'],
+  carbs_total: ['Carbs', 'Carbohydrate', 'Carbohydrates', 'Total Carbs'],
+  carbs_net: ['Net Carbs'],
+  fiber: ['Fiber'],
+  starch: ['Starch'],
+  sugars: ['Sugars', 'Sugar'],
+  sugars_added: ['Added Sugars'],
+  fat: ['Fat', 'Total Fat'],
+  fat_saturated: ['Saturated', 'Saturated Fat'],
+  fat_monounsaturated: ['Monounsaturated', 'Monounsaturated Fat'],
+  fat_polyunsaturated: ['Polyunsaturated', 'Polyunsaturated Fat'],
+  fat_trans: ['Trans-Fats', 'Trans Fat', 'Trans Fats'],
+  omega_3: ['Omega-3', 'Omega 3'],
+  omega_6: ['Omega-6', 'Omega 6'],
+  cholesterol: ['Cholesterol'],
+  ala: ['ALA', 'Alpha-Linolenic Acid'],
+  epa: ['EPA', 'Eicosapentaenoic Acid'],
+  dha: ['DHA', 'Docosahexaenoic Acid'],
+  linoleic: ['Linoleic Acid', 'Linoleic'],
+  protein: ['Protein'],
+  cystine: ['Cystine', 'Cysteine'],
+  histidine: ['Histidine'],
+  isoleucine: ['Isoleucine'],
+  leucine: ['Leucine'],
+  lysine: ['Lysine'],
+  methionine: ['Methionine'],
+  phenylalanine: ['Phenylalanine'],
+  threonine: ['Threonine'],
+  tryptophan: ['Tryptophan'],
+  tyrosine: ['Tyrosine'],
+  valine: ['Valine'],
+  arginine: ['Arginine'],
+  vit_a: ['Vitamin A'],
+  b1_thiamine: ['B1', 'Thiamin', 'Thiamine'],
+  b2_riboflavin: ['B2', 'Riboflavin'],
+  b3_niacin: ['B3', 'Niacin'],
+  b5_pantothenic: ['B5', 'Pantothenic Acid'],
+  b6_pyridoxine: ['B6', 'Pyridoxine'],
+  b7_biotin: ['B7', 'Biotin'],
+  b9_folate: ['B9', 'Folate'],
+  b12_cobalamin: ['B12', 'Cobalamin', 'Vitamin B12'],
+  vit_c: ['Vitamin C'],
+  vit_d: ['Vitamin D'],
+  vit_e: ['Vitamin E'],
+  vit_k: ['Vitamin K'],
+  calcium: ['Calcium'],
+  chloride: ['Chloride'],
+  chromium: ['Chromium'],
+  copper: ['Copper'],
+  fluoride: ['Fluoride'],
+  iodine: ['Iodine'],
+  iron: ['Iron'],
+  magnesium: ['Magnesium'],
+  manganese: ['Manganese'],
+  molybdenum: ['Molybdenum'],
+  phosphorus: ['Phosphorus'],
+  potassium: ['Potassium'],
+  selenium: ['Selenium'],
+  sodium: ['Sodium'],
+  zinc: ['Zinc'],
+};
+function matchKey(nutrient) {
+  const n = nutrient.trim().toLowerCase();
+  for (const [k, names] of Object.entries(CRON_KEYS)) {
+    if (names.some(x => n === x.toLowerCase())) return k;
+  }
+  for (const [k, names] of Object.entries(CRON_KEYS)) {
+    if (names.some(x => n.startsWith(x.toLowerCase()))) return k;
+  }
+  return null;
+}
+
+function parseCronometerCSV(csv) {
+  const lines = csv.split(/\r?\n/).filter(l => l.trim().length > 0);
+  if (lines.length === 0) return null;
+  let headerIdx = -1;
+  let headers = [];
+  for (let i = 0; i < Math.min(20, lines.length); i++) {
+    const cells = parseCSVLine(lines[i]).map(s => s.trim().toLowerCase());
+    if (cells.some(c => c.includes('nutrient')) || cells.includes('amount')) {
+      headerIdx = i; headers = cells; break;
+    }
+  }
+  if (headerIdx < 0) {
+    headers = parseCSVLine(lines[0]).map(s => s.trim().toLowerCase());
+    headerIdx = 0;
+  }
+  const col = (name) => headers.findIndex(h => h.includes(name));
+  const iNutrient = col('nutrient') >= 0 ? col('nutrient') : col('name');
+  const iAmount = col('amount') >= 0 ? col('amount') : col('value');
+  const iUnit = col('unit');
+  let iPct = headers.findIndex(h => h === '%' || h.includes('% target') || h.includes('%target') || h.includes('% of target') || h.includes('pct'));
+  if (iPct < 0) {
+    const tIdx = col('target');
+    if (tIdx >= 0 && (headers[tIdx].includes('%'))) iPct = tIdx;
+  }
+  const iDate = col('day') >= 0 ? col('day') : col('date');
+
+  if (iNutrient < 0 || iAmount < 0) {
+    return parseCronometerWide(lines, headers, headerIdx);
+  }
+
+  const out = { date: null, nutrients: {} };
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i]);
+    if (cells.length < 2) continue;
+    const nutrient = cells[iNutrient];
+    if (!nutrient) continue;
+    const key = matchKey(nutrient);
+    if (!key) continue;
+    const amount = parseFloat(cells[iAmount]);
+    const unit = iUnit >= 0 ? cells[iUnit] : '';
+    let pct = null;
+    if (iPct >= 0 && cells[iPct]) {
+      const t = cells[iPct].replace('%', '').trim();
+      pct = parseFloat(t);
+    }
+    if (iDate >= 0 && cells[iDate] && !out.date) out.date = cells[iDate];
+    out.nutrients[key] = { amount, unit, pct };
+  }
+  return out;
+}
+
+function parseCronometerWide(lines, headers, headerIdx) {
+  const out = { date: null, nutrients: {} };
+  const colMap = {};
+  headers.forEach((h, i) => {
+    const k = matchKey(h.replace(/\(.*\)/, '').trim());
+    if (k) colMap[k] = i;
+  });
+  const iDate = headers.findIndex(h => h.includes('date') || h.includes('day'));
+  const dataLines = lines.slice(headerIdx + 1).filter(l => l.trim().length);
+  if (dataLines.length === 0) return out;
+  const last = parseCSVLine(dataLines[dataLines.length - 1]);
+  if (iDate >= 0) out.date = last[iDate];
+  for (const [k, i] of Object.entries(colMap)) {
+    const v = parseFloat(last[i]);
+    if (!isNaN(v)) out.nutrients[k] = { amount: v, unit: '', pct: null };
+  }
+  return out;
+}
+
+// ----- Day ops -----
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function sortDays() { VAULT.days.sort((a, b) => a.date.localeCompare(b.date)); }
+function getDay(date) { return VAULT.days.find(d => d.date === date); }
+function upsertDay(date, patch) {
+  let d = getDay(date);
+  if (!d) { d = { date, health: null, cron: null, savedAt: Date.now() }; VAULT.days.push(d); }
+  Object.assign(d, patch, { savedAt: Date.now() });
+  sortDays();
+  return d;
+}
+
+// ----- Helpers -----
+const $ = (id) => document.getElementById(id);
+const KG_TO_LB = 2.2046;
+
+function fmt(v, digits = 1) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return Number(v).toFixed(digits);
+}
+function fmtInt(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return Math.round(v).toString();
+}
+function fmtSigned(v, digits = 1) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  const s = Math.abs(v).toFixed(digits);
+  return (v > 0 ? '+' : v < 0 ? '−' : '') + s;
+}
+function kgToLb(kg) {
+  if (kg === null || kg === undefined || isNaN(kg)) return null;
+  return kg * KG_TO_LB;
+}
+function delta(curr, prev) {
+  if (curr == null || prev == null || isNaN(curr) || isNaN(prev)) return null;
+  return curr - prev;
+}
+function arrowText(d, unit = '', dec = 1, lowerIsBetter = true) {
+  if (d === null) return { text: '—', cls: 'flat' };
+  if (Math.abs(d) < 0.05) return { text: `±0${unit}`, cls: 'flat' };
+  const sign = d > 0 ? '+' : '−';
+  const v = Math.abs(d).toFixed(dec);
+  const good = lowerIsBetter ? d < 0 : d > 0;
+  return { text: `${sign}${v}${unit}`, cls: good ? 'down' : 'up' };
+}
+function rollingAvg(values, window) {
+  const nums = values.filter(v => typeof v === 'number' && !isNaN(v));
+  if (nums.length === 0) return null;
+  const slice = nums.slice(-window);
+  return slice.reduce((a, b) => a + b, 0) / slice.length;
+}
+function daysBetween(a, b) {
+  const ms = new Date(b) - new Date(a);
+  return Math.round(ms / (24 * 3600 * 1000));
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// Format a UNIX ms timestamp as "4:23pm" if today, "May 24 4:23pm" otherwise.
+function fmtTimeStamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', '');
+  if (sameDay) return time;
+  const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${date} ${time}`;
+}
+
+// Format as relative time: "just now", "5m ago", "2h ago", "3d ago".
+function timeAgo(ts) {
+  if (!ts) return '';
+  const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (s < 30) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+// ----- Number tween -----
+const tweenState = new WeakMap();
+function tween(el, to, opts = {}) {
+  if (el == null) return;
+  const dec = opts.dec ?? 0;
+  const prefix = opts.prefix ?? '';
+  const suffix = opts.suffix ?? '';
+  const dur = opts.dur ?? 700;
+  const signed = opts.signed ?? false;
+  const fmtFn = opts.fmtFn;
+
+  const prev = tweenState.get(el);
+  const from = prev?.value ?? (to ?? 0);
+  if (prev?.raf) cancelAnimationFrame(prev.raf);
+
+  if (to == null || isNaN(to)) {
+    el.textContent = '—';
+    tweenState.set(el, { value: null });
+    return;
+  }
+  const start = performance.now();
+  function step(now) {
+    const t = clamp((now - start) / dur, 0, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const cur = from + (to - from) * eased;
+    if (fmtFn) {
+      el.textContent = fmtFn(cur);
+    } else {
+      const s = signed ? fmtSigned(cur, dec) : (dec === 0 ? Math.round(cur).toString() : cur.toFixed(dec));
+      el.textContent = `${prefix}${s}${suffix}`;
+    }
+    if (t < 1) {
+      const raf = requestAnimationFrame(step);
+      tweenState.set(el, { value: to, raf });
+    } else {
+      tweenState.set(el, { value: to });
+    }
+  }
+  tweenState.set(el, { value: from, raf: requestAnimationFrame(step) });
+}
+
+// ----- Metric card -----
+function metricCard(label, value, unit = '', delta = null, opts = {}) {
+  const cls = opts.cls ? ' ' + opts.cls : '';
+  const dh = delta ? `<div class="metric-delta ${delta.cls}">${delta.text}</div>` : '';
+  const pct = opts.pct != null ? Math.min(100, opts.pct) : null;
+  const bar = pct != null ? `<div class="pct-bar ${opts.pctCls || ''}"><span data-bar-target="${pct}"></span></div>` : '';
+  return `<div class="metric${cls}">
+    <div class="metric-label">${label}</div>
+    <div class="metric-value">${value}<span class="metric-unit">${unit}</span></div>
+    ${dh}${bar}
+  </div>`;
+}
+function animateBars(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-bar-target]').forEach(el => {
+    const t = parseFloat(el.dataset.barTarget);
+    if (isNaN(t)) return;
+    requestAnimationFrame(() => { el.style.width = t + '%'; });
+  });
+}
+
+// ============================================================
+//   RENDER
+// ============================================================
+function render() {
+  if (!VAULT) return;
+  renderHero();
+  renderToday();
+  renderMicroPanel();
+  renderTrends();
+  renderRecentTable();
+  renderBaseline();
+  renderTargets();
+  renderDays();
+  loadCloudIntoForm();
+  renderBiometric();
+}
+
+function renderBiometric() {
+  const supported = webauthnSupported();
+  const cfg = biometricConfig();
+  const statusText = $('biometric-status-text');
+  const statusEl = $('biometric-status');
+  const enableBtn = $('biometric-enable');
+  const disableBtn = $('biometric-disable');
+  const meta = $('biometric-meta');
+
+  if (!supported) {
+    statusText.textContent = 'not supported on this browser';
+    statusEl.classList.remove('on');
+    enableBtn.style.display = 'none';
+    disableBtn.style.display = 'none';
+    meta.innerHTML = '<span class="pill muted">unavailable</span>';
+    return;
+  }
+  if (cfg) {
+    const when = cfg.createdAt ? new Date(cfg.createdAt).toLocaleDateString() : '';
+    statusText.textContent = `enabled${when ? ` · set up ${when}` : ''}`;
+    statusEl.classList.add('on');
+    enableBtn.style.display = 'none';
+    disableBtn.style.display = 'inline-flex';
+    meta.innerHTML = '<span class="pill ok">on</span>';
+  } else {
+    statusText.textContent = 'not set up on this device';
+    statusEl.classList.remove('on');
+    enableBtn.style.display = 'inline-flex';
+    disableBtn.style.display = 'none';
+    meta.innerHTML = '<span class="pill muted">off</span>';
+  }
+}
+
+// ---------- HERO ----------
+function renderHero() {
+  const days = VAULT.days;
+  const baseline = VAULT.baseline;
+  const targets = VAULT.targets;
+  const latest = days[days.length - 1];
+
+  // Day of cut
+  const dayN = daysBetween(baseline.date, todayISO()) + 1;
+  $('hero-day').textContent = dayN > 0 ? dayN : '—';
+  const streak = computeStreak();
+  $('hero-day-note').textContent = streak > 0 ? `${streak}-day streak` : 'log to start';
+
+  // Lost so far (vs baseline). Always a non-negative number under the
+  // primary label; if currently above baseline, flip the label + note.
+  const latestW = latest?.health?.weight_kg ?? null;
+  const baseW = baseline.weight_kg;
+  const lossLabelEl = $('hero-loss-label');
+  if (latestW != null) {
+    const lostLb = (baseW - latestW) * KG_TO_LB;
+    const daysSince = Math.max(0, daysBetween(baseline.date, latest.date));
+    if (lostLb >= -0.05) {
+      // Losing or flat
+      lossLabelEl.textContent = 'Lost so far';
+      $('hero-loss').innerHTML = `${lostLb.toFixed(1)} <span class="hero-stat-unit">lb</span>`;
+      $('hero-loss-note').textContent = daysSince > 0 ? `in ${daysSince} day${daysSince === 1 ? '' : 's'}` : 'vs baseline';
+      $('hero-loss-note').className = 'hero-stat-note pos';
+    } else {
+      // Above baseline
+      lossLabelEl.textContent = 'Above baseline';
+      $('hero-loss').innerHTML = `+${(-lostLb).toFixed(1)} <span class="hero-stat-unit">lb</span>`;
+      $('hero-loss-note').textContent = daysSince > 0 ? `in ${daysSince} day${daysSince === 1 ? '' : 's'}` : 'vs baseline';
+      $('hero-loss-note').className = 'hero-stat-note neg';
+    }
+  } else {
+    lossLabelEl.textContent = 'Lost so far';
+    $('hero-loss').textContent = '—';
+    $('hero-loss-note').textContent = '';
+  }
+
+  // 7-day rate (lb/wk) — linear slope across last 7 days, * 7
+  const w7 = lastN(days, 7).map(d => d.health?.weight_kg).filter(v => v != null);
+  if (w7.length >= 3) {
+    const slope = linRegSlope(w7); // per index (≈ per day)
+    const rateLb = slope * 7 * KG_TO_LB; // lb/wk
+    $('hero-rate').innerHTML = `${fmtSigned(rateLb, 1)} <span class="hero-stat-unit">lb/wk</span>`;
+    const r = Math.abs(rateLb);
+    let note = '', cls = 'hero-stat-note';
+    if (rateLb < 0 && r > 2) { note = 'too aggressive'; cls += ' neg'; }
+    else if (rateLb < 0 && r >= 1) { note = 'in window (1–2 lb)'; cls += ' pos'; }
+    else if (rateLb < 0) { note = 'gentle'; cls += ''; }
+    else if (rateLb > 0.5) { note = 'gaining'; cls += ' neg'; }
+    else { note = 'holding'; }
+    $('hero-rate-note').textContent = note;
+    $('hero-rate-note').className = cls;
+  } else {
+    $('hero-rate').textContent = '—';
+    $('hero-rate-note').textContent = 'need 3+ days';
+  }
+
+  // Today's deficit
+  const h = latest?.health || {};
+  const tdee = (h.active_kcal ?? 0) + (h.resting_kcal ?? 0);
+  if (h.dietary_kcal != null && tdee > 0) {
+    const def = tdee - h.dietary_kcal;
+    $('hero-deficit').innerHTML = `${fmtSigned(def, 0)} <span class="hero-stat-unit">kcal</span>`;
+    let note = '', cls = 'hero-stat-note';
+    if (def >= 700 && def <= 1100) { note = 'on target'; cls += ' pos'; }
+    else if (def > 1100) { note = 'too steep'; cls += ' neg'; }
+    else if (def < 300) { note = 'shallow'; cls += ' neg'; }
+    else { note = 'modest'; }
+    $('hero-deficit-note').textContent = note;
+    $('hero-deficit-note').className = cls;
+  } else {
+    $('hero-deficit').textContent = '—';
+    $('hero-deficit-note').textContent = 'need kcal data';
+  }
+}
+
+function computeStreak() {
+  const today = todayISO();
+  let count = 0;
+  let cursor = today;
+  while (true) {
+    const d = VAULT.days.find(x => x.date === cursor && x.health);
+    if (!d) break;
+    count++;
+    const dt = new Date(cursor);
+    dt.setDate(dt.getDate() - 1);
+    cursor = dt.toISOString().slice(0, 10);
+  }
+  return count;
+}
+function lastN(days, n) { return days.slice(-n); }
+function linRegSlope(ys) {
+  const n = ys.length;
+  const xs = ys.map((_, i) => i);
+  const mx = xs.reduce((a,b)=>a+b,0)/n;
+  const my = ys.reduce((a,b)=>a+b,0)/n;
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (xs[i]-mx) * (ys[i]-my);
+    den += (xs[i]-mx) ** 2;
+  }
+  return den === 0 ? 0 : num / den;
+}
+
+// ---------- TODAY ----------
+function renderToday() {
+  const days = VAULT.days;
+  const latest = days[days.length - 1];
+  const baseline = VAULT.baseline;
+  const targets = VAULT.targets;
+
+  const bodyGrid = $('today-body-grid');
+  const vitalsGrid = $('today-vitals-grid');
+  const macrosGrid = $('today-macros-grid');
+  const microsGrid = $('today-micros-grid');
+
+  if (!latest) {
+    $('today-date').textContent = 'no data yet';
+    bodyGrid.innerHTML = '';
+    vitalsGrid.innerHTML = `<div class="metric"><div class="metric-label">Get started</div><div class="metric-value" style="font-size:14px; line-height:1.4">Tap + to add a daily JSON.</div></div>`;
+    macrosGrid.innerHTML = '';
+    microsGrid.innerHTML = '';
+    $('macro-split').innerHTML = '';
+    $('energy-balance').innerHTML = '<p class="hint" style="margin:0">No data for today.</p>';
+    $('alerts').innerHTML = `<div class="alerts-empty">All clear — log your first day to begin.</div>`;
+    $('alerts-count').textContent = '';
+    $('read-card').classList.add('hidden');
+    return;
+  }
+  $('read-card').classList.remove('hidden');
+
+  const h = latest.health || {};
+  const updated = latest.savedAt ? ` · updated ${fmtTimeStamp(latest.savedAt)}` : '';
+  $('today-date').textContent = `${latest.date}${latest.cron ? ' · Health + Cronometer' : ' · Health only'}${updated}`;
+
+  // Energy balance
+  renderEnergyBalance(h, VAULT.baseline, VAULT.targets);
+
+  // Body composition
+  const wKg = h.weight_kg ?? (h.weight_lb ? h.weight_lb / KG_TO_LB : null);
+  const wBaseline = baseline.weight_kg;
+  const lean = h.lean_mass_kg;
+  const leanBase = baseline.lean_mass_kg;
+  const fat = h.fat_mass_kg;
+  const bf = h.body_fat_pct;
+
+  const wLb = kgToLb(wKg);
+  const wBaseLb = kgToLb(wBaseline);
+  const leanLb = kgToLb(lean);
+  const leanBaseLb = kgToLb(leanBase);
+  const fatLb = kgToLb(fat);
+  const fatBaseLb = kgToLb(baseline.fat_mass_kg);
+
+  bodyGrid.innerHTML = [
+    metricCard('Weight', fmt(wLb, 1), 'lb', arrowText(delta(wLb, wBaseLb), 'lb', 1, true)),
+    metricCard('Body Fat', fmt(bf, 1), '%', arrowText(delta(bf, baseline.body_fat_pct), '%', 1, true)),
+    metricCard('Lean Mass', fmt(leanLb, 1), 'lb', arrowText(delta(leanLb, leanBaseLb), 'lb', 1, false), {
+      cls: lean != null && leanBase != null && lean < leanBase - 0.4 ? 'bad' : '',
+    }),
+    metricCard('Fat Mass', fmt(fatLb, 1), 'lb', arrowText(delta(fatLb, fatBaseLb), 'lb', 1, true)),
+  ].join('');
+  animateBars(bodyGrid);
+
+  // Vitals
+  vitalsGrid.innerHTML = [
+    metricCard('Resting HR', fmtInt(h.resting_hr), 'bpm', arrowText(delta(h.resting_hr, baseline.resting_hr), '', 0, true)),
+    metricCard('HRV', fmtInt(h.hrv_ms), 'ms', arrowText(delta(h.hrv_ms, baseline.hrv_apple), '', 0, false)),
+    metricCard('Diet kcal', fmtInt(h.dietary_kcal), '', null, {
+      pct: h.dietary_kcal != null ? (h.dietary_kcal / targets.kcal) * 100 : null,
+      pctCls: h.dietary_kcal != null && Math.abs(h.dietary_kcal - targets.kcal) > 300 ? 'warn' : 'ok',
+    }),
+    metricCard('Active kcal', fmtInt(h.active_kcal), '', null),
+  ].join('');
+  animateBars(vitalsGrid);
+
+  // Macros + split
+  const proteinG = h.protein_g;
+  const fatG = h.fat_g;
+  const cronNet = latest.cron?.nutrients?.carbs_net?.amount;
+  const cronTotal = latest.cron?.nutrients?.carbs_total?.amount;
+  const carbsForSplit = cronNet ?? h.carbs_g ?? null;
+
+  renderMacroSplit(proteinG, fatG, carbsForSplit);
+
+  // 7-day rolling averages (skips null days, doesn't require 7 full days)
+  const avg7 = (picker) => {
+    const vals = days.slice(-7).map(picker).filter(v => v != null && !isNaN(v));
+    if (vals.length === 0) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  };
+  const proteinAvg = avg7(d => d.health?.protein_g);
+  const netCarbsAvg = avg7(d => d.cron?.nutrients?.carbs_net?.amount);
+  const totalCarbsAvg = avg7(d => d.cron?.nutrients?.carbs_total?.amount ?? d.health?.carbs_g);
+  const fatAvg = avg7(d => d.health?.fat_g);
+  const avgNote = (v, dec = 0) => v == null ? null : { text: `7d ${dec ? v.toFixed(dec) : Math.round(v)}g`, cls: 'flat' };
+
+  const proteinPct = proteinG != null ? (proteinG / targets.protein_min) * 100 : null;
+  const proteinCls = proteinG != null && proteinG < targets.protein_min ? 'warn' : 'ok';
+  const carbsNet = cronNet ?? null;
+  const carbsTotal = cronTotal ?? h.carbs_g ?? null;
+  const carbsNetCls = carbsNet != null && carbsNet > targets.carbs_net_max ? 'bad' : 'ok';
+  const carbsTotalCls = carbsTotal != null && carbsTotal > targets.carbs_total_max ? 'bad' : 'ok';
+
+  macrosGrid.innerHTML = [
+    metricCard('Protein', fmtInt(proteinG), 'g', avgNote(proteinAvg), {
+      pct: proteinPct, pctCls: proteinCls,
+      cls: proteinG != null && proteinG < targets.protein_min - 15 ? 'warn' : '',
+    }),
+    metricCard('Net Carbs', carbsNet != null ? fmt(carbsNet, 1) : '—', 'g', avgNote(netCarbsAvg, 1), {
+      pct: carbsNet != null ? (carbsNet / targets.carbs_net_max) * 100 : null,
+      pctCls: carbsNetCls,
+      cls: carbsNetCls === 'bad' ? 'bad' : '',
+    }),
+    metricCard('Total Carbs', carbsTotal != null ? fmt(carbsTotal, 1) : '—', 'g', avgNote(totalCarbsAvg, 1), {
+      pct: carbsTotal != null ? (carbsTotal / targets.carbs_total_max) * 100 : null,
+      pctCls: carbsTotalCls,
+      cls: carbsTotalCls === 'bad' ? 'bad' : '',
+    }),
+    metricCard('Fat', fmtInt(fatG), 'g', avgNote(fatAvg)),
+  ].join('');
+  animateBars(macrosGrid);
+
+  // Micros snapshot
+  const c = latest.cron?.nutrients || {};
+  const RDA = { magnesium: 420, potassium: 3400, sodium: 2300, fiber: 30 };
+  function microCell(label, key, unit, classifyFn) {
+    const v = c[key];
+    if (!v || (v.amount == null && v.pct == null)) return metricCard(label, '—', '');
+    const pct = v.pct ?? (v.amount != null && RDA[key] ? (v.amount / RDA[key]) * 100 : null);
+    const value = pct != null ? `${fmtInt(pct)}%` : `${fmt(v.amount, v.amount < 10 ? 1 : 0)} ${unit}`;
+    const cls = classifyFn(pct, v.amount);
+    return metricCard(label, value, '', null, {
+      pct: pct != null ? Math.min(150, pct) : null,
+      pctCls: cls,
+      cls: (cls === 'bad' || cls === 'warn') ? cls : '',
+    });
+  }
+  microsGrid.innerHTML = [
+    microCell('Magnesium', 'magnesium', 'mg', (p, a) => {
+      const eff = p ?? (a != null ? (a / 420) * 100 : null);
+      return eff == null ? '' : (eff < 50 ? 'bad' : eff < 80 ? 'warn' : 'ok');
+    }),
+    microCell('Potassium', 'potassium', 'mg', (p, a) => {
+      const eff = p ?? (a != null ? (a / 3400) * 100 : null);
+      return eff == null ? '' : (eff < 60 ? 'warn' : 'ok');
+    }),
+    microCell('Sodium', 'sodium', 'mg', () => 'ok'),
+    (function() {
+      const v = c.fiber;
+      if (!v || v.amount == null) return metricCard('Fiber', '—', '');
+      const pct = (v.amount / 30) * 100;
+      const cls = v.amount < 15 ? 'warn' : v.amount < 20 ? 'warn' : 'ok';
+      return metricCard('Fiber', `${fmt(v.amount, 1)} g`, '', null, {
+        pct: Math.min(150, pct), pctCls: cls, cls: cls === 'warn' ? 'warn' : '',
+      });
+    })(),
+  ].join('');
+  animateBars(microsGrid);
+
+  renderAlerts(latest, days[days.length - 2], baseline, targets);
+  renderRead(latest, baseline, targets);
+}
+
+function renderEnergyBalance(h, baseline, targets) {
+  const el = $('energy-balance');
+  if (h.dietary_kcal == null) {
+    el.innerHTML = `<p class="hint" style="margin:0">No kcal data yet today.</p>`;
+    return;
+  }
+  const intake = h.dietary_kcal;
+  const out = (h.active_kcal ?? 0) + (h.resting_kcal ?? baseline.bmr);
+  const def = out - intake;
+  const max = Math.max(intake, out);
+  const inPct = (intake / max) * 100;
+  const outPct = (out / max) * 100;
+
+  el.innerHTML = `
+    <div class="energy-row">
+      <div class="energy-cell">
+        <div class="label">Intake</div>
+        <div class="val" data-tween="intake">${fmtInt(intake)}</div>
+        <div class="sub">target ${targets.kcal}</div>
+      </div>
+      <div class="energy-cell">
+        <div class="label">Burn</div>
+        <div class="val" data-tween="burn">${fmtInt(out)}</div>
+        <div class="sub">${fmtInt(h.active_kcal ?? 0)} active + ${fmtInt(h.resting_kcal ?? baseline.bmr)} rest</div>
+      </div>
+      <div class="energy-cell ${def > 0 ? 'deficit' : ''}">
+        <div class="label">${def > 0 ? 'Deficit' : 'Surplus'}</div>
+        <div class="val" data-tween="def">${fmtInt(Math.abs(def))}</div>
+        <div class="sub">${def > 0 ? '≈ ' + fmt(def/3500, 2) + ' lb/day' : 'gaining'}</div>
+      </div>
+    </div>
+    <div style="font-size:11px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px">In vs Out</div>
+    <div class="energy-bar">
+      <span class="seg-in" data-bar-target="${inPct/2}"></span>
+      <span class="seg-out" data-bar-target="${outPct/2}"></span>
+    </div>
+    <div class="energy-legend">
+      <span><span class="dot in"></span>Intake ${fmtInt(intake)}</span>
+      <span><span class="dot out"></span>Burn ${fmtInt(out)}</span>
+    </div>
+  `;
+  // animate bars to target widths
+  requestAnimationFrame(() => {
+    el.querySelectorAll('[data-bar-target]').forEach(s => {
+      const t = parseFloat(s.dataset.barTarget);
+      s.style.width = t + '%';
+    });
+  });
+  // tween numbers
+  tween(el.querySelector('[data-tween="intake"]'), intake);
+  tween(el.querySelector('[data-tween="burn"]'), out);
+  tween(el.querySelector('[data-tween="def"]'), Math.abs(def));
+}
+
+function renderMacroSplit(proteinG, fatG, carbsG) {
+  const el = $('macro-split');
+  if (proteinG == null && fatG == null && carbsG == null) {
+    el.innerHTML = `<p class="hint" style="margin:0 0 8px">No macro data yet.</p>`;
+    return;
+  }
+  const pK = (proteinG ?? 0) * 4;
+  const fK = (fatG ?? 0) * 9;
+  const cK = (carbsG ?? 0) * 4;
+  const total = pK + fK + cK;
+  if (total <= 0) {
+    el.innerHTML = `<p class="hint" style="margin:0 0 8px">No macros logged.</p>`;
+    return;
+  }
+  const pp = (pK / total) * 100;
+  const fp = (fK / total) * 100;
+  const cp = (cK / total) * 100;
+
+  el.innerHTML = `
+    <div class="macro-split-bar">
+      <span class="p" data-bar-target="${pp}">${pp > 9 ? Math.round(pp)+'%' : ''}</span>
+      <span class="f" data-bar-target="${fp}">${fp > 9 ? Math.round(fp)+'%' : ''}</span>
+      <span class="c" data-bar-target="${cp}">${cp > 9 ? Math.round(cp)+'%' : ''}</span>
+    </div>
+    <div class="macro-split-legend">
+      <span><span class="swatch sw-p"></span>Protein ${fmtInt(proteinG)}g · ${fmtInt(pK)} kcal</span>
+      <span><span class="swatch sw-f"></span>Fat ${fmtInt(fatG)}g · ${fmtInt(fK)} kcal</span>
+      <span><span class="swatch sw-c"></span>Carbs ${fmtInt(carbsG)}g · ${fmtInt(cK)} kcal</span>
+    </div>
+  `;
+  requestAnimationFrame(() => {
+    el.querySelectorAll('[data-bar-target]').forEach(s => {
+      s.style.width = parseFloat(s.dataset.barTarget) + '%';
+    });
+  });
+}
+
+// ---------- ALERTS ----------
+function renderAlerts(latest, prev, baseline, targets) {
+  const al = [];
+  const c = latest.cron?.nutrients || {};
+  const h = latest.health || {};
+  const pctOf = (n, rda) => (n?.pct ?? (n?.amount != null && rda ? (n.amount / rda) * 100 : null));
+
+  const mgPct = pctOf(c.magnesium, 420);
+  if (mgPct != null && mgPct < targets.mg_min_pct) {
+    const amtTxt = c.magnesium?.amount != null ? ` (${Math.round(c.magnesium.amount)} mg)` : '';
+    al.push({ cls: 'bad', t: `Magnesium ${Math.round(mgPct)}%${amtTxt} — under ${targets.mg_min_pct}% floor. <b>Fix first.</b> Pumpkin seeds, almonds, dark chocolate (85%+), spinach. Or supp 200–400 mg glycinate.` });
+  } else if (mgPct != null && mgPct < 80) {
+    al.push({ cls: 'warn', t: `Magnesium ${Math.round(mgPct)}% — still climbing. Add pumpkin seeds or supp.` });
+  }
+
+  const proteinG = h.protein_g ?? c.protein?.amount;
+  if (proteinG != null && proteinG < targets.protein_min) {
+    al.push({ cls: proteinG < targets.protein_min - 20 ? 'bad' : 'warn',
+      t: `Protein ${proteinG.toFixed(0)}g — under ${targets.protein_min}g floor. <b>Push up.</b> +1 scoop whey or +100g chicken closes the gap.` });
+  }
+
+  const netCarbs = c.carbs_net?.amount ?? h.carbs_g;
+  if (netCarbs != null && netCarbs > targets.carbs_net_max) {
+    al.push({ cls: 'warn', t: `Net carbs ${netCarbs.toFixed(1)}g — over ${targets.carbs_net_max}g keto target.` });
+  }
+  if (netCarbs != null && (c.carbs_total?.amount ?? h.carbs_g) > targets.carbs_total_max) {
+    al.push({ cls: 'bad', t: `Total carbs over ${targets.carbs_total_max}g ceiling.` });
+  }
+
+  const recentLean = VAULT.days.slice(-3).map(d => d.health?.lean_mass_kg).filter(v => v != null);
+  if (recentLean.length >= 3 && recentLean[recentLean.length - 1] < baseline.lean_mass_kg - 0.8) {
+    al.push({ cls: 'bad', t: `Lean mass <b>${((baseline.lean_mass_kg - recentLean[recentLean.length - 1]) * KG_TO_LB).toFixed(1)} lb below baseline</b> over recent days. Eat at maintenance 1–2 days or bump protein.` });
+  }
+
+  if (VAULT.days.length >= 3) {
+    const last3 = VAULT.days.slice(-3);
+    const rhrAvg = rollingAvg(last3.map(d => d.health?.resting_hr), 3);
+    const hrvAvg = rollingAvg(last3.map(d => d.health?.hrv_ms), 3);
+    if (rhrAvg != null && hrvAvg != null
+        && rhrAvg > baseline.resting_hr + 4
+        && hrvAvg < baseline.hrv_apple - 8) {
+      al.push({ cls: 'bad', t: `RHR up (${Math.round(rhrAvg)} vs ${baseline.resting_hr}) + HRV down (${Math.round(hrvAvg)} vs ${baseline.hrv_apple}) over 3 days. <b>Cutting too hard.</b> Eat at maintenance 1–2 days.` });
+    }
+  }
+
+  if (h.dietary_kcal != null && h.dietary_kcal < baseline.bmr) {
+    al.push({ cls: 'warn', t: `Intake ${h.dietary_kcal} kcal — below resting BMR (${baseline.bmr}). Don't go this low for multiple days.` });
+  }
+
+  if (c.leucine?.amount != null && c.leucine.amount < 7.5) {
+    al.push({ cls: c.leucine.amount < 5 ? 'bad' : 'warn',
+      t: `Leucine ${c.leucine.amount.toFixed(1)}g — under 7.5g floor for muscle preservation on a cut. <b>Eat more animal protein</b> (eggs, whey, beef). Below 2.5g per meal = no MPS trigger.` });
+  }
+
+  const vdPct = pctOf(c.vit_d, 15);
+  if (vdPct != null && vdPct < 50) {
+    al.push({ cls: vdPct < 25 ? 'bad' : 'warn',
+      t: `Vitamin D ${Math.round(vdPct)}% — low for cut recovery. Sun + 2000–4000 IU supp. Affects testosterone, sleep, mood.` });
+  }
+
+  const b12Pct = pctOf(c.b12_cobalamin, 2.4);
+  if (b12Pct != null && b12Pct < 50) {
+    al.push({ cls: 'warn', t: `B12 ${Math.round(b12Pct)}% — energy and HRV will suffer. 200g beef or 3 eggs covers it.` });
+  }
+
+  const ironPct = pctOf(c.iron, 8);
+  if (ironPct != null && ironPct < 50) {
+    al.push({ cls: 'warn', t: `Iron ${Math.round(ironPct)}% — low iron looks identical to overtraining (high RHR, low HRV). Red meat, dark leafy greens, or supp if persistent.` });
+  }
+
+  const znPct = pctOf(c.zinc, 11);
+  if (znPct != null && znPct < 50) {
+    al.push({ cls: 'warn', t: `Zinc ${Math.round(znPct)}% — supports testosterone, immune function. Pumpkin seeds and beef are dense. Bonus: pumpkin seeds also fix Mg.` });
+  }
+
+  if (c.omega_3?.amount != null && c.omega_6?.amount != null && c.omega_3.amount > 0) {
+    const ratio = c.omega_6.amount / c.omega_3.amount;
+    if (ratio > 10) {
+      al.push({ cls: ratio > 20 ? 'bad' : 'warn',
+        t: `Omega-6:Omega-3 ratio <b>${ratio.toFixed(1)}:1</b> — inflammation flag. Add fatty fish (salmon, sardines) or fish oil. Target under 4:1.` });
+    }
+  }
+
+  if (c.fat_saturated?.amount != null && c.fat?.amount != null && c.cholesterol?.amount != null) {
+    const sfaShare = c.fat_saturated.amount / c.fat.amount;
+    if (sfaShare > 0.5 && c.cholesterol.amount > 400) {
+      al.push({ cls: 'info', t: `Saturated fat ${Math.round(sfaShare*100)}% of total + cholesterol ${Math.round(c.cholesterol.amount)}mg. Not alarming on keto, but watch the trend if it persists.` });
+    }
+  }
+
+  if (c.fiber?.amount != null && c.fiber.amount < 15) {
+    al.push({ cls: 'warn', t: `Fiber only ${c.fiber.amount.toFixed(1)}g — gut + satiety suffer below ~20g/day. Avocado, chia, flax, leafy greens are low-net-carb fiber.` });
+  }
+
+  if (VAULT.days.length <= 7) {
+    al.push({ cls: 'info', t: `<b>Early week:</b> rapid scale drops are glycogen+water (300–500g/day glycogen × 3–4× water). Real fat loss reads off the 7–14 day average, not yesterday.` });
+  }
+
+  const bad = al.filter(a => a.cls === 'bad').length;
+  const warn = al.filter(a => a.cls === 'warn').length;
+  const cnt = bad + warn;
+  $('alerts-count').innerHTML = cnt === 0 ? '<span class="pill ok">all clear</span>'
+    : `<span class="pill ${bad > 0 ? 'bad' : 'warn'}">${cnt} active</span>`;
+
+  if (al.length === 0) {
+    $('alerts').innerHTML = `<div class="alerts-empty">All clear — keep doing what you're doing.</div>`;
+    return;
+  }
+  $('alerts').innerHTML = al.map((a, i) => {
+    return `<div class="alert ${a.cls}" style="animation-delay:${i * 0.04}s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>${a.t}</div></div>`;
+  }).join('');
+}
+
+function renderRead(latest, baseline, targets) {
+  const h = latest.health || {};
+  const c = latest.cron?.nutrients || {};
+  const wKg = h.weight_kg ?? null;
+
+  let read = '', fix = '';
+
+  if (wKg != null) {
+    const dW = wKg - baseline.weight_kg;
+    const dLb = dW * KG_TO_LB;
+    if (dW > 0.2) read = `Scale up ${dLb.toFixed(1)} lb vs baseline — likely water/sodium swing, not fat. Lean mass is the win/loss signal here.`;
+    else if (dW < -0.3) read = `Down ${(-dLb).toFixed(1)} lb vs baseline. Early in the cut this is mostly glycogen water — keep watching the 7-day avg.`;
+    else read = `Holding near baseline (${dLb >= 0 ? '+' : ''}${dLb.toFixed(1)} lb). Normal noise this early.`;
+  }
+
+  if (c.magnesium?.pct != null && c.magnesium.pct < 50) {
+    fix = `<b>Fix:</b> Magnesium ${Math.round(c.magnesium.pct)}% — eat 30g pumpkin seeds today (~150mg) or take 300mg glycinate tonight.`;
+  } else if (h.protein_g != null && h.protein_g < targets.protein_min) {
+    fix = `<b>Fix:</b> Add ${targets.protein_min - h.protein_g}g protein — 1 scoop whey (~25g) or 120g chicken (~37g).`;
+  } else if ((c.carbs_net?.amount ?? h.carbs_g ?? 0) > targets.carbs_net_max) {
+    fix = `<b>Fix:</b> Pull back net carbs tomorrow — swap any fruit/starchy veg for greens + avocado.`;
+  } else if (h.dietary_kcal != null && Math.abs(h.dietary_kcal - targets.kcal) > 300) {
+    fix = h.dietary_kcal < targets.kcal
+      ? `<b>Fix:</b> Add ~${targets.kcal - h.dietary_kcal} kcal — don't undershoot. Floor matters for lean preservation.`
+      : `<b>Fix:</b> ${h.dietary_kcal - targets.kcal} kcal over target. Trim portion of fat sources tomorrow.`;
+  } else {
+    fix = `<b>Fix:</b> On track — keep magnesium and protein climbing, log daily.`;
+  }
+
+  $('read-body').innerHTML = `<span class="read-line">${read}</span><span class="read-line read-fix">${fix}</span>`;
+}
+
+// ---------- MICROS PANEL ----------
+const MICRO_GROUPS = [
+  ['Vitamins', [
+    ['vit_d', 'Vitamin D', 'mcg'],
+    ['b12_cobalamin', 'B12 (Cobalamin)', 'mcg'],
+    ['b9_folate', 'B9 (Folate)', 'mcg'],
+    ['vit_c', 'Vitamin C', 'mg'],
+    ['vit_a', 'Vitamin A', 'mcg'],
+    ['vit_e', 'Vitamin E', 'mg'],
+    ['vit_k', 'Vitamin K', 'mcg'],
+    ['b1_thiamine', 'B1 (Thiamine)', 'mg'],
+    ['b2_riboflavin', 'B2 (Riboflavin)', 'mg'],
+    ['b3_niacin', 'B3 (Niacin)', 'mg'],
+    ['b5_pantothenic', 'B5 (Pantothenic)', 'mg'],
+    ['b6_pyridoxine', 'B6 (Pyridoxine)', 'mg'],
+    ['b7_biotin', 'B7 (Biotin)', 'mcg'],
+  ]],
+  ['Minerals', [
+    ['magnesium', 'Magnesium', 'mg'],
+    ['potassium', 'Potassium', 'mg'],
+    ['sodium', 'Sodium', 'mg'],
+    ['iron', 'Iron', 'mg'],
+    ['zinc', 'Zinc', 'mg'],
+    ['calcium', 'Calcium', 'mg'],
+    ['selenium', 'Selenium', 'mcg'],
+    ['phosphorus', 'Phosphorus', 'mg'],
+    ['copper', 'Copper', 'mg'],
+    ['manganese', 'Manganese', 'mg'],
+    ['chloride', 'Chloride', 'mg'],
+    ['iodine', 'Iodine', 'mcg'],
+    ['chromium', 'Chromium', 'mcg'],
+    ['molybdenum', 'Molybdenum', 'mcg'],
+    ['fluoride', 'Fluoride', 'mcg'],
+  ]],
+  ['Lipid breakdown', [
+    ['fat_saturated', 'Saturated', 'g'],
+    ['fat_monounsaturated', 'Monounsaturated', 'g'],
+    ['fat_polyunsaturated', 'Polyunsaturated', 'g'],
+    ['fat_trans', 'Trans fats', 'g'],
+    ['omega_3', 'Omega-3', 'g'],
+    ['omega_6', 'Omega-6', 'g'],
+    ['cholesterol', 'Cholesterol', 'mg'],
+    ['ala', 'ALA', 'g'],
+    ['epa', 'EPA', 'mg'],
+    ['dha', 'DHA', 'mg'],
+    ['linoleic', 'Linoleic acid', 'g'],
+  ]],
+  ['Amino acids', [
+    ['leucine', 'Leucine', 'g'],
+    ['lysine', 'Lysine', 'g'],
+    ['isoleucine', 'Isoleucine', 'g'],
+    ['valine', 'Valine', 'g'],
+    ['threonine', 'Threonine', 'g'],
+    ['methionine', 'Methionine', 'g'],
+    ['phenylalanine', 'Phenylalanine', 'g'],
+    ['histidine', 'Histidine', 'g'],
+    ['tryptophan', 'Tryptophan', 'g'],
+    ['tyrosine', 'Tyrosine', 'g'],
+    ['cystine', 'Cystine', 'g'],
+    ['arginine', 'Arginine', 'g'],
+  ]],
+  ['Other', [
+    ['fiber', 'Fiber', 'g'],
+    ['sugars', 'Sugars', 'g'],
+    ['sugars_added', 'Added sugars', 'g'],
+    ['starch', 'Starch', 'g'],
+    ['caffeine', 'Caffeine', 'mg'],
+    ['alcohol', 'Alcohol', 'g'],
+    ['water', 'Water', 'g'],
+  ]],
+];
+
+function classifyPct(pct) {
+  if (pct == null) return '';
+  if (pct < 50) return 'bad';
+  if (pct < 80) return 'warn';
+  if (pct > 150) return 'info';
+  return 'ok';
+}
+
+function renderMicroPanel() {
+  const body = $('micro-body');
+  const summary = $('micro-summary');
+  if (!body) return;
+  const latest = VAULT.days[VAULT.days.length - 1];
+  const n = latest?.cron?.nutrients || {};
+  const total = Object.keys(n).length;
+  if (total === 0) {
+    body.innerHTML = `<p class="hint" style="margin: 0">No Cronometer data yet today. Either log meals in Cronometer (the scheduled task will pick them up at 7pm), or drop a CSV in History.</p>`;
+    summary.textContent = '';
+    return;
+  }
+  summary.textContent = `${total} captured`;
+
+  const groupHTML = MICRO_GROUPS.map(([groupName, items]) => {
+    const rows = items
+      .map(([key, label, unit]) => {
+        const v = n[key];
+        if (!v || v.amount == null || isNaN(v.amount)) return null;
+        const amt = v.amount < 10 ? v.amount.toFixed(1) : Math.round(v.amount);
+        const pct = v.pct;
+        const cls = classifyPct(pct);
+        const pctTxt = pct != null ? `${Math.round(pct)}%` : '—';
+        const barW = pct != null ? Math.min(100, pct) : 0;
+        const barColor = cls === 'bad' ? 'var(--bad)' : cls === 'warn' ? 'var(--warn)' : cls === 'info' ? 'var(--info)' : 'var(--ok)';
+        return `<div class="micro-row">
+          <span class="label">${label}</span>
+          <span class="amt">${amt} ${unit}</span>
+          <span class="bar-wrap">
+            <span class="bar">${pct != null ? `<span data-bar-target="${barW}" style="background:${barColor}"></span>` : ''}</span>
+            <span class="pct" style="color:${pct != null ? barColor : 'var(--text-3)'}">${pctTxt}</span>
+          </span>
+        </div>`;
+      })
+      .filter(Boolean)
+      .join('');
+    if (!rows) return '';
+    return `<div class="micro-group">
+      <div class="micro-group-label">${groupName}</div>
+      ${rows}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  body.innerHTML = groupHTML || `<p class="hint">No recognized nutrients in payload.</p>`;
+  animateBars(body);
+}
+
+// ============================================================
+//   CHARTS — interactive multi-series line chart
+// ============================================================
+function rangeDays() {
+  const all = VAULT.days;
+  if (RANGE === 'all') return all;
+  return all.slice(-RANGE);
+}
+
+function chart(containerId, opts) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const days = rangeDays();
+  const series = opts.series;
+  const n = days.length;
+  if (n < 2) {
+    el.innerHTML = `<p class="hint" style="margin:0; text-align:center; padding:24px 0">Need at least 2 logged days for this range.</p>`;
+    return;
+  }
+
+  // Collect all valid values to determine y range
+  const allValid = [];
+  series.forEach(s => {
+    days.forEach(d => {
+      const v = s.pick(d);
+      if (typeof v === 'number' && !isNaN(v)) allValid.push(v);
+    });
+  });
+  if (allValid.length === 0) {
+    el.innerHTML = `<p class="hint" style="margin:0; text-align:center; padding:24px 0">No data in this range.</p>`;
+    return;
+  }
+  let yMin = Math.min(...allValid);
+  let yMax = Math.max(...allValid);
+  if (opts.yMin != null) yMin = Math.min(yMin, opts.yMin);
+  if (opts.yMax != null) yMax = Math.max(yMax, opts.yMax);
+  const yPad = (yMax - yMin) * 0.12 || 1;
+  yMin -= yPad;
+  yMax += yPad;
+  const yRange = yMax - yMin || 1;
+
+  const W = 600, H = 220;
+  const padL = 36, padR = 14, padT = 12, padB = 26;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+
+  const xAt = (i) => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+  const yAt = (v) => padT + innerH - ((v - yMin) / yRange) * innerH;
+
+  // gridlines + y ticks
+  const tickCount = 4;
+  const ticks = [];
+  for (let i = 0; i <= tickCount; i++) {
+    const v = yMin + (yRange * i / tickCount);
+    ticks.push({ v, y: yAt(v) });
+  }
+
+  // x labels — first, middle, last
+  const xLabels = [];
+  if (n > 0) {
+    xLabels.push({ i: 0, txt: shortDate(days[0].date) });
+    if (n > 4) xLabels.push({ i: Math.floor(n / 2), txt: shortDate(days[Math.floor(n / 2)].date) });
+    xLabels.push({ i: n - 1, txt: shortDate(days[n - 1].date) });
+  }
+
+  // Build paths
+  const seriesHTML = series.map((s, si) => {
+    const pts = [];
+    days.forEach((d, i) => {
+      const v = s.pick(d);
+      if (typeof v === 'number' && !isNaN(v)) pts.push([xAt(i), yAt(v), i, v]);
+    });
+    if (pts.length < 2) return '';
+    const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const last = pts[pts.length - 1];
+    const stroke = s.color || `var(--chart-${(si % 5) + 1})`;
+    const fillId = `g-${containerId}-${si}`;
+    const areaPath = `${path} L${last[0]},${padT + innerH} L${pts[0][0]},${padT + innerH} Z`;
+    return `
+      <defs>
+        <linearGradient id="${fillId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${stroke}" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="${stroke}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="area" d="${areaPath}" fill="url(#${fillId})"/>
+      <path class="line" d="${path}" stroke="${stroke}" style="animation-delay:${si * 0.08}s"/>
+      <circle class="end-dot" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${stroke}" stroke="var(--bg-elev)" stroke-width="1.5"/>
+      <circle class="hover-dot" data-series="${si}" cx="0" cy="0" r="4" fill="${stroke}" stroke="var(--bg-elev)" stroke-width="2"/>
+    `;
+  }).join('');
+
+  const gridHTML = ticks.map(t => `
+    <line class="gridline" x1="${padL}" y1="${t.y}" x2="${padL + innerW}" y2="${t.y}"/>
+    <text class="tick-text" x="${padL - 6}" y="${t.y + 3}" text-anchor="end">${opts.fmtY ? opts.fmtY(t.v) : fmt(t.v, t.v >= 100 ? 0 : 1)}</text>
+  `).join('');
+
+  const xLabelHTML = xLabels.map(l =>
+    `<text class="tick-text" x="${xAt(l.i)}" y="${H - 6}" text-anchor="middle">${l.txt}</text>`
+  ).join('');
+
+  const legendHTML = series.length > 1 ? `<div class="chart-legend">${series.map((s, si) =>
+    `<span><span class="swatch" style="background:${s.color || `var(--chart-${(si % 5) + 1})`}"></span>${s.label}</span>`
+  ).join('')}</div>` : '';
+
+  el.innerHTML = `
+    <svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${opts.aria || ''}">
+      ${gridHTML}
+      <line class="axis-line" x1="${padL}" y1="${padT + innerH}" x2="${padL + innerW}" y2="${padT + innerH}"/>
+      ${seriesHTML}
+      <line class="hover-line" x1="0" y1="${padT}" x2="0" y2="${padT + innerH}"/>
+      ${xLabelHTML}
+      <rect data-hover-area x="${padL}" y="${padT}" width="${innerW}" height="${innerH}" fill="transparent" style="cursor:crosshair"/>
+    </svg>
+    <div class="chart-tip"></div>
+    ${legendHTML}
+  `;
+
+  // Wire hover
+  const svg = el.querySelector('svg');
+  const tip = el.querySelector('.chart-tip');
+  const hoverLine = svg.querySelector('.hover-line');
+  const hoverDots = Array.from(svg.querySelectorAll('.hover-dot'));
+  const hoverArea = svg.querySelector('[data-hover-area]');
+
+  function onMove(e) {
+    const rect = svg.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const xViewbox = (x / rect.width) * W;
+    // Snap to nearest index
+    const rel = clamp((xViewbox - padL) / innerW, 0, 1);
+    const i = Math.round(rel * (n - 1));
+    const xPos = xAt(i);
+    const day = days[i];
+
+    hoverLine.setAttribute('x1', xPos);
+    hoverLine.setAttribute('x2', xPos);
+
+    let rows = '';
+    series.forEach((s, si) => {
+      const v = s.pick(day);
+      const dot = hoverDots[si];
+      if (typeof v === 'number' && !isNaN(v)) {
+        const yp = yAt(v);
+        dot.setAttribute('cx', xPos);
+        dot.setAttribute('cy', yp);
+        dot.style.opacity = 1;
+        const color = s.color || `var(--chart-${(si % 5) + 1})`;
+        rows += `<div class="tip-row"><span class="dot" style="background:${color}"></span><span class="tip-label">${s.label}</span><span class="tip-val">${s.fmt ? s.fmt(v) : fmt(v, 1)}</span></div>`;
+      } else {
+        dot.style.opacity = 0;
+      }
+    });
+    if (!rows) rows = `<div class="tip-row"><span class="tip-label">no data</span></div>`;
+
+    tip.innerHTML = `<div class="tip-date">${day.date}</div>${rows}`;
+    // Position tooltip in container px
+    const containerRect = el.getBoundingClientRect();
+    const xPx = (xPos / W) * containerRect.width;
+    tip.style.left = xPx + 'px';
+    tip.style.top = ((padT - 4) / H * containerRect.height) + 'px';
+    tip.classList.add('visible');
+    svg.classList.add('has-hover');
+  }
+  function onLeave() {
+    tip.classList.remove('visible');
+    svg.classList.remove('has-hover');
+    hoverDots.forEach(d => d.style.opacity = 0);
+  }
+  hoverArea.addEventListener('mousemove', onMove);
+  hoverArea.addEventListener('touchstart', onMove, { passive: true });
+  hoverArea.addEventListener('touchmove', onMove, { passive: true });
+  hoverArea.addEventListener('mouseleave', onLeave);
+  hoverArea.addEventListener('touchend', () => setTimeout(onLeave, 1500));
+}
+
+function shortDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function renderTrends() {
+  if (VAULT.days.length < 2) {
+    ['chart-body','chart-bf','chart-energy','chart-recovery','chart-macros','chart-mg'].forEach(id => {
+      const el = $(id);
+      if (el) el.innerHTML = `<p class="hint" style="margin:0; text-align:center; padding:18px 0">Need at least 2 logged days.</p>`;
+    });
+    return;
+  }
+
+  chart('chart-body', {
+    aria: 'Body composition over time',
+    series: [
+      { label: 'Weight', color: 'var(--chart-1)', pick: d => kgToLb(d.health?.weight_kg), fmt: v => v.toFixed(1) + ' lb' },
+      { label: 'Lean', color: 'var(--chart-3)', pick: d => kgToLb(d.health?.lean_mass_kg), fmt: v => v.toFixed(1) + ' lb' },
+      { label: 'Fat', color: 'var(--chart-2)', pick: d => kgToLb(d.health?.fat_mass_kg), fmt: v => v.toFixed(1) + ' lb' },
+    ],
+  });
+  chart('chart-bf', {
+    aria: 'Body fat percentage',
+    series: [{ label: 'BF %', color: 'var(--chart-2)', pick: d => d.health?.body_fat_pct, fmt: v => v.toFixed(1) + '%' }],
+    fmtY: v => v.toFixed(1) + '%',
+  });
+  chart('chart-energy', {
+    aria: 'Energy intake vs burn',
+    series: [
+      { label: 'Intake', color: 'var(--chart-1)', pick: d => d.health?.dietary_kcal, fmt: v => Math.round(v) + ' kcal' },
+      { label: 'Burn', color: 'var(--chart-2)', pick: d => {
+        const a = d.health?.active_kcal, r = d.health?.resting_kcal;
+        if (a == null && r == null) return null;
+        return (a ?? 0) + (r ?? 0);
+      }, fmt: v => Math.round(v) + ' kcal' },
+    ],
+    fmtY: v => Math.round(v),
+  });
+  chart('chart-recovery', {
+    aria: 'Recovery — RHR and HRV',
+    series: [
+      { label: 'RHR (bpm)', color: 'var(--chart-5)', pick: d => d.health?.resting_hr, fmt: v => Math.round(v) + ' bpm' },
+      { label: 'HRV (ms)', color: 'var(--chart-3)', pick: d => d.health?.hrv_ms, fmt: v => Math.round(v) + ' ms' },
+    ],
+    fmtY: v => Math.round(v),
+  });
+  chart('chart-macros', {
+    aria: 'Protein and net carbs',
+    series: [
+      { label: 'Protein (g)', color: 'var(--chart-1)', pick: d => d.health?.protein_g, fmt: v => Math.round(v) + ' g' },
+      { label: 'Net carbs (g)', color: 'var(--chart-5)', pick: d => d.cron?.nutrients?.carbs_net?.amount ?? d.health?.carbs_g, fmt: v => v.toFixed(1) + ' g' },
+    ],
+    fmtY: v => Math.round(v),
+  });
+  chart('chart-mg', {
+    aria: 'Magnesium percent of target',
+    series: [{
+      label: 'Mg %',
+      color: 'var(--chart-2)',
+      pick: d => {
+        const v = d.cron?.nutrients?.magnesium;
+        if (!v) return null;
+        return v.pct ?? (v.amount != null ? (v.amount / 420) * 100 : null);
+      },
+      fmt: v => Math.round(v) + '%',
+    }],
+    yMin: 0,
+    fmtY: v => Math.round(v) + '%',
+  });
+}
+
+// ---------- RECENT DAYS TABLE ----------
+function renderRecentTable() {
+  const el = $('recent-table');
+  const days = VAULT.days.slice(-14).reverse();
+  if (days.length === 0) {
+    el.innerHTML = `<p class="hint" style="margin:0">No days logged.</p>`;
+    return;
+  }
+  const targets = VAULT.targets;
+  const rows = days.map(d => {
+    const h = d.health || {};
+    const c = d.cron?.nutrients || {};
+    const wLb = kgToLb(h.weight_kg);
+    const leanLb = kgToLb(h.lean_mass_kg);
+    const netCarbs = c.carbs_net?.amount ?? h.carbs_g;
+    const mgPct = c.magnesium?.pct ?? (c.magnesium?.amount != null ? (c.magnesium.amount / 420) * 100 : null);
+    const flags = `${d.health ? '<span class="flag h" title="Health"></span>' : ''}${d.cron ? '<span class="flag c" title="Cronometer"></span>' : ''}`;
+    const carbsCls = netCarbs != null && netCarbs > targets.carbs_net_max ? 'color:var(--bad)' : '';
+    const mgCls = mgPct != null && mgPct < 50 ? 'color:var(--bad)' : '';
+    const proteinCls = h.protein_g != null && h.protein_g < targets.protein_min ? 'color:var(--warn)' : '';
+    return `<tr>
+      <td class="date-cell">${shortDate(d.date)}</td>
+      <td>${wLb != null ? wLb.toFixed(1) : '—'}</td>
+      <td>${leanLb != null ? leanLb.toFixed(1) : '—'}</td>
+      <td>${h.dietary_kcal != null ? fmtInt(h.dietary_kcal) : '—'}</td>
+      <td style="${proteinCls}">${h.protein_g != null ? fmtInt(h.protein_g) : '—'}</td>
+      <td style="${carbsCls}">${netCarbs != null ? fmt(netCarbs, 1) : '—'}</td>
+      <td style="${mgCls}">${mgPct != null ? fmtInt(mgPct) + '%' : '—'}</td>
+      <td><span class="flag-cell">${flags}</span></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="recent-table">
+    <thead>
+      <tr><th>Date</th><th>Wt</th><th>Lean</th><th>kcal</th><th>Prot</th><th>NetC</th><th>Mg</th><th></th></tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ---------- BASELINE / TARGETS / DAYS ----------
+function renderBaseline() {
+  const b = VAULT.baseline;
+  const leanLb = (b.lean_mass_kg * KG_TO_LB).toFixed(1);
+  const fatLb = (b.fat_mass_kg * KG_TO_LB).toFixed(1);
+  $('baseline-view').innerHTML = `
+    Date: ${b.date} · Weight: ${b.weight_lb} lb<br>
+    BF: ${b.body_fat_pct}% · Lean: ${leanLb} lb · Fat: ${fatLb} lb<br>
+    RHR: ${b.resting_hr} · HRV (Apple/Oura): ${b.hrv_apple} / ${b.hrv_oura} ms<br>
+    Maintenance: ${b.maintenance_kcal} kcal · BMR: ${b.bmr} kcal · Age ${b.age ?? '—'} · Height ${b.height_cm ?? '—'} cm
+  `;
+}
+
+// Mifflin-St Jeor BMR for males. Female would be -161 instead of +5.
+function mifflinBMR(weight_kg, height_cm, age) {
+  return Math.round(10 * weight_kg + 6.25 * height_cm - 5 * age + 5);
+}
+
+function computeBaselineFromData() {
+  const withWeight = VAULT.days.filter(d => d.health?.weight_kg != null);
+  if (withWeight.length === 0) return null;
+
+  // Peak weight day = cut start
+  const peak = withWeight.reduce((a, b) => b.health.weight_kg > a.health.weight_kg ? b : a);
+
+  // Earliest day with BF% reading (used as best-known starting body comp)
+  const withBF = VAULT.days
+    .filter(d => d.health?.body_fat_pct != null)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const bfDay = withBF[0];
+  const bfPct = bfDay?.health?.body_fat_pct ?? VAULT.baseline.body_fat_pct;
+
+  // Derive lean/fat at the peak weight using the earliest known BF%
+  const wKg = peak.health.weight_kg;
+  const fatKg = bfPct != null ? wKg * (bfPct / 100) : VAULT.baseline.fat_mass_kg;
+  const leanKg = bfPct != null ? wKg * (1 - bfPct / 100) : VAULT.baseline.lean_mass_kg;
+
+  // RHR/HRV from the same peak day, or rolling-7d avg if missing
+  const rhr = peak.health.resting_hr ?? rollingAvg(VAULT.days.map(d => d.health?.resting_hr), 7) ?? VAULT.baseline.resting_hr;
+  const hrv = peak.health.hrv_ms ?? rollingAvg(VAULT.days.map(d => d.health?.hrv_ms), 7) ?? VAULT.baseline.hrv_apple;
+
+  const age = VAULT.baseline.age ?? 32;
+  const height_cm = VAULT.baseline.height_cm ?? 177;
+  const bmr = mifflinBMR(wKg, height_cm, age);
+  const maintenance = Math.round(bmr * 1.5);
+
+  return {
+    date: peak.date,
+    weight_kg: +wKg.toFixed(2),
+    weight_lb: +(wKg * KG_TO_LB).toFixed(1),
+    body_fat_pct: bfPct != null ? +bfPct.toFixed(2) : VAULT.baseline.body_fat_pct,
+    lean_mass_kg: +leanKg.toFixed(2),
+    fat_mass_kg: +fatKg.toFixed(2),
+    resting_hr: Math.round(rhr),
+    hrv_apple: Math.round(hrv),
+    hrv_oura: VAULT.baseline.hrv_oura,
+    maintenance_kcal: maintenance,
+    bmr,
+    age, height_cm,
+  };
+}
+
+function renderTargets() {
+  const t = VAULT.targets;
+  $('t-kcal').value = t.kcal;
+  $('t-protein-min').value = t.protein_min;
+  $('t-protein-max').value = t.protein_max;
+  $('t-carbs-net').value = t.carbs_net_max;
+  $('t-carbs-total').value = t.carbs_total_max;
+  $('t-mg-min').value = t.mg_min_pct;
+}
+
+function renderDays() {
+  const list = $('days-list');
+  if (VAULT.days.length === 0) { list.innerHTML = `<div class="day-row"><span class="d">No days logged.</span></div>`; return; }
+  const sorted = [...VAULT.days].sort((a, b) => b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(d => {
+    const tags = [];
+    if (d.health) tags.push('<span class="pill ok">H</span>');
+    if (d.cron) tags.push('<span class="pill info">C</span>');
+    return `<div class="day-row">
+      <span class="d">${d.date}</span>
+      <span>${tags.join(' ')}</span>
+      <button class="secondary" data-day-del="${d.date}">Delete</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-day-del]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const date = btn.dataset.dayDel;
+      if (!confirm(`Delete ${date}?`)) return;
+      VAULT.days = VAULT.days.filter(d => d.date !== date);
+      await saveVault(); render();
+    });
+  });
+}
+
+// ============================================================
+//   WIRING
+// ============================================================
+async function completeUnlock(pass) {
+  await loadVault(pass);
+  $('gate').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  render();
+  consumePendingCron().then(r => {
+    if (r.merged > 0) setSyncPill('ok', `+${r.merged} cron`);
+  });
+  // Soft-prompt for biometric setup if device supports it and not yet configured
+  if (webauthnSupported() && !biometricConfig() && !sessionStorage.getItem('cut-tracker-bio-prompted')) {
+    sessionStorage.setItem('cut-tracker-bio-prompted', '1');
+    setTimeout(() => {
+      if (confirm('Set up Face ID / Touch ID unlock now? Faster next time, same crypto strength.')) {
+        document.querySelector('[data-tab="history"]').click();
+        setTimeout(() => {
+          $('biometric-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      }
+    }, 500);
+  }
+}
+
+$('gate-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pass = $('gate-pass').value;
+  $('gate-err').textContent = '';
+  if (!pass || pass.length < 4) { $('gate-err').textContent = 'Passphrase must be at least 4 chars.'; return; }
+  try { await completeUnlock(pass); }
+  catch (err) { $('gate-err').textContent = 'Wrong passphrase, or vault corrupt.'; }
+});
+
+// ---------- Biometric gate button ----------
+function refreshGateBiometric() {
+  const has = biometricConfig();
+  const supported = webauthnSupported();
+  const btn = $('gate-biometric');
+  const divider = $('gate-divider');
+  const sub = $('gate-sub');
+  if (!has || !supported) {
+    btn.style.display = 'none';
+    divider.style.display = 'none';
+    sub.textContent = 'Passphrase unlocks your data.';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  divider.style.display = 'flex';
+  sub.textContent = 'Use Face ID / Touch ID, or your passphrase.';
+}
+$('gate-biometric').addEventListener('click', async () => {
+  $('gate-err').textContent = '';
+  $('gate-err').style.color = '';
+  try {
+    const pass = await unlockBiometric();
+    await completeUnlock(pass);
+  } catch (err) {
+    $('gate-err').style.color = 'var(--bad)';
+    $('gate-err').textContent = err.message || 'Biometric unlock failed.';
+  }
+});
+refreshGateBiometric();
+
+$('lock-btn').addEventListener('click', () => {
+  VAULT = null; PASSPHRASE = null;
+  $('gate-pass').value = '';
+  $('app').classList.add('hidden');
+  $('gate').classList.remove('hidden');
+  $('gate-pass').focus();
+});
+
+// ---------- TAB SWITCHING ----------
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    if (tab === ACTIVE_TAB) return;
+    ACTIVE_TAB = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
+    // Re-trigger fade-up animations on the panel that just became visible
+    const panel = document.querySelector(`.tab-panel[data-panel="${tab}"]`);
+    if (panel) {
+      panel.style.animation = 'none';
+      void panel.offsetWidth;
+      panel.style.animation = '';
+    }
+  });
+});
+
+// ---------- RANGE BAR ----------
+document.querySelectorAll('#range-bar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#range-bar button').forEach(b => b.classList.toggle('active', b === btn));
+    const r = btn.dataset.range;
+    RANGE = r === 'all' ? 'all' : parseInt(r, 10);
+    renderTrends();
+  });
+});
+
+// ---------- FAB ----------
+$('fab').addEventListener('click', () => {
+  document.querySelector('.tab[data-tab="history"]').click();
+  setTimeout(() => {
+    $('intake-health').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('health-input').focus();
+  }, 100);
+});
+
+// ---------- Auto-refresh on tab focus ----------
+let lastFocusSync = 0;
+async function focusSync() {
+  if (!VAULT || !PASSPHRASE) return;
+  const now = Date.now();
+  if (now - lastFocusSync < 60_000) return;
+  lastFocusSync = now;
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return;
+  try {
+    const cloudWrap = await cloudFetchVault(cfg);
+    if (cloudWrap) {
+      const localRaw = localStorage.getItem(STORE_KEY);
+      const localWrap = localRaw ? JSON.parse(localRaw) : null;
+      if ((cloudWrap.updatedAt || 0) > (localWrap?.updatedAt || 0)) {
+        const cloudVault = await decryptVault(cloudWrap, PASSPHRASE);
+        VAULT.baseline = { ...DEFAULT_VAULT.baseline, ...cloudVault.baseline };
+        VAULT.targets = { ...DEFAULT_VAULT.targets, ...cloudVault.targets };
+        VAULT.days = cloudVault.days || [];
+        localStorage.setItem(STORE_KEY, JSON.stringify(cloudWrap));
+        render();
+      }
+    }
+  } catch (e) { /* offline / 404 — keep local */ }
+  const r = await consumePendingCron();
+  if (r.merged > 0) setSyncPill('ok', `+${r.merged} cron`);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') focusSync();
+});
+window.addEventListener('focus', focusSync);
+
+function extractJSON(raw) {
+  let s = raw.trim();
+  s = s.replace(/^```(?:json|JSON)?\s*\n?/i, '').replace(/\n?```\s*$/, '');
+  s = s.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+  // Pick the larger of {} vs [] envelopes so we accept either a single object
+  // or an array of objects (for backfill).
+  const firstObj = s.indexOf('{'), lastObj = s.lastIndexOf('}');
+  const firstArr = s.indexOf('['), lastArr = s.lastIndexOf(']');
+  const objSpan = (firstObj >= 0 && lastObj > firstObj) ? lastObj - firstObj : -1;
+  const arrSpan = (firstArr >= 0 && lastArr > firstArr) ? lastArr - firstArr : -1;
+  if (arrSpan > objSpan && firstArr >= 0 && lastArr > firstArr) {
+    s = s.slice(firstArr, lastArr + 1);
+  } else if (firstObj >= 0 && lastObj > firstObj) {
+    s = s.slice(firstObj, lastObj + 1);
+  }
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  return JSON.parse(s);
+}
+
+function normalizeHealthEntry(obj) {
+  if (obj && obj.weight_lb && !obj.weight_kg) obj.weight_kg = obj.weight_lb / KG_TO_LB;
+  return obj;
+}
+
+$('health-save').addEventListener('click', async () => {
+  const txt = $('health-input').value.trim();
+  $('health-msg').textContent = '';
+  if (!txt) { $('health-msg').textContent = 'Paste JSON first.'; return; }
+  let parsed;
+  try { parsed = extractJSON(txt); }
+  catch (e) {
+    $('health-msg').innerHTML = `<span style="color:var(--bad)">Invalid JSON — ${e.message}.</span> Tell Claude: "reply with ONLY the JSON, no prose, no code fences."`;
+    return;
+  }
+
+  if (Array.isArray(parsed)) {
+    const entries = parsed.filter(o => o && typeof o === 'object');
+    if (entries.length === 0) {
+      $('health-msg').innerHTML = `<span style="color:var(--bad)">Array is empty.</span>`;
+      return;
+    }
+    let saved = 0, skipped = 0;
+    const dates = [];
+    for (const raw of entries) {
+      const obj = normalizeHealthEntry({ ...raw });
+      const date = obj.date;
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { skipped++; continue; }
+      upsertDay(date, { health: obj });
+      saved++;
+      dates.push(date);
+    }
+    if (saved === 0) {
+      $('health-msg').innerHTML = `<span style="color:var(--bad)">No valid entries — each item needs a "date": "YYYY-MM-DD".</span>`;
+      return;
+    }
+    await saveVault();
+    dates.sort();
+    const range = dates.length > 1 ? `${dates[0]} → ${dates[dates.length - 1]}` : dates[0];
+    const skipTxt = skipped > 0 ? ` · ${skipped} skipped (no date)` : '';
+    $('health-msg').innerHTML = `<span style="color:var(--ok)">Saved ${saved} days · ${range}${skipTxt}.</span>`;
+    $('health-input').value = '';
+    render();
+    return;
+  }
+
+  // Single-day path
+  const obj = normalizeHealthEntry(parsed);
+  const date = obj.date || todayISO();
+  upsertDay(date, { health: obj });
+  await saveVault();
+  $('health-msg').innerHTML = `<span style="color:var(--ok)">Saved ${date}.</span>`;
+  $('health-input').value = '';
+  render();
+});
+
+const IOS_PROMPT = `You have Apple Health access. Pull TODAY's metrics and reply with ONLY a JSON object in this exact schema, no commentary, no code fences:
+
+{
+  "date": "YYYY-MM-DD",
+  "weight_kg": <number>,
+  "body_fat_pct": <number>,
+  "lean_mass_kg": <number>,
+  "fat_mass_kg": <number>,
+  "resting_hr": <number>,
+  "hrv_ms": <number>,
+  "dietary_kcal": <number>,
+  "protein_g": <number>,
+  "carbs_g": <number>,
+  "fat_g": <number>,
+  "active_kcal": <number>,
+  "resting_kcal": <number>,
+  "caffeine_mg": <number or null>,
+  "water_ml": <number or null>
+}
+
+If a value isn't available, use null. Use kg for mass. Use Apple Health's HRV (SDNN ms). dietary_kcal is total dietary energy logged today. Today's date in America/New_York.`;
+
+const IOS_HISTORY_PROMPT = `You have Apple Health access. Pull DAILY metrics for the LAST 90 DAYS (or as far back as available, capped at 90) and reply with ONLY a JSON array, no commentary, no code fences. Each element is one day in this schema:
+
+{
+  "date": "YYYY-MM-DD",
+  "weight_kg": <number or null>,
+  "body_fat_pct": <number or null>,
+  "lean_mass_kg": <number or null>,
+  "fat_mass_kg": <number or null>,
+  "resting_hr": <number or null>,
+  "hrv_ms": <number or null>,
+  "dietary_kcal": <number or null>,
+  "protein_g": <number or null>,
+  "carbs_g": <number or null>,
+  "fat_g": <number or null>,
+  "active_kcal": <number or null>,
+  "resting_kcal": <number or null>,
+  "caffeine_mg": <number or null>,
+  "water_ml": <number or null>
+}
+
+Wrap them in a JSON array, sorted oldest → newest:
+[ {...}, {...}, ... ]
+
+Rules:
+- Use kg for mass. HRV = Apple Health SDNN ms.
+- Skip days where ALL values would be null (don't include empty days).
+- Date in America/New_York timezone.
+- Reply with ONLY the array, no prose, no markdown.`;
+
+$('health-prompt-copy').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(IOS_PROMPT);
+  $('health-msg').innerHTML = `<span style="color:var(--ok)">Today's prompt copied. Paste into Claude on iPhone.</span>`;
+});
+$('health-history-prompt-copy').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(IOS_HISTORY_PROMPT);
+  $('health-msg').innerHTML = `<span style="color:var(--ok)">90-day backfill prompt copied. Paste into Claude on iPhone — reply will be a JSON array.</span>`;
+});
+
+$('cron-save').addEventListener('click', async () => {
+  const txt = $('cron-input').value.trim();
+  $('cron-msg').textContent = '';
+  if (!txt) { $('cron-msg').textContent = 'Paste CSV first.'; return; }
+  const parsed = parseCronometerCSV(txt);
+  if (!parsed || Object.keys(parsed.nutrients).length === 0) {
+    $('cron-msg').textContent = 'Could not find nutrients in that CSV.';
+    return;
+  }
+  const date = parsed.date || todayISO();
+  upsertDay(date, { cron: parsed });
+  await saveVault();
+  const found = Object.keys(parsed.nutrients).length;
+  $('cron-msg').innerHTML = `<span style="color:var(--ok)">Saved ${date} · ${found} nutrients parsed.</span>`;
+  $('cron-input').value = '';
+  render();
+});
+
+$('cron-file-btn').addEventListener('click', () => $('cron-file').click());
+$('cron-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  $('cron-input').value = text;
+});
+
+const cronArea = $('cron-input');
+['dragover', 'dragenter'].forEach(ev => cronArea.addEventListener(ev, e => { e.preventDefault(); cronArea.style.borderColor = 'var(--accent)'; }));
+['dragleave', 'drop'].forEach(ev => cronArea.addEventListener(ev, e => { e.preventDefault(); cronArea.style.borderColor = ''; }));
+cronArea.addEventListener('drop', async (e) => {
+  const file = e.dataTransfer.files?.[0];
+  if (!file) return;
+  cronArea.value = await file.text();
+});
+
+$('targets-save').addEventListener('click', async () => {
+  VAULT.targets = {
+    kcal: +$('t-kcal').value,
+    protein_min: +$('t-protein-min').value,
+    protein_max: +$('t-protein-max').value,
+    carbs_net_max: +$('t-carbs-net').value,
+    carbs_total_max: +$('t-carbs-total').value,
+    mg_min_pct: +$('t-mg-min').value,
+  };
+  await saveVault();
+  render();
+});
+
+$('baseline-recompute').addEventListener('click', async () => {
+  const msg = $('baseline-msg');
+  const proposed = computeBaselineFromData();
+  if (!proposed) {
+    msg.style.color = 'var(--bad)';
+    msg.textContent = 'No logged days with weight yet. Add Apple Health data first.';
+    return;
+  }
+  const old = VAULT.baseline;
+  const diff = [
+    ['Date', old.date, proposed.date],
+    ['Weight', `${old.weight_lb} lb`, `${proposed.weight_lb} lb`],
+    ['BF', `${old.body_fat_pct}%`, `${proposed.body_fat_pct}%`],
+    ['Lean', `${(old.lean_mass_kg*KG_TO_LB).toFixed(1)} lb`, `${(proposed.lean_mass_kg*KG_TO_LB).toFixed(1)} lb`],
+    ['Fat', `${(old.fat_mass_kg*KG_TO_LB).toFixed(1)} lb`, `${(proposed.fat_mass_kg*KG_TO_LB).toFixed(1)} lb`],
+    ['RHR', `${old.resting_hr}`, `${proposed.resting_hr}`],
+    ['HRV', `${old.hrv_apple} ms`, `${proposed.hrv_apple} ms`],
+    ['BMR', `${old.bmr} kcal`, `${proposed.bmr} kcal`],
+    ['Maint.', `${old.maintenance_kcal} kcal`, `${proposed.maintenance_kcal} kcal`],
+  ];
+  const lines = diff.map(([k, a, b]) => `  ${k}: ${a}  →  ${b}`).join('\n');
+  if (!confirm(`Replace baseline with values from your peak weight day?\n\n${lines}\n\nThis only changes the comparison anchor — your logged days are not touched.`)) return;
+
+  VAULT.baseline = { ...VAULT.baseline, ...proposed };
+  await saveVault();
+  render();
+  msg.style.color = 'var(--ok)';
+  msg.textContent = `✓ Baseline updated to ${proposed.date} / ${proposed.weight_lb} lb.`;
+});
+
+$('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(VAULT, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `cut-tracker-${todayISO()}.json`; a.click();
+  URL.revokeObjectURL(url);
+});
+
+$('import-btn').addEventListener('click', () => $('import-file').click());
+$('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const text = await file.text();
+  try {
+    const obj = JSON.parse(text);
+    if (!obj.baseline || !Array.isArray(obj.days)) throw new Error('shape');
+    VAULT = obj;
+    await saveVault(); render();
+    alert('Imported.');
+  } catch { alert('Import failed: invalid JSON shape.'); }
+});
+
+$('change-pass-btn').addEventListener('click', async () => {
+  const newPass = prompt('New passphrase (min 4 chars):');
+  if (!newPass || newPass.length < 4) return;
+  PASSPHRASE = newPass;
+  await saveVault();
+  // Biometric config wraps the OLD passphrase; invalidate it.
+  if (biometricConfig()) {
+    clearBiometric();
+    renderBiometric();
+    refreshGateBiometric();
+    alert('Passphrase changed. Biometric unlock was disabled — re-enable it from the History tab if you want.');
+  } else {
+    alert('Passphrase changed. Re-lock and re-unlock with the new one. Push to cloud if other devices use the cloud copy.');
+  }
+});
+
+// ---------- Biometric setup wiring ----------
+$('biometric-enable').addEventListener('click', async () => {
+  $('biometric-msg').textContent = '';
+  $('biometric-msg').style.color = '';
+  if (!PASSPHRASE) {
+    $('biometric-msg').style.color = 'var(--bad)';
+    $('biometric-msg').textContent = 'Re-unlock with passphrase first (shouldn\'t happen — file a bug).';
+    return;
+  }
+  $('biometric-msg').textContent = 'Follow the Face ID / Touch ID prompt…';
+  try {
+    await registerBiometric(PASSPHRASE);
+    $('biometric-msg').style.color = 'var(--ok)';
+    $('biometric-msg').textContent = '✓ Enabled. Next time you open the app, tap Unlock with Face ID.';
+    renderBiometric();
+    refreshGateBiometric();
+  } catch (e) {
+    $('biometric-msg').style.color = 'var(--bad)';
+    $('biometric-msg').textContent = '✗ ' + (e.message || 'Setup failed.');
+  }
+});
+$('biometric-disable').addEventListener('click', () => {
+  if (!confirm('Remove biometric unlock on this device? Passphrase still works.')) return;
+  clearBiometric();
+  renderBiometric();
+  refreshGateBiometric();
+  $('biometric-msg').style.color = 'var(--text-3)';
+  $('biometric-msg').textContent = 'Removed from this device.';
+});
+
+// ---------- Cloud sync UI wiring ----------
+function loadCloudIntoForm() {
+  const cfg = getCloudConfig() || {};
+  $('c-url').value = cfg.url || '';
+  $('c-token').value = cfg.token || '';
+  $('c-auto').value = cfg.auto === false ? '0' : '1';
+  refreshSyncStatusText();
+}
+function refreshSyncStatusText() {
+  const cfg = getCloudConfig() || {};
+  const ls = getLastSync();
+  const lastTxt = ls ? ` · last synced ${fmtTimeStamp(ls)}` : '';
+  $('sync-status-text').textContent = !cfg.url || !cfg.token
+    ? 'not configured'
+    : (cfg.auto === false ? 'manual sync' : 'auto-sync on') + lastTxt;
+}
+$('c-save').addEventListener('click', () => {
+  const url = $('c-url').value.trim();
+  const token = $('c-token').value.trim();
+  const auto = $('c-auto').value === '1';
+  if (!url || !token) { $('c-msg').innerHTML = '<span style="color:var(--bad)">URL and token required.</span>'; return; }
+  if (!/^https?:\/\//.test(url)) { $('c-msg').innerHTML = '<span style="color:var(--bad)">URL must include https://</span>'; return; }
+  setCloudConfig({ url, token, auto });
+  loadCloudIntoForm();
+  setSyncPill('info', 'cloud');
+  $('c-msg').innerHTML = '<span style="color:var(--ok)">Saved. Hit Test connection, then Push.</span>';
+});
+$('c-test').addEventListener('click', async () => {
+  const cfg = getCloudConfig();
+  if (!cfg) { $('c-msg').innerHTML = '<span style="color:var(--bad)">Save config first.</span>'; return; }
+  $('c-msg').textContent = 'Testing…';
+  try { await cloudTest(cfg); $('c-msg').innerHTML = '<span style="color:var(--ok)">✓ Connected. Auth OK.</span>'; setSyncPill('ok', 'connected'); }
+  catch (e) { $('c-msg').innerHTML = `<span style="color:var(--bad)">✗ ${e.message}</span>`; setSyncPill('bad', 'error'); }
+});
+$('c-push').addEventListener('click', async () => {
+  const cfg = getCloudConfig();
+  if (!cfg) { $('c-msg').innerHTML = '<span style="color:var(--bad)">Save config first.</span>'; return; }
+  $('c-msg').textContent = 'Pushing…';
+  try {
+    const wrap = await encryptVault(VAULT, PASSPHRASE);
+    await cloudPutVault(cfg, wrap);
+    localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
+    recordSync();
+    setSyncPill('ok', 'synced');
+    refreshSyncStatusText();
+    $('c-msg').innerHTML = `<span style="color:var(--ok)">✓ Pushed to cloud at ${fmtTimeStamp(Date.now())}.</span>`;
+  } catch (e) { $('c-msg').innerHTML = `<span style="color:var(--bad)">✗ ${e.message}</span>`; setSyncPill('bad', 'error'); }
+});
+function buildCronConfig() {
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return null;
+  return { worker_url: cfg.url.replace(/\/+$/, ''), worker_token: cfg.token };
+}
+$('cron-config-show').addEventListener('click', () => {
+  const cfg = buildCronConfig();
+  const block = $('cron-config-block');
+  if (!cfg) { $('cron-config-msg').innerHTML = '<span style="color:var(--bad)">Save cloud sync config first.</span>'; return; }
+  block.textContent = JSON.stringify(cfg, null, 2);
+  block.style.display = 'block';
+  $('cron-config-msg').innerHTML = 'Save to <code>~/.config/cut-tracker/config.json</code> — <code>mkdir -p ~/.config/cut-tracker</code> first if needed.';
+});
+$('cron-config-dl').addEventListener('click', () => {
+  const cfg = buildCronConfig();
+  if (!cfg) { $('cron-config-msg').innerHTML = '<span style="color:var(--bad)">Save cloud sync config first.</span>'; return; }
+  const blob = new Blob([JSON.stringify(cfg, null, 2) + '\n'], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'config.json'; a.click();
+  URL.revokeObjectURL(url);
+  $('cron-config-msg').innerHTML = 'Move to <code>~/.config/cut-tracker/config.json</code>.';
+});
+$('c-pull').addEventListener('click', async () => {
+  const cfg = getCloudConfig();
+  if (!cfg) { $('c-msg').innerHTML = '<span style="color:var(--bad)">Save config first.</span>'; return; }
+  if (!confirm('Pull from cloud will overwrite local data with the cloud copy. Continue?')) return;
+  $('c-msg').textContent = 'Pulling…';
+  try {
+    const wrap = await cloudFetchVault(cfg);
+    if (!wrap) { $('c-msg').innerHTML = '<span style="color:var(--warn)">No vault on server yet.</span>'; return; }
+    const obj = await decryptVault(wrap, PASSPHRASE);
+    VAULT = { ...DEFAULT_VAULT, ...obj };
+    VAULT.baseline = { ...DEFAULT_VAULT.baseline, ...obj.baseline };
+    VAULT.targets = { ...DEFAULT_VAULT.targets, ...obj.targets };
+    VAULT.days = obj.days || [];
+    localStorage.setItem(STORE_KEY, JSON.stringify(wrap));
+    recordSync();
+    render();
+    setSyncPill('ok', 'pulled');
+    refreshSyncStatusText();
+    $('c-msg').innerHTML = `<span style="color:var(--ok)">✓ Pulled from cloud at ${fmtTimeStamp(Date.now())}.</span>`;
+  } catch (e) {
+    $('c-msg').innerHTML = `<span style="color:var(--bad)">✗ ${e.message} — passphrase must match the one used to push.</span>`;
+  }
+});
+
+$('wipe-btn').addEventListener('click', () => {
+  if (!confirm('Wipe the entire vault on this device? Cannot undo.')) return;
+  if (!confirm('Really sure?')) return;
+  localStorage.removeItem(STORE_KEY);
+  clearBiometric();
+  location.reload();
+});
+
+// ---------- QR Pairing ----------
+function buildPairURL() {
+  const cfg = getCloudConfig();
+  if (!cfg || !cfg.url || !cfg.token) return null;
+  const payload = btoa(JSON.stringify({ url: cfg.url, token: cfg.token }));
+  return `${location.origin}/health/?pair=${payload}`;
+}
+let qrTimer = null;
+function showPairQR() {
+  const url = buildPairURL();
+  if (!url) {
+    $('c-msg').innerHTML = '<span style="color:var(--bad)">Save sync config first.</span>';
+    return;
+  }
+  if (typeof qrcode === 'undefined') {
+    $('c-msg').innerHTML = '<span style="color:var(--bad)">QR library failed to load. Check internet, refresh page.</span>';
+    return;
+  }
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  $('qr-container').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true });
+  const svg = $('qr-container').querySelector('svg');
+  if (svg) { svg.removeAttribute('width'); svg.removeAttribute('height'); svg.style.width = '100%'; svg.style.maxWidth = '260px'; svg.style.height = 'auto'; }
+  $('qr-modal').style.display = 'flex';
+  let remaining = 90;
+  $('qr-countdown').textContent = remaining;
+  clearInterval(qrTimer);
+  qrTimer = setInterval(() => {
+    remaining--;
+    $('qr-countdown').textContent = remaining;
+    if (remaining <= 0) hidePairQR();
+  }, 1000);
+  window.__pairURL = url;
+}
+function hidePairQR() {
+  clearInterval(qrTimer);
+  qrTimer = null;
+  $('qr-modal').style.display = 'none';
+  $('qr-container').innerHTML = '';
+  delete window.__pairURL;
+}
+$('c-qr').addEventListener('click', showPairQR);
+$('qr-close').addEventListener('click', hidePairQR);
+$('qr-copy').addEventListener('click', async () => {
+  if (!window.__pairURL) return;
+  try {
+    await navigator.clipboard.writeText(window.__pairURL);
+    $('qr-copy').textContent = 'Copied ✓';
+    setTimeout(() => { $('qr-copy').textContent = 'Copy link instead'; }, 1500);
+  } catch {
+    $('qr-copy').textContent = 'Copy failed';
+  }
+});
+
+(function handlePairOnLoad() {
+  try {
+    const u = new URL(window.location.href);
+    const p = u.searchParams.get('pair');
+    if (!p) return;
+    const cfg = JSON.parse(atob(p));
+    if (cfg && cfg.url && cfg.token) {
+      setCloudConfig({ url: cfg.url, token: cfg.token, auto: true });
+      u.searchParams.delete('pair');
+      history.replaceState(null, '', u.toString());
+      $('gate-err').style.color = 'var(--ok)';
+      $('gate-err').textContent = 'Paired ✓ — unlock with your passphrase.';
+    }
+  } catch (e) {
+    $('gate-err').style.color = 'var(--bad)';
+    $('gate-err').textContent = 'Pair link malformed — paste manually.';
+  }
+})();
+
+</script>
+</body>
+</html>

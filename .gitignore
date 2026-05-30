@@ -1,0 +1,8 @@
+# Claude Code local state
+.claude/worktrees/
+
+# Wrangler local dev cache
+**/.wrangler/
+
+# OS junk
+.DS_Store
