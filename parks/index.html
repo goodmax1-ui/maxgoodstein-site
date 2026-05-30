@@ -1854,6 +1854,20 @@
   .link-btn-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
   .link-btn-sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
 
+  /* Generic skeletons for async sections */
+  .skel {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--bg-soft), var(--border), var(--bg-soft));
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+    border-radius: 4px;
+    color: transparent;
+  }
+  .skel-block { display: block; height: 14px; }
+  .skel-tile-icon { width: 32px; height: 32px; border-radius: 9px; }
+  .skel-tile-num { width: 40%; height: 22px; margin-top: 4px; }
+  .skel-tile-lab { width: 60%; height: 10px; margin-top: 6px; }
+
   /* Inside the Park */
   .inside-grid {
     display: grid;
@@ -4421,16 +4435,24 @@ async function loadParkEvents(p, gen) {
   const root = $('events');
   const countEl = $('eventsCount');
   if (!sec || !root) return;
-  sec.hidden = true;
-  root.innerHTML = '';
-  setNavCount('sec-events', null);
   eventState = null;
   const name = (p.signname || '').trim();
-  if (!name) return;
+  if (!name) { sec.hidden = true; return; }
+  // Reveal section with skeleton rows so the timeline+section nav don't shift in a beat
+  // after the rest of the page renders. Hides itself at the end if there are 0 events.
+  sec.hidden = false;
+  root.innerHTML = Array(3).fill(`<div class="event-item" style="pointer-events:none">
+    <span class="skel" style="width:48px;height:48px;border-radius:10px;flex-shrink:0"></span>
+    <div class="event-body">
+      <span class="skel skel-block" style="width:75%"></span>
+      <span class="skel skel-block" style="width:45%;margin-top:6px;height:11px"></span>
+    </div>
+  </div>`).join('');
+  setNavCount('sec-events', null);
   try {
     const permits = await fetchPermittedEventsForPark(p);
     if (gen !== undefined && gen !== loadGen) return;
-    if (!permits.length) return;
+    if (!permits.length) { sec.hidden = true; root.innerHTML = ''; return; }
     const merged = permits.map(e => {
       const cat = classifyEvent(e);
       const { venue } = splitPermitLocation(e.event_location || '');
@@ -4771,10 +4793,16 @@ async function loadInsideThePark(p, gen) {
   const sec = $('sec-inside');
   const root = $('inside');
   if (!sec || !root) return;
-  sec.hidden = true;
-  root.innerHTML = '';
+  if (!p.gispropnum) { sec.hidden = true; return; }
+  // Show skeleton tiles immediately so the section doesn't pop into existence after
+  // 1-2s of silence. Hides itself at the end if all counts are zero.
+  sec.hidden = false;
+  root.innerHTML = Array(5).fill(`<div class="inside-tile">
+    <span class="skel skel-tile-icon"></span>
+    <span class="skel skel-tile-num"></span>
+    <span class="skel skel-tile-lab"></span>
+  </div>`).join('');
   setNavCount('sec-inside', null);
-  if (!p.gispropnum) return;
   const id = p.gispropnum;
   const parkUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(id)}`;
   const day = 24 * 60 * 60 * 1000;
@@ -4794,7 +4822,11 @@ async function loadInsideThePark(p, gen) {
     const restroomCount = structRes.filter(s => s.public_restroom === true || s.public_restroom === 'true').length;
 
     // Hide the section entirely if there's nothing to show — skip the rote "0/0/0" grid.
-    if (!monCount && !dfCount && !poolCount && !restroomCount && !pip) return;
+    if (!monCount && !dfCount && !poolCount && !restroomCount && !pip) {
+      sec.hidden = true;
+      root.innerHTML = '';
+      return;
+    }
 
     const tiles = [
       insideTile('monument', monCount, monCount === 1 ? 'Monument' : 'Monuments',

@@ -31,6 +31,13 @@ const POWERBI = {
   reportId: 'a2064d24-eef1-40c7-98b4-ddec7d824b58',
   visualId: '4fe44b9770666a63921e',
   modelId: 968771,
+  // TODO: visualId for the "Budget & Spend Breakdown by Fiscal Year" visual.
+  // To capture this, open https://app.powerbigov.us/view?r=eyJrIjoiNDEzMjFmYjAtNGJk
+  // (the public report URL), drill into a project that has the FY visual, open
+  // DevTools → Network → filter "querydata", and copy the visualId + the
+  // SemanticQueryDataShapeCommand body. Then add a new field `fyVisualId` and a
+  // separate buildPowerBIFYQuery() following the same shape as buildPowerBIQuery().
+  fyVisualId: null,
 };
 
 const POWERBI_FIELD_MAP = {
