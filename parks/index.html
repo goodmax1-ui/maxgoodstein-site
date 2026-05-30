@@ -4840,7 +4840,9 @@ async function loadInsideThePark(p, gen) {
         restroomCount > 0 ? parkUrl : null, { zero: restroomCount === 0 }),
     ];
     if (pip) {
-      tiles.push(insideTile('pip', pip.label, pip.sub, null, { isText: true, iconCls: pip.cls }));
+      // Link the PIP tile to the park's official condition report on nycgovparks.org.
+      const inspectionsUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(id)}/inspections`;
+      tiles.push(insideTile('pip', pip.label, pip.sub, inspectionsUrl, { isText: true, iconCls: pip.cls }));
     }
     root.innerHTML = tiles.join('');
     sec.hidden = false;
@@ -5288,6 +5290,7 @@ function renderLinks(p) {
     { href: `https://news.google.com/search?q=${q}`, label: 'Recent news', sub: 'Google News', icon: 'news' },
     { href: mapUrl, label: 'Map / directions', sub: 'Google Maps', icon: 'map' },
     { href: `https://www.nycgovparks.org/planning-and-building/capital-project-tracker?selected_parkid=${id}`, label: 'Capital tracker', sub: 'All projects', icon: 'tracker' },
+    { href: `https://www.nycgovparks.org/parks/${id}/inspections`, label: 'Condition report', sub: 'PIP inspections', icon: 'clipboard' },
     { href: 'https://www.nycgovparks.org/contact', label: 'Contact Parks', sub: '311 + agency', icon: 'contact' },
   ];
 
@@ -5297,6 +5300,7 @@ function renderLinks(p) {
     news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
     map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
     tracker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="14 5 21 12 14 19"/></svg>',
+    clipboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 13l2 2 4-4"/></svg>',
     contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92V21a1 1 0 0 1-1.1 1 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 3.19 4.1 1 1 0 0 1 4.18 3h4.09a1 1 0 0 1 1 .75 12.84 12.84 0 0 0 .7 2.81 1 1 0 0 1-.23 1L8.09 9.91a16 16 0 0 0 6 6l2.35-1.65a1 1 0 0 1 1-.23 12.84 12.84 0 0 0 2.81.7 1 1 0 0 1 .75 1z"/></svg>',
   };
 

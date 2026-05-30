@@ -31,8 +31,27 @@ self.addEventListener('fetch', e => {
   if (url.hostname === 'parks-proxy.goodmax1.workers.dev') return;
   if (url.hostname === 'tree-map.nycgovparks.org') return;
 
-  // SWR for everything else (fonts, Wikipedia images served from upload.wikimedia.org,
-  // congress.gov headshots, google s2 favicons, the app shell itself).
+  const isShell = e.request.mode === 'navigate' ||
+    url.pathname === '/parks/' ||
+    url.pathname === '/parks/index.html' ||
+    url.pathname === '/parks/reps.json';
+
+  if (isShell) {
+    // Network-first for the app shell + data files so a fresh deploy shows up
+    // immediately. Fall back to cache only when offline.
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        if (resp && resp.ok) {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return resp;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // SWR for static assets (fonts, Wikipedia images, congress.gov headshots, favicons).
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetchPromise = fetch(e.request).then(resp => {
