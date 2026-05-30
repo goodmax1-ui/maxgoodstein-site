@@ -2111,17 +2111,63 @@
     font-variant-numeric: tabular-nums;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
+  .map-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 4px 12px;
+    flex-wrap: wrap;
+  }
+  .map-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    font: 700 12px/1 'Inter', inherit;
+    cursor: pointer;
+    transition: transform 0.12s var(--ease-spring), border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .map-filter:active { transform: scale(0.95); }
+  .map-filter.active { background: var(--accent-soft); color: var(--accent); border-color: transparent; box-shadow: 0 0 0 1px var(--accent-glow); }
+  .mf-count { opacity: 0.65; font-variant-numeric: tabular-nums; }
+  .mf-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .mf-dot.rest { background: #52b788; }
+  .mf-dot.fount { background: #38bdf8; }
+  .mf-dot.closed { background: #f59e0b; }
+  .map-legend {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: var(--text-3);
+    margin-left: auto;
+  }
   #mapCanvas {
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    height: calc(100vh - 150px);
-    min-height: 380px;
+    height: calc(100vh - 190px);
+    min-height: 360px;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-md);
   }
+  .map-kind {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .map-status {
+    align-self: flex-start;
+    font-size: 11px; font-weight: 800;
+    padding: 2px 9px; border-radius: 999px;
+  }
+  .map-status.open { background: var(--ok-soft); color: var(--ok); }
+  .map-status.closed { background: var(--warn-soft); color: var(--warn); }
+  .map-status.unknown { background: var(--bg-soft); color: var(--text-3); }
   .leaflet-container { background: var(--bg-soft); font-family: 'Inter', sans-serif; }
   .leaflet-popup-content-wrapper, .leaflet-popup-tip {
     background: var(--bg-elev);
@@ -2209,8 +2255,8 @@
     <a class="home-card reveal map-cta" id="restroomMapCard" href="#/map">
       <span class="map-cta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="5" r="1.8"/><path d="M5.5 9.5h4l-1 6.5h1.5V22h-3v-6h-1.5"/><circle cx="16.5" cy="5" r="1.8"/><path d="M14 10.5h5l-2 5.5h2V22h-3v-5h-2"/></svg></span>
       <span class="map-cta-text">
-        <span class="map-cta-title">Restroom map</span>
-        <span class="map-cta-sub">Every public bathroom in NYC parks</span>
+        <span class="map-cta-title">Amenity map</span>
+        <span class="map-cta-sub">Restrooms &amp; drinking fountains, citywide</span>
       </span>
       <span class="map-cta-arrow">&rarr;</span>
     </a>
@@ -2365,11 +2411,16 @@
     </div>
   </div>
 
-  <!-- Restroom map view -->
+  <!-- Amenity map view -->
   <div id="mapView" class="hidden">
     <div class="map-bar">
-      <h2 class="map-title">Park Restrooms</h2>
+      <h2 class="map-title">Park Amenities</h2>
       <span class="map-count" id="mapCount"></span>
+    </div>
+    <div class="map-filters">
+      <button class="map-filter active" type="button" data-layer="restrooms"><span class="mf-dot rest"></span>Restrooms <span class="mf-count" id="mfRestrooms"></span></button>
+      <button class="map-filter" type="button" data-layer="fountains"><span class="mf-dot fount"></span>Fountains <span class="mf-count" id="mfFountains"></span></button>
+      <span class="map-legend"><span class="mf-dot closed"></span>closed</span>
     </div>
     <div id="mapCanvas"></div>
   </div>
@@ -2888,13 +2939,15 @@ function loadLeaflet() {
 }
 
 let mapInstance = null;
-let restroomLayerLoaded = false;
+const mapLayers = { restrooms: null, fountains: null };   // L.layerGroup once loaded
+const mapLayerLoading = { restrooms: false, fountains: false };
+let activeMapLayers = { restrooms: true, fountains: false };
 
 async function showMap() {
   setActiveView('map');
   clearBoroughTheme();
   window.scrollTo({ top: 0, behavior: 'instant' });
-  if ($('headerParkName')) $('headerParkName').textContent = 'Park Restrooms';
+  if ($('headerParkName')) $('headerParkName').textContent = 'Park Amenities';
   try {
     await loadLeaflet();
   } catch {
@@ -2915,44 +2968,128 @@ async function showMap() {
   }
   // The container had zero size while hidden; recompute now that it's visible.
   setTimeout(() => mapInstance.invalidateSize(), 80);
-  if (!restroomLayerLoaded) {
-    restroomLayerLoaded = true;
-    loadRestroomMarkers();
+  // Activate whichever layers are toggled on (restrooms by default).
+  if (activeMapLayers.restrooms) ensureMapLayer('restrooms');
+  if (activeMapLayers.fountains) ensureMapLayer('fountains');
+}
+
+function toggleMapLayer(kind) {
+  activeMapLayers[kind] = !activeMapLayers[kind];
+  document.querySelector(`.map-filter[data-layer="${kind}"]`)?.classList.toggle('active', activeMapLayers[kind]);
+  if (activeMapLayers[kind]) {
+    ensureMapLayer(kind);
+  } else if (mapLayers[kind]) {
+    mapInstance.removeLayer(mapLayers[kind]);
   }
 }
+
+async function ensureMapLayer(kind) {
+  if (mapLayers[kind]) { mapLayers[kind].addTo(mapInstance); return; }
+  if (mapLayerLoading[kind]) return;
+  mapLayerLoading[kind] = true;
+  if (kind === 'restrooms') await loadRestroomMarkers();
+  else await loadFountainMarkers();
+  mapLayerLoading[kind] = false;
+}
+
+function pointFromGeom(geom) {
+  const c = geom && geom.coordinates;
+  if (!Array.isArray(c) || c.length < 2) return null;
+  return { lat: c[1], lng: c[0] };
+}
+
+const RESTROOM_STATUS = {
+  'Active': { label: 'Open', cls: 'open' },
+  'Closed Temporarily': { label: 'Closed temporarily', cls: 'closed' },
+  'Inactive': { label: 'Currently closed', cls: 'closed' },
+};
 
 async function loadRestroomMarkers() {
   const countEl = $('mapCount');
   countEl.textContent = 'Loading restrooms…';
   try {
     const rows = await cachedFetchJSON(
-      'restrooms-all',
-      `${SOCRATA}/n8q6-i44s.json?$where=${encodeURIComponent('public_restroom=true')}&$select=gispropnum,description,multipolygon&$limit=1200`,
+      'restrooms-all-v2',
+      `${SOCRATA}/n8q6-i44s.json?$where=${encodeURIComponent("public_restroom=true AND featurestatus NOT IN('Removed','Archived')")}&$select=gispropnum,description,featurestatus,multipolygon&$limit=1500`,
       24 * 60 * 60 * 1000
     );
-    let n = 0;
     const layer = L.layerGroup();
+    let n = 0, open = 0;
     for (const r of rows) {
       const c = centroidFromMultipolygon(r.multipolygon);
       if (!c) continue;
       n++;
+      const st = RESTROOM_STATUS[r.featurestatus] || { label: r.featurestatus || 'Status unknown', cls: 'unknown' };
+      const isOpen = st.cls === 'open';
+      if (isOpen) open++;
       const desc = r.description || 'Public restroom';
       const id = r.gispropnum || '';
       const marker = L.circleMarker([c.lat, c.lng], {
-        radius: 5, color: '#ffffff', weight: 1.2, fillColor: '#52b788', fillOpacity: 0.92,
+        radius: 5, color: '#ffffff', weight: 1.2,
+        fillColor: isOpen ? '#52b788' : '#f59e0b', fillOpacity: 0.92,
       });
       marker.bindPopup(
-        `<div class="map-popup"><strong>${escapeHTML(desc)}</strong>` +
+        `<div class="map-popup">` +
+        `<span class="map-kind">Restroom</span>` +
+        `<strong>${escapeHTML(desc)}</strong>` +
+        `<span class="map-status ${st.cls}">${escapeHTML(st.label)}</span>` +
         (id ? `<a class="map-popup-btn" href="#/p/${escapeHTML(id)}">Open park &rarr;</a>` : '') +
         `</div>`
       );
       marker.addTo(layer);
     }
-    layer.addTo(mapInstance);
-    countEl.textContent = `${n} restrooms`;
+    mapLayers.restrooms = layer;
+    if (activeMapLayers.restrooms) layer.addTo(mapInstance);
+    const el = $('mfRestrooms'); if (el) el.textContent = n;
+    updateMapCount();
   } catch (e) {
     countEl.textContent = 'Could not load restrooms';
   }
+}
+
+async function loadFountainMarkers() {
+  const countEl = $('mapCount');
+  countEl.textContent = 'Loading fountains…';
+  try {
+    const rows = await cachedFetchJSON(
+      'fountains-all',
+      `${SOCRATA}/qnv7-p7a2.json?$where=${encodeURIComponent("featuresta='Active'")}&$select=gispropnum,propertyna,fountainty,the_geom&$limit=5000`,
+      24 * 60 * 60 * 1000
+    );
+    const layer = L.layerGroup();
+    let n = 0;
+    for (const r of rows) {
+      const c = pointFromGeom(r.the_geom);
+      if (!c) continue;
+      n++;
+      const park = r.propertyna || 'Drinking fountain';
+      const id = r.gispropnum || '';
+      const marker = L.circleMarker([c.lat, c.lng], {
+        radius: 4, color: '#ffffff', weight: 1, fillColor: '#38bdf8', fillOpacity: 0.9,
+      });
+      marker.bindPopup(
+        `<div class="map-popup">` +
+        `<span class="map-kind">Drinking fountain</span>` +
+        `<strong>${escapeHTML(park)}</strong>` +
+        (id ? `<a class="map-popup-btn" href="#/p/${escapeHTML(id)}">Open park &rarr;</a>` : '') +
+        `</div>`
+      );
+      marker.addTo(layer);
+    }
+    mapLayers.fountains = layer;
+    if (activeMapLayers.fountains) layer.addTo(mapInstance);
+    const el = $('mfFountains'); if (el) el.textContent = n;
+    updateMapCount();
+  } catch (e) {
+    countEl.textContent = 'Could not load fountains';
+  }
+}
+
+function updateMapCount() {
+  const parts = [];
+  if (activeMapLayers.restrooms && $('mfRestrooms')?.textContent) parts.push(`${$('mfRestrooms').textContent} restrooms`);
+  if (activeMapLayers.fountains && $('mfFountains')?.textContent) parts.push(`${$('mfFountains').textContent} fountains`);
+  $('mapCount').textContent = parts.join(' · ');
 }
 
 function normalize(s) {
@@ -5647,6 +5784,8 @@ async function init() {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrap')) $('results').classList.remove('show');
     if (e.target.closest('#locateBtn')) requestNearMe();
+    const mf = e.target.closest('.map-filter');
+    if (mf) { toggleMapLayer(mf.dataset.layer); }
   });
   $('backBtn').addEventListener('click', () => {
     if (window.location.hash) {
