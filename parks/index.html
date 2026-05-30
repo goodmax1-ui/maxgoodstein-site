@@ -33,6 +33,10 @@
     --accent-glow: rgba(45,106,79,0.22);
     --accent-grad: linear-gradient(135deg, #1b4332 0%, #2d6a4f 40%, #52b788 100%);
     --accent-grad-soft: linear-gradient(135deg, rgba(45,106,79,0.06), rgba(82,183,136,0.10));
+    /* Mesh-gradient blob colors for the hero (overridden per borough on detail). */
+    --mesh-1: #52b788;
+    --mesh-2: #2d6a4f;
+    --mesh-3: #95d5b2;
     --ok: #16a34a;
     --ok-soft: #dcfce7;
     --warn: #d97706;
@@ -663,21 +667,36 @@
     background: var(--accent-grad);
     overflow: hidden;
   }
+  /* Animated mesh-gradient blobs drifting behind the silhouette. */
   .hero-canvas::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -45%;
     background:
-      radial-gradient(900px 300px at -10% 110%, rgba(255,255,255,0.18), transparent 60%),
-      radial-gradient(700px 280px at 110% -20%, rgba(255,255,255,0.14), transparent 60%);
+      radial-gradient(circle at 28% 30%, var(--mesh-1), transparent 45%),
+      radial-gradient(circle at 76% 24%, var(--mesh-3), transparent 42%),
+      radial-gradient(circle at 52% 82%, var(--mesh-2), transparent 50%),
+      radial-gradient(circle at 12% 88%, var(--mesh-3), transparent 40%);
+    opacity: 0.85;
+    mix-blend-mode: screen;
+    animation: meshDrift 18s ease-in-out infinite alternate;
     pointer-events: none;
   }
   .hero-canvas::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.42) 100%);
     pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes meshDrift {
+    0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate(4%, -3%) scale(1.12) rotate(6deg); }
+    100% { transform: translate(-3%, 4%) scale(1.06) rotate(-5deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-canvas::before { animation: none; }
   }
   .hero-photo {
     position: absolute;
@@ -841,9 +860,10 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--accent-grad-soft);
+    background:
+      radial-gradient(120% 80% at 50% 120%, var(--accent-soft), transparent 70%);
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.75;
   }
   .stat-card > * { position: relative; z-index: 1; }
   .stat-val {
@@ -855,6 +875,8 @@
     font-variant-numeric: tabular-nums;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
+  .stat-card:nth-child(3) .stat-val,
+  .stat-card:nth-child(4) .stat-val { text-shadow: 0 0 22px var(--accent-glow); }
   .stat-val .stat-unit {
     font-size: 12px;
     font-weight: 700;
@@ -977,6 +999,7 @@
   .nav-pill.active {
     background: var(--accent-soft);
     color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-glow), 0 4px 14px -4px var(--accent-glow);
   }
   .nav-pill .nav-count {
     margin-left: 4px;
@@ -2228,15 +2251,19 @@ const ENDPOINT_COUNCIL = SOCRATA + '/uvw5-9znb.json';
 const ENDPOINT_CAPITAL = SOCRATA + '/4hcv-tc5r.json';
 const ENDPOINT_CPDB = SOCRATA + '/fi59-268w.json';
 
-const BOROUGHS = { M: 'Manhattan', B: 'Bronx', X: 'Bronx', Q: 'Queens', K: 'Brooklyn', R: 'Staten Island' };
+// enfh-gkve borough field uses: M=Manhattan, X=Bronx, B=Brooklyn, Q=Queens, R=Staten
+// Island. (There is NO 'K' in this dataset — community boards use a different scheme.)
+const BOROUGHS = { M: 'Manhattan', X: 'Bronx', B: 'Brooklyn', K: 'Brooklyn', Q: 'Queens', R: 'Staten Island' };
 const CB_BOROUGH_PREFIX = { '1': 'M', '2': 'X', '3': 'K', '4': 'Q', '5': 'R' };
 const CB_BOROUGH_SLUG = { M: 'manhattancb', X: 'bronxcb', K: 'brooklyncb', Q: 'queenscb', R: 'statenislandcb' };
 const CB_BOROUGH_NAME = { M: 'Manhattan', X: 'Bronx', K: 'Brooklyn', Q: 'Queens', R: 'Staten Island' };
 
+// Keyed by the enfh-gkve borough field (B=Brooklyn, X=Bronx). K kept as a harmless
+// alias in case any record uses it.
 const BOROUGH_PRESIDENTS = {
   M: { name: 'Mark Levine', url: 'https://www.manhattanbp.nyc.gov/' },
   X: { name: 'Vanessa L. Gibson', url: 'https://bronxboropres.nyc.gov/' },
-  B: { name: 'Vanessa L. Gibson', url: 'https://bronxboropres.nyc.gov/' },
+  B: { name: 'Antonio Reynoso', url: 'https://www.brooklynbp.nyc.gov/' },
   K: { name: 'Antonio Reynoso', url: 'https://www.brooklynbp.nyc.gov/' },
   Q: { name: 'Donovan Richards', url: 'https://www.queensbp.org/' },
   R: { name: 'Vito Fossella', url: 'https://www.statenislandusa.com/' },
@@ -2245,7 +2272,7 @@ const BOROUGH_PRESIDENTS = {
 const PARKS_BOROUGH_COMMISSIONERS = {
   M: { name: 'Manhattan Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
   X: { name: 'Bronx Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
-  B: { name: 'Bronx Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
+  B: { name: 'Brooklyn Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
   K: { name: 'Brooklyn Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
   Q: { name: 'Queens Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
   R: { name: 'Staten Island Borough Commissioner', url: 'https://www.nycgovparks.org/about/borough-management' },
@@ -2354,12 +2381,49 @@ function renderRecent() {
   });
 }
 
+// ---- Borough color theming ----
+// Each borough re-tints the whole detail view by overriding the accent custom
+// properties on <body>. The hero mesh-gradient, glows, pills, links, donut center
+// and progress bars all reference these vars, so a Brooklyn park glows violet, a
+// Queens park cyan, etc. Home view stays on the green brand default.
+// Keyed by enfh-gkve borough field: M=Manhattan (amber), X=Bronx (rose),
+// B=Brooklyn (violet), Q=Queens (cyan), R=Staten Island (emerald).
+const BOROUGH_THEME = {
+  M: { a: '#d98a00', a2: '#f0a92e', a3: '#f7c873', soft: 'rgba(230,150,10,0.16)', glow: 'rgba(240,169,46,0.34)', g1: '#4a3000', g2: '#b8780c', g3: '#f0a92e', m1: '#f0a92e', m2: '#b8780c', m3: '#f7c873' },
+  X: { a: '#e0426a', a2: '#fb7193', a3: '#ffa3ba', soft: 'rgba(224,66,106,0.16)', glow: 'rgba(251,113,147,0.34)', g1: '#4d0f20', g2: '#bd3355', g3: '#fb7193', m1: '#fb7193', m2: '#bd3355', m3: '#ffa3ba' },
+  B: { a: '#8b6df0', a2: '#a78bfa', a3: '#c4b2ff', soft: 'rgba(139,109,240,0.18)', glow: 'rgba(167,139,250,0.36)', g1: '#2a1d52', g2: '#6d4fc0', g3: '#a78bfa', m1: '#a78bfa', m2: '#6d4fc0', m3: '#c4b2ff' },
+  Q: { a: '#0fa3b8', a2: '#22d0e0', a3: '#6fe2ee', soft: 'rgba(15,163,184,0.16)', glow: 'rgba(34,208,224,0.34)', g1: '#0a3d47', g2: '#1593ad', g3: '#22d0e0', m1: '#22d0e0', m2: '#1593ad', m3: '#6fe2ee' },
+  R: { a: '#1f9d62', a2: '#34d399', a3: '#6ee7b7', soft: 'rgba(31,157,98,0.16)', glow: 'rgba(52,211,153,0.34)', g1: '#0d4429', g2: '#1a8f5e', g3: '#34d399', m1: '#34d399', m2: '#1a8f5e', m3: '#6ee7b7' },
+};
+
+const BOROUGH_THEME_VARS = ['--accent', '--accent-2', '--accent-3', '--accent-soft', '--accent-glow', '--accent-grad', '--mesh-1', '--mesh-2', '--mesh-3'];
+
+function applyBoroughTheme(borough) {
+  const t = BOROUGH_THEME[borough];
+  if (!t) { clearBoroughTheme(); return; }
+  const s = document.body.style;
+  s.setProperty('--accent', t.a);
+  s.setProperty('--accent-2', t.a2);
+  s.setProperty('--accent-3', t.a3);
+  s.setProperty('--accent-soft', t.soft);
+  s.setProperty('--accent-glow', t.glow);
+  s.setProperty('--accent-grad', `linear-gradient(135deg, ${t.g1} 0%, ${t.g2} 45%, ${t.g3} 100%)`);
+  s.setProperty('--mesh-1', t.m1);
+  s.setProperty('--mesh-2', t.m2);
+  s.setProperty('--mesh-3', t.m3);
+}
+function clearBoroughTheme() {
+  const s = document.body.style;
+  BOROUGH_THEME_VARS.forEach(v => s.removeProperty(v));
+}
+
 // ---- View switching ----
 function showSearch() {
   document.body.classList.remove('detail');
   $('searchView').classList.remove('hidden');
   $('detailView').classList.add('hidden');
   if ($('headerParkName')) $('headerParkName').textContent = '';
+  clearBoroughTheme();
   renderRecent();
   initHome();
 }
@@ -2758,7 +2822,10 @@ async function loadDetailByGispropnum(id, fromHistory = false) {
     if (!rows.length) throw new Error('Park not found');
     loadDetail(rows[0], fromHistory);
   } catch (e) {
-    alert('Could not load park: ' + e.message);
+    // Non-blocking: a bad deep link / unknown id just falls back to the search view.
+    console.warn('Could not load park', id, e.message);
+    if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+    showSearch();
   }
 }
 
@@ -2777,6 +2844,7 @@ async function loadDetail(stub, fromHistory = false) {
     }
   }
   currentPark = full;
+  applyBoroughTheme(full.borough);
   const gen = ++loadGen;
   // Reset async-rendered sections so they don't show stale data from a previous park
   // while in-flight fetches for the new park are still pending.
@@ -3099,7 +3167,9 @@ function chunkDistricts(s, width) {
 function renderOfficials(p) {
   const rows = [];
   const bor = p.borough;
-  const borChar = bor === 'B' ? 'X' : bor;
+  // The borough field is already the right key for our maps (B=Brooklyn, X=Bronx);
+  // no remapping needed.
+  const borChar = bor;
 
   if (p.councildistrict) {
     const cd = String(p.councildistrict);
