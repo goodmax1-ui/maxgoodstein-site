@@ -1826,6 +1826,66 @@
   .link-btn-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
   .link-btn-sub { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
 
+  /* Inside the Park */
+  .inside-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+  @media (min-width: 540px) {
+    .inside-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  .inside-tile {
+    background: var(--bg-elev);
+    padding: 14px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+    min-width: 0;
+  }
+  .inside-tile:hover { background: var(--bg-soft); }
+  .inside-tile.inside-zero { opacity: 0.5; }
+  .inside-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .inside-icon svg { width: 17px; height: 17px; }
+  .inside-icon.pip-a { background: var(--ok-soft); color: var(--ok); }
+  .inside-icon.pip-u { background: var(--bad-soft); color: var(--bad); }
+  .inside-count {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .inside-count.is-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+  }
+  .inside-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    line-height: 1.25;
+  }
+
   /* Events */
   .event-bucket-header {
     display: flex;
@@ -2032,6 +2092,14 @@
         <span class="section-count" id="officialsCount"></span>
       </div>
       <div id="officials"></div>
+    </div>
+
+    <div class="section reveal" id="sec-inside" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Inside the Park</h2>
+        <span class="section-count" id="insideCount"></span>
+      </div>
+      <div class="inside-grid" id="inside"></div>
     </div>
 
     <div class="section reveal" id="sec-events" hidden>
@@ -2651,6 +2719,7 @@ async function loadDetail(stub, fromHistory = false) {
   loadHeroImage(full, gen);
   loadParkBadges(full, gen);
   loadCommunityBoardLeaders(full, gen);
+  loadInsideThePark(full, gen);
   loadParkEvents(full, gen);
   loadHistory(full, gen);
   loadNews(full, gen);
@@ -2872,6 +2941,7 @@ function renderSectionNav() {
   const inner = document.querySelector('.section-nav-inner');
   const sections = [
     { id: 'sec-officials', label: 'Officials' },
+    { id: 'sec-inside', label: 'Inside' },
     { id: 'sec-events', label: 'Events' },
     { id: 'sec-finance', label: 'Finance' },
     { id: 'sec-timeline', label: 'Timeline' },
@@ -4597,6 +4667,106 @@ function insertCBLeaderRows(borCode, cbNum, data) {
   if (data.district_manager) {
     cursor = insertAfter(cursor, officialRow('District Mgr', data.district_manager, cbLabel, null, cbUrl));
   }
+}
+
+// ---- Inside the Park: monuments, drinking fountains, pools, restrooms, PIP rating ----
+const INSIDE_ICONS = {
+  monument: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22V8.5a4 4 0 0 1 8 0V22"/><path d="M5 22h14"/><path d="M9 13h6"/><circle cx="12" cy="6" r="1.5"/></svg>',
+  fountain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M7 22V14a5 5 0 0 1 10 0v8"/><path d="M12 14V8"/><circle cx="12" cy="5" r="2"/></svg>',
+  pool: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 21c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M7 16V5a2 2 0 1 1 4 0M17 16V5a2 2 0 1 0-4 0"/></svg>',
+  restroom: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="5" r="1.8"/><path d="M5.5 9.5h4l-1 6.5h1.5V22h-3v-6h-1.5"/><circle cx="16.5" cy="5" r="1.8"/><path d="M14 10.5h5l-2 5.5h2V22h-3v-5h-2"/></svg>',
+  pip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+};
+
+function insideTile(iconKey, value, label, url, opts = {}) {
+  const { isText = false, iconCls = '', zero = false } = opts;
+  const valHtml = `<span class="inside-count${isText ? ' is-text' : ''}">${escapeHTML(String(value))}</span>`;
+  const inner = `
+    <span class="inside-icon ${iconCls}">${INSIDE_ICONS[iconKey] || ''}</span>
+    ${valHtml}
+    <span class="inside-label">${escapeHTML(label)}</span>`;
+  const cls = `inside-tile${zero ? ' inside-zero' : ''}`;
+  return url
+    ? `<a class="${cls}" href="${escapeHTML(url)}" target="_blank" rel="noopener">${inner}</a>`
+    : `<div class="${cls}">${inner}</div>`;
+}
+
+async function loadInsideThePark(p, gen) {
+  const sec = $('sec-inside');
+  const root = $('inside');
+  if (!sec || !root) return;
+  sec.hidden = true;
+  root.innerHTML = '';
+  setNavCount('sec-inside', null);
+  if (!p.gispropnum) return;
+  const id = p.gispropnum;
+  const parkUrl = `https://www.nycgovparks.org/parks/${encodeURIComponent(id)}`;
+  const day = 24 * 60 * 60 * 1000;
+  try {
+    const [monRes, dfRes, poolRes, structRes, pip] = await Promise.all([
+      cachedFetchJSON(`monuments:${id}`, `${SOCRATA}/6rrm-vxj9.json?parknumber=${encodeURIComponent(id)}&$select=count(*)`, day).catch(() => [{}]),
+      cachedFetchJSON(`fountains:${id}`, `${SOCRATA}/qnv7-p7a2.json?gispropnum=${encodeURIComponent(id)}&$where=${encodeURIComponent("featuresta='Active'")}&$select=count(*)`, day).catch(() => [{}]),
+      cachedFetchJSON(`pools:${id}`, `${SOCRATA}/y5rm-wagw.json?gispropnum=${encodeURIComponent(id)}&$select=name,pooltype&$limit=20`, day).catch(() => []),
+      cachedFetchJSON(`structs:${id}`, `${SOCRATA}/n8q6-i44s.json?gispropnum=${encodeURIComponent(id)}&$select=description,public_restroom,recreation_center&$limit=200`, day).catch(() => []),
+      loadPIPRating(p).catch(() => null),
+    ]);
+    if (gen !== undefined && gen !== loadGen) return;
+
+    const monCount = parseInt(monRes[0]?.count || '0', 10);
+    const dfCount = parseInt(dfRes[0]?.count || '0', 10);
+    const poolCount = poolRes.length;
+    const restroomCount = structRes.filter(s => s.public_restroom === true || s.public_restroom === 'true').length;
+
+    // Hide the section entirely if there's nothing to show — skip the rote "0/0/0" grid.
+    if (!monCount && !dfCount && !poolCount && !restroomCount && !pip) return;
+
+    const tiles = [
+      insideTile('monument', monCount, monCount === 1 ? 'Monument' : 'Monuments',
+        monCount > 0 ? `https://www.nycgovparks.org/art_and_antiquities/search?keyword=${encodeURIComponent(p.signname)}` : null,
+        { zero: monCount === 0 }),
+      insideTile('fountain', dfCount, dfCount === 1 ? 'Drinking fountain' : 'Drinking fountains',
+        dfCount > 0 ? parkUrl : null, { zero: dfCount === 0 }),
+      insideTile('pool', poolCount, poolCount === 1 ? 'Pool' : 'Pools',
+        poolCount > 0 ? `https://www.nycgovparks.org/facilities/outdoor-pools` : null, { zero: poolCount === 0 }),
+      insideTile('restroom', restroomCount, restroomCount === 1 ? 'Restroom' : 'Restrooms',
+        restroomCount > 0 ? parkUrl : null, { zero: restroomCount === 0 }),
+    ];
+    if (pip) {
+      tiles.push(insideTile('pip', pip.label, pip.sub, null, { isText: true, iconCls: pip.cls }));
+    }
+    root.innerHTML = tiles.join('');
+    sec.hidden = false;
+    const total = monCount + dfCount + poolCount + restroomCount;
+    $('insideCount').textContent = total > 0 ? String(total) : '';
+    setNavCount('sec-inside', total > 0 ? total : null);
+  } catch { /* silent */ }
+}
+
+// PIP (Parks Inspection Program) — most-recent inspection result across all of this
+// park's zones. Inspections are at prop_id = "{gispropnum}-{zone}", so we starts_with
+// the gispropnum prefix. overall_condition values are A (acceptable), U (unacceptable),
+// N (not rated / not applicable).
+async function loadPIPRating(p) {
+  if (!p.gispropnum) return null;
+  const where = `starts_with(prop_id, '${p.gispropnum}-') AND overall_condition IN('A','U')`;
+  const rows = await cachedFetchJSON(
+    `pip:${p.gispropnum}`,
+    `${SOCRATA}/yg3y-7juh.json?$where=${encodeURIComponent(where)}&$order=date+DESC&$limit=20`,
+    24 * 60 * 60 * 1000
+  );
+  if (!rows.length) return null;
+  // Treat all inspections within 90 days of the latest as the "current" sample.
+  const latest = new Date(rows[0].date).getTime();
+  if (!Number.isFinite(latest)) return null;
+  const cutoff = latest - 90 * 86400000;
+  const recent = rows.filter(r => new Date(r.date).getTime() >= cutoff);
+  const aCount = recent.filter(r => r.overall_condition === 'A').length;
+  const allA = aCount === recent.length;
+  const label = allA ? 'A' : (aCount > recent.length / 2 ? 'A−' : 'U');
+  const cls = (label === 'A' || label === 'A−') ? 'pip-a' : 'pip-u';
+  const dateStr = new Date(latest).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const sub = `PIP · ${dateStr}`;
+  return { label, sub, cls };
 }
 
 async function loadParkBadges(p, gen) {
