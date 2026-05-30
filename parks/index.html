@@ -501,6 +501,34 @@
     border-radius: 999px;
     flex-shrink: 0;
   }
+  .walk-row-header {
+    padding: 14px 16px 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+  .walk-item {
+    padding: 10px 16px;
+  }
+  .walk-item .nm-name { font-size: 13.5px; }
+  .walk-item .nm-sub { font-size: 11px; }
+  .walk-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-grad);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
 
   /* Featured park card */
   .featured-card {
@@ -2441,13 +2469,12 @@ async function requestNearMe() {
       const lng = pos.coords.longitude;
       $('nearMePrompt').innerHTML = `<p style="font-size:13px;color:var(--text-2)"><span class="spinner" style="vertical-align:-2px"></span>&nbsp;&nbsp;Searching nearby parks and trees…</p>`;
       try {
-        const [parkRes, treeRes] = await Promise.all([
+        const [parkRes, treeRes, walkingParks] = await Promise.all([
           findNearestPark(lat, lng),
           findNearestTree(lat, lng),
+          findParksWithinWalking(lat, lng, 800).catch(() => []),
         ]);
-        renderNearMe(parkRes, treeRes);
-        // Find events at parks actually close to the user (haversine against each
-        // park's centroid), not just "any event in this borough".
+        renderNearMe(parkRes, treeRes, walkingParks);
         loadNearbyEvents(lat, lng, parkRes?.park?.borough);
       } catch (e) {
         $('nearMePrompt').innerHTML = `<p style="color:var(--bad);font-size:13px">Lookup failed: ${escapeHTML(e.message)}</p>`;
@@ -2461,6 +2488,24 @@ async function requestNearMe() {
     },
     { timeout: 12000, maximumAge: 120000 }
   );
+}
+
+// All parks within `radiusMeters` of the user, ranked by haversine distance to
+// each park's centroid. Used to populate the "Walking distance" list on the home.
+async function findParksWithinWalking(lat, lng, radiusMeters) {
+  const k = `walking-parks:${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMeters}`;
+  const rows = await cachedFetchJSON(
+    k,
+    `${ENDPOINT_PARKS}?$where=${encodeURIComponent(`within_circle(multipolygon, ${lat}, ${lng}, ${radiusMeters})`)}&$select=gispropnum,signname,borough,typecategory,multipolygon&$limit=60`,
+    30 * 60 * 1000
+  );
+  return rows
+    .map(p => {
+      const c = centroidFromMultipolygon(p.multipolygon);
+      return c ? { park: p, dist: haversine(lat, lng, c.lat, c.lng) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dist - b.dist);
 }
 
 async function findNearestPark(lat, lng) {
@@ -2529,7 +2574,7 @@ function formatDistance(m) {
   return `${Math.round(mi)} mi`;
 }
 
-function renderNearMe(parkRes, treeRes) {
+function renderNearMe(parkRes, treeRes, walkingParks) {
   const root = $('nearMeContent');
   const items = [];
   if (parkRes) {
@@ -2570,7 +2615,28 @@ function renderNearMe(parkRes, treeRes) {
     root.innerHTML = `<div class="empty">No parks or trees within range. Are you outside NYC?</div>`;
     return;
   }
-  root.innerHTML = `<div class="near-me-result">${items.join('')}</div>`;
+  // Filter walking-distance parks: drop the closest one (already shown above) and
+  // keep parks within ~0.5 mi or the 5 closest, whichever cuts the list shorter.
+  let walkChunk = '';
+  if (Array.isArray(walkingParks) && walkingParks.length > 0) {
+    const closestId = parkRes?.park?.gispropnum;
+    const others = walkingParks.filter(x => x.park.gispropnum !== closestId).slice(0, 5);
+    if (others.length) {
+      walkChunk = `<div class="walk-row-header">Walking distance</div>` + others.map(({ park, dist }) => {
+        const bor = BOROUGHS[park.borough] || park.borough || '';
+        const type = (park.typecategory || '').split(' ')[0];
+        return `<a class="nm-item walk-item" data-park="${escapeHTML(park.gispropnum)}">
+          <span class="walk-mark">${escapeHTML((park.signname || '?').charAt(0).toUpperCase())}</span>
+          <div class="nm-body">
+            <div class="nm-name">${escapeHTML(park.signname)}</div>
+            <div class="nm-sub">${escapeHTML([bor, type].filter(Boolean).join(' · '))}</div>
+          </div>
+          <div class="nm-dist">${escapeHTML(formatDistance(dist))}</div>
+        </a>`;
+      }).join('');
+    }
+  }
+  root.innerHTML = `<div class="near-me-result">${items.join('')}${walkChunk}</div>`;
   root.querySelectorAll('[data-park]').forEach(el => {
     el.addEventListener('click', () => loadDetailByGispropnum(el.dataset.park));
   });
@@ -3039,7 +3105,8 @@ function renderOfficials(p) {
     const subLabel = senateDistricts.length > 1
       ? `Districts ${senateDistricts.map(d => parseInt(d, 10)).join(', ')}`
       : `District ${parseInt(senateDistricts[0], 10)}`;
-    rows.push(officialRow('State Senate', names.join(', '), subLabel, null, firstUrl));
+    const displayName = names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0];
+    rows.push(officialRow('State Senate', displayName, subLabel, null, firstUrl, false, { photoKey: normalizePhotoKey(names[0]) }));
   }
 
   const asmDistricts = chunkDistricts(p.nys_assembly, 2);
@@ -3188,15 +3255,19 @@ async function loadOfficialPhotos(gen) {
 }
 
 async function fetchOfficialPhoto(name) {
-  // Many NYC officials share names with non-politicians on Wikipedia (e.g. "Mark Levine"
-  // is also a writer). Try disambiguated titles in order, and require the article's
-  // description or extract to look political before accepting it.
+  // Wikipedia titles for NYC officials vary: some are the bare name ("Liz Krueger"),
+  // some need disambiguation ("Mark Levine (New York politician)"). Try the most
+  // specific candidates first, then fall back to the bare name and accept the result
+  // if the article title matches what we asked for (which already implies that
+  // Wikipedia routed our query to the right article).
+  const clean = name.trim();
   const candidates = [
-    `${name} (New York politician)`,
-    `${name} (politician)`,
-    name,
+    `${clean} (New York politician)`,
+    `${clean} (American politician)`,
+    `${clean} (politician)`,
+    clean,
   ];
-  const politicalKeywords = /politician|senator|assembly|representative|member of (congress|the )|council\s*member|councilmember|councilman|councilwoman|governor|president|mayor|borough|elected/i;
+  const politicalKeywords = /politician|senator|assembly|representative|member of (congress|the )|council\s*member|councilmember|councilman|councilwoman|governor|president|mayor|borough|elected|state senate|state assembly/i;
   for (const title of candidates) {
     try {
       const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`);
@@ -3204,9 +3275,14 @@ async function fetchOfficialPhoto(name) {
       const d = await r.json();
       if (d.type === 'disambiguation') continue;
       if (!d.thumbnail?.source) continue;
-      const combined = ((d.description || '') + ' ' + (d.extract || '')).slice(0, 600);
-      if (!politicalKeywords.test(combined)) continue;
-      return d.thumbnail.source;
+      // Accept if the article's resolved title matches what we searched (modulo
+      // case/punctuation) — Wikipedia already chose the most relevant article.
+      const titleMatches = (d.title || '').toLowerCase().replace(/[^a-z ]/g, '') ===
+                           clean.toLowerCase().replace(/[^a-z ]/g, '');
+      const combined = ((d.description || '') + ' ' + (d.extract || '')).slice(0, 800);
+      if (titleMatches || politicalKeywords.test(combined)) {
+        return d.thumbnail.source;
+      }
     } catch {}
   }
   return null;
@@ -5256,6 +5332,15 @@ async function init() {
 
   renderRecent();
   handleRoute();
+
+  // Service Worker registration — gives offline app shell + cache-first fonts/images
+  // on repeat visits. Live data sources are explicitly bypassed in sw.js so we never
+  // serve stale Socrata responses.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/parks/sw.js').catch(() => { /* not critical */ });
+    });
+  }
 }
 
 function handleRoute() {
