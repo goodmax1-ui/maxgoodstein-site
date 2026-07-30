@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1d3557" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#080a0f" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="TD House" />
+<meta name="robots" content="noindex, nofollow" />
+<title>TD House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f4;
+    --bg-grad: radial-gradient(1400px 700px at 50% -240px, #dde4ef 0%, #eef1f4 55%);
+    --bg-elev: #ffffff;
+    --text: #0b1220;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e6e8ec;
+    --accent: #1d3557;
+    --accent-2: #457b9d;
+    --accent-soft: #dbe6f2;
+    --ok: #16a34a; --ok-soft: #dcfce7;
+    --new: #d97706; --new-soft: #fef3c7;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.04);
+    --shadow-md: 0 6px 20px -6px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.04);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #07090e;
+      --bg-grad: radial-gradient(1400px 700px at 50% -240px, #101a2a 0%, #07090e 55%);
+      --bg-elev: #11141b;
+      --text: #e8edf4;
+      --text-2: #9aa7b8;
+      --text-3: #5b6675;
+      --border: #1e242e;
+      --accent: #7ba7d0;
+      --accent-2: #457b9d;
+      --accent-soft: #16233a;
+      --ok: #4ade80; --ok-soft: #10241a;
+      --new: #fbbf24; --new-soft: #2a2011;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: Inter, -apple-system, sans-serif;
+    background: var(--bg); background-image: var(--bg-grad);
+    background-repeat: no-repeat;
+    color: var(--text);
+    min-height: 100vh;
+    padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header { margin: 8px 2px 16px; }
+  h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .sub { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.5; }
+  .sub .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .stats { display: flex; gap: 8px; margin: 14px 0 10px; flex-wrap: wrap; }
+  .stat {
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 8px 12px; box-shadow: var(--shadow-sm); font-size: 12px; color: var(--text-2);
+  }
+  .stat b { display: block; font-size: 17px; color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .chip {
+    border: 1px solid var(--border); background: var(--bg-elev); color: var(--text-2);
+    border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent;
+  }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .chip.on { color: #0b1220; } }
+  select {
+    margin-left: auto; border: 1px solid var(--border); background: var(--bg-elev); color: var(--text);
+    border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; font-family: inherit; font-weight: 600;
+  }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 960px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card {
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+    text-decoration: none; color: inherit; transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:active { transform: scale(0.985); }
+  @media (hover: hover) { .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); } }
+  .ph { position: relative; aspect-ratio: 3/2; background: var(--accent-soft); }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badges { position: absolute; top: 8px; left: 8px; display: flex; gap: 6px; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+    backdrop-filter: blur(6px);
+  }
+  .badge.new { background: var(--new-soft); color: var(--new); }
+  .badge.net { background: var(--ok-soft); color: var(--ok); }
+  .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .price { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .price small { font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .price .strike { text-decoration: line-through; color: var(--text-3); font-size: 13px; font-weight: 600; margin-left: 6px; }
+  .addr { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .meta { font-size: 12.5px; color: var(--text-2); }
+  .agent { font-size: 11.5px; color: var(--text-3); margin-top: auto; padding-top: 6px; }
+  .empty { text-align: center; color: var(--text-2); padding: 48px 16px; font-size: 14px; }
+  footer { text-align: center; font-size: 11.5px; color: var(--text-3); margin-top: 28px; line-height: 1.6; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TD House</h1>
+    <div class="sub">1+ bed · W/D in unit · under $3,800 · Astoria, Long Island City, Greenpoint<br>
+    <span class="mono" id="updated">loading…</span></div>
+  </header>
+  <div class="stats" id="stats" hidden>
+    <div class="stat"><b id="s-count">–</b>listings</div>
+    <div class="stat"><b id="s-new">–</b>new this scrape</div>
+    <div class="stat"><b id="s-med">–</b>median rent</div>
+  </div>
+  <div class="controls" id="controls" hidden>
+    <button class="chip on" data-area="all">All</button>
+    <button class="chip" data-area="Astoria">Astoria</button>
+    <button class="chip" data-area="Long Island City">LIC</button>
+    <button class="chip" data-area="Greenpoint">Greenpoint</button>
+    <select id="sort">
+      <option value="price">Price ↑</option>
+      <option value="price-desc">Price ↓</option>
+      <option value="new">Newest first</option>
+      <option value="sqft">Biggest first</option>
+    </select>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>No listings match.</div>
+  <footer>Source: StreetEasy search, refreshed twice daily.<br>
+  Prices shown are net-effective where advertised; struck price is base rent.</footer>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const fmt = n => '$' + n.toLocaleString();
+let DATA = null, area = 'all', sort = 'price';
+
+fetch('data.json?t=' + Date.now()).then(r => r.json()).then(d => {
+  DATA = d;
+  const up = new Date(d.updated);
+  $('#updated').textContent = 'updated ' + up.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+  const latest = d.updated.slice(0, 10);
+  const newCount = d.listings.filter(l => l.firstSeen === latest).length;
+  const prices = d.listings.map(l => l.netPrice && l.netPrice <= 3800 ? l.netPrice : l.price).sort((a,b)=>a-b);
+  $('#s-count').textContent = d.count;
+  $('#s-new').textContent = newCount;
+  $('#s-med').textContent = prices.length ? fmt(prices[Math.floor(prices.length/2)]) : '–';
+  $('#stats').hidden = false;
+  $('#controls').hidden = false;
+  render();
+}).catch(() => { $('#updated').textContent = 'failed to load data'; });
+
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+  c.classList.add('on');
+  area = c.dataset.area;
+  render();
+}));
+$('#sort').addEventListener('change', e => { sort = e.target.value; render(); });
+
+function render() {
+  const latest = DATA.updated.slice(0, 10);
+  let items = DATA.listings.filter(l => area === 'all' || l.area === area);
+  const eff = l => l.netPrice && l.netPrice <= 3800 ? l.netPrice : l.price;
+  if (sort === 'price') items.sort((a,b) => eff(a) - eff(b));
+  if (sort === 'price-desc') items.sort((a,b) => eff(b) - eff(a));
+  if (sort === 'new') items.sort((a,b) => (b.firstSeen || '').localeCompare(a.firstSeen || '') || eff(a) - eff(b));
+  if (sort === 'sqft') items.sort((a,b) => (b.sqft || 0) - (a.sqft || 0));
+  $('#empty').hidden = items.length > 0;
+  $('#grid').innerHTML = items.map(l => {
+    const isNew = l.firstSeen === latest;
+    const hasNet = l.netPrice && l.netPrice <= 3800;
+    return `<a class="card" href="${l.url}" target="_blank" rel="noopener">
+      <div class="ph">${l.img ? `<img src="${l.img}" alt="" loading="lazy">` : ''}
+        <div class="badges">
+          ${isNew ? '<span class="badge new">NEW</span>' : ''}
+          ${hasNet ? '<span class="badge net">NET</span>' : ''}
+        </div>
+      </div>
+      <div class="body">
+        <div class="price">${fmt(hasNet ? l.netPrice : l.price)}<small>/mo</small>${hasNet ? `<span class="strike">${fmt(l.price)}</span>` : ''}</div>
+        <div class="addr">${l.address}</div>
+        <div class="meta">${l.hood} · ${l.beds} bed · ${l.baths || '?'} bath${l.sqft ? ' · ' + l.sqft.toLocaleString() + ' ft²' : ''}</div>
+        <div class="agent">${l.by || ''}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
