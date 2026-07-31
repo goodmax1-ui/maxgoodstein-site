@@ -105,6 +105,10 @@
   .addr { font-size: 14px; font-weight: 600; line-height: 1.35; }
   .meta { font-size: 12.5px; color: var(--text-2); }
   .agent { font-size: 11.5px; color: var(--text-3); margin-top: auto; padding-top: 6px; }
+  .commute { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-2); display: flex; gap: 10px; flex-wrap: wrap; padding-top: 2px; }
+  .commute b { font-weight: 600; color: var(--text); }
+  .commute .good b { color: var(--ok); }
+  .station { font-size: 11px; color: var(--text-3); }
   .empty { text-align: center; color: var(--text-2); padding: 48px 16px; font-size: 14px; }
   footer { text-align: center; font-size: 11.5px; color: var(--text-3); margin-top: 28px; line-height: 1.6; }
   footer a { color: var(--accent); }
@@ -132,12 +136,14 @@
       <option value="price-desc">Price ↓</option>
       <option value="new">Newest first</option>
       <option value="sqft">Biggest first</option>
+      <option value="commute">Best commute</option>
     </select>
   </div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty" hidden>No listings match.</div>
-  <footer>Source: StreetEasy search, refreshed twice daily.<br>
-  Prices shown are net-effective where advertised; struck price is base rent.</footer>
+  <footer>Source: StreetEasy search, refreshed 5x daily (8a–8p).<br>
+  Prices shown are net-effective where advertised; struck price is base rent.<br>
+  Commute minutes are estimated off-peak transit: Law = CUNY Law (Court Sq), FiDi = 120 Broadway, Sun = Sunnyside (40 St–Lowery). Walk + wait included.</footer>
 </div>
 <script>
 const $ = s => document.querySelector(s);
@@ -175,6 +181,8 @@ function render() {
   if (sort === 'price-desc') items.sort((a,b) => eff(b) - eff(a));
   if (sort === 'new') items.sort((a,b) => (b.firstSeen || '').localeCompare(a.firstSeen || '') || eff(a) - eff(b));
   if (sort === 'sqft') items.sort((a,b) => (b.sqft || 0) - (a.sqft || 0));
+  const cavg = l => l.commute ? (l.commute.law + l.commute.fidi + l.commute.sunnyside) / 3 : 999;
+  if (sort === 'commute') items.sort((a,b) => cavg(a) - cavg(b));
   $('#empty').hidden = items.length > 0;
   $('#grid').innerHTML = items.map(l => {
     const isNew = l.firstSeen === latest;
@@ -190,6 +198,12 @@ function render() {
         <div class="price">${fmt(hasNet ? l.netPrice : l.price)}<small>/mo</small>${hasNet ? `<span class="strike">${fmt(l.price)}</span>` : ''}</div>
         <div class="addr">${l.address}</div>
         <div class="meta">${l.hood} · ${l.beds} bed · ${l.baths || '?'} bath${l.sqft ? ' · ' + l.sqft.toLocaleString() + ' ft²' : ''}</div>
+        ${l.commute ? `<div class="commute">
+          <span class="${l.commute.law <= 25 ? 'good' : ''}">Law <b>${l.commute.law}</b></span>
+          <span class="${l.commute.fidi <= 35 ? 'good' : ''}">FiDi <b>${l.commute.fidi}</b></span>
+          <span class="${l.commute.sunnyside <= 25 ? 'good' : ''}">Sun <b>${l.commute.sunnyside}</b></span>
+        </div>
+        <div class="station">${l.commute.walk} min walk to ${l.commute.station}${l.commute.approx ? ' (approx)' : ''}</div>` : ''}
         <div class="agent">${l.by || ''}</div>
       </div>
     </a>`;

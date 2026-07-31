@@ -12,6 +12,9 @@ Usage: python3 _scripts/tdhouse_build_data.py <raw_listings.json>
 import json, sys, time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tdhouse_commute import enrich
+
 TARGET = {"Astoria", "Ditmars-Steinway", "Long Island City", "Hunters Point", "Greenpoint"}
 GROUP = {"Ditmars-Steinway": "Astoria", "Hunters Point": "Long Island City"}
 OUT = Path(__file__).resolve().parent.parent / "tdhouse" / "data.json"
@@ -47,6 +50,7 @@ for l in raw:
         "firstSeen": prev_seen.get(key, today),
     })
 
+listings = enrich(listings)
 listings.sort(key=lambda x: x.get("netPrice") or x["price"])
 data = {
     "updated": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -62,3 +66,10 @@ data = {
 }
 OUT.write_text(json.dumps(data, indent=1))
 print(f"wrote {OUT} with {len(listings)} listings, {sum(1 for l in listings if l['firstSeen'] == today)} first seen today")
+
+added = [l for l in listings if (l["url"] + "|" + l["address"]) not in prev_seen]
+if prev_seen and added:
+    print(f"NEW_THIS_RUN {len(added)}")
+    for l in added:
+        p = l.get("netPrice") or l["price"]
+        print(f"NEW: {l['address']} ({l['hood']}) ${p:,}")

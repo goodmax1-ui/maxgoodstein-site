@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-30T19:22:48-0400",
+ "updated": "2026-07-30T20:26:35-0400",
  "criteria": {
   "maxPrice": 3800,
   "minBeds": 1,
@@ -25,7 +25,15 @@
    "img": "https://photos.zillowstatic.com/fp/07c2e893be37485d46d9604079900fe8-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/41_07-28-avenue-astoria/4",
@@ -39,7 +47,15 @@
    "img": "https://photos.zillowstatic.com/fp/d850b50370d0df8a0f4546f731f1c81a-p_e.webp",
    "by": "346 Realty Group LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 9,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/212",
@@ -53,7 +69,15 @@
    "img": "https://photos.zillowstatic.com/fp/d6fa28524bdf0b8e2abe0296614789e8-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/304",
@@ -67,7 +91,15 @@
    "img": "https://photos.zillowstatic.com/fp/0d4a80d240cedbe1404bee871d60f6ca-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/417",
@@ -81,7 +113,15 @@
    "img": "https://photos.zillowstatic.com/fp/d6fa28524bdf0b8e2abe0296614789e8-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/millo-astoria/1c",
@@ -95,7 +135,15 @@
    "img": "https://photos.zillowstatic.com/fp/d0b161fbbd60983dfba4bc12019771dd-p_e.webp",
    "by": "Howard Hanna NYC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 10,
+    "law": 30,
+    "fidi": 50,
+    "sunnyside": 34,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/106",
@@ -109,7 +157,15 @@
    "img": "https://photos.zillowstatic.com/fp/f25ea01910540d03316deef16074fdee-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/nusun-vernon/2j",
@@ -123,7 +179,15 @@
    "img": "https://photos.zillowstatic.com/fp/1e7dcf80d753a87e2042a602da99269f-p_e.webp",
    "by": "Global Real Estate Ventures Group LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 14,
+    "law": 34,
+    "fidi": 54,
+    "sunnyside": 38,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/30-halletts-point-astoria/30504",
@@ -137,7 +201,15 @@
    "img": "https://photos.zillowstatic.com/fp/fc4d3f9bfd0905d64179e347f747d73a-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 21,
+    "law": 41,
+    "fidi": 61,
+    "sunnyside": 45,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-montenegro-of-astoria/5g",
@@ -151,7 +223,15 @@
    "img": "https://photos.zillowstatic.com/fp/39a037bed215962a167f199beed6f758-p_e.webp",
    "by": "Brighton Management",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 9,
+    "law": 29,
+    "fidi": 49,
+    "sunnyside": 33,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/vordonia-tower/w516",
@@ -165,7 +245,15 @@
    "img": "https://photos.zillowstatic.com/fp/1ed7e9d6d4708ac5f6ba45f119a498af-p_e.webp",
    "by": "Living New York",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "21 St-Queensbridge (F)",
+    "walk": 14,
+    "law": 30,
+    "fidi": 53,
+    "sunnyside": 34,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-willow/2a",
@@ -179,7 +267,15 @@
    "img": "https://photos.zillowstatic.com/fp/8976e6a8098fde7248b8b075bd9b230a-p_e.webp",
    "by": "Modern Spaces",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 2,
+    "law": 22,
+    "fidi": 42,
+    "sunnyside": 26,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/10-halletts-point/1602",
@@ -193,7 +289,15 @@
    "img": "https://photos.zillowstatic.com/fp/3404bfbd1780ed6602750aa03c574942-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 20,
+    "law": 40,
+    "fidi": 60,
+    "sunnyside": 44,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/14_01-broadway-astoria/2b",
@@ -207,7 +311,15 @@
    "img": "https://photos.zillowstatic.com/fp/ff4c41de07bc57da34de85ed7d9eec82-p_e.webp",
    "by": "Yunan LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 11,
+    "law": 29,
+    "fidi": 49,
+    "sunnyside": 33,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/402",
@@ -221,7 +333,15 @@
    "img": "https://photos.zillowstatic.com/fp/f25ea01910540d03316deef16074fdee-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/20-halletts-point-astoria/20503",
@@ -235,7 +355,15 @@
    "img": "https://photos.zillowstatic.com/fp/c051c4266f172eade5ab9bf10a88c59d-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 21,
+    "law": 41,
+    "fidi": 61,
+    "sunnyside": 45,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-marina-astoria/6ii",
@@ -249,7 +377,15 @@
    "img": "https://photos.zillowstatic.com/fp/50ee55d76db8d95282a5eb5a8421b96f-p_e.webp",
    "by": "Nest Seekers International",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 14,
+    "law": 34,
+    "fidi": 54,
+    "sunnyside": 38,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/23_22-30-road-astoria/3h",
@@ -263,7 +399,15 @@
    "img": "https://photos.zillowstatic.com/fp/0d434b964f94846916835416c79df172-p_e.webp",
    "by": "Douglas Elliman",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 6,
+    "law": 26,
+    "fidi": 46,
+    "sunnyside": 30,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/bevel-lic/1608",
@@ -277,7 +421,15 @@
    "img": "https://photos.zillowstatic.com/fp/32f8720605ce27d6ee3a54940444dac9-p_e.webp",
    "by": "Brooklyn Living USA Corp.",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Queensboro Plaza (N/W/7)",
+    "walk": 2,
+    "law": 10,
+    "fidi": 34,
+    "sunnyside": 12,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/bevel-lic/314",
@@ -291,7 +443,15 @@
    "img": "https://photos.zillowstatic.com/fp/9fa6a782f14616026ae65310d460cba7-p_e.webp",
    "by": "Brooklyn Living USA Corp.",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Queensboro Plaza (N/W/7)",
+    "walk": 2,
+    "law": 10,
+    "fidi": 34,
+    "sunnyside": 12,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/nusun-vernon/5a",
@@ -305,7 +465,15 @@
    "img": "https://photos.zillowstatic.com/fp/56af77fd0d220f8b9b1efd9ba2ac75a2-p_e.webp",
    "by": "Global Real Estate Ventures Group LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 14,
+    "law": 34,
+    "fidi": 54,
+    "sunnyside": 38,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-at-hallets-cove/7c",
@@ -319,7 +487,15 @@
    "img": "https://photos.zillowstatic.com/fp/f7e7d4042e3f9892e7dcc17fbcf27af3-p_e.webp",
    "by": "Brighton Management",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 13,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-y-garden-31_61-vernon-boulevard-astoria/2h",
@@ -333,7 +509,15 @@
    "img": "https://photos.zillowstatic.com/fp/4135968d88319e56fc869c534be738b9-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 14,
+    "law": 32,
+    "fidi": 52,
+    "sunnyside": 36,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/10-halletts-point/2207",
@@ -347,7 +531,15 @@
    "img": "https://photos.zillowstatic.com/fp/a660c8bdb85c7e1c59c23728cfaea75a-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 20,
+    "law": 40,
+    "fidi": 60,
+    "sunnyside": 44,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-21/4b",
@@ -361,7 +553,15 @@
    "img": "https://photos.zillowstatic.com/fp/32e452f1fcab4939babb8816c3fd4f45-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 9,
+    "law": 29,
+    "fidi": 49,
+    "sunnyside": 33,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-21/4a",
@@ -375,7 +575,15 @@
    "img": "https://photos.zillowstatic.com/fp/32e452f1fcab4939babb8816c3fd4f45-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 9,
+    "law": 29,
+    "fidi": 49,
+    "sunnyside": 33,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-at-hallets-cove/2m",
@@ -389,7 +597,15 @@
    "img": "https://photos.zillowstatic.com/fp/58d0f905f9441f38534c8401f31b6555-p_e.webp",
    "by": "Brighton Management",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 13,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/20-halletts-point-astoria/20505",
@@ -403,7 +619,15 @@
    "img": "https://photos.zillowstatic.com/fp/c051c4266f172eade5ab9bf10a88c59d-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 21,
+    "law": 41,
+    "fidi": 61,
+    "sunnyside": 45,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-west/ph725w",
@@ -417,7 +641,15 @@
    "img": "https://photos.zillowstatic.com/fp/292fc66a87ca64161958c4eb9e9b48f5-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 14,
+    "law": 34,
+    "fidi": 54,
+    "sunnyside": 38,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/millo-astoria/4d",
@@ -431,7 +663,15 @@
    "img": "https://photos.zillowstatic.com/fp/31eb80c28201ef9d8b9aceb80fa74ca7-p_e.webp",
    "by": "Howard Hanna NYC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 10,
+    "law": 30,
+    "fidi": 50,
+    "sunnyside": 34,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/30_64-34-street-astoria/2e",
@@ -445,7 +685,15 @@
    "img": "https://photos.zillowstatic.com/fp/a5cf8f6c1f09b39b9ca82b9dbe57805a-p_e.webp",
    "by": "Made In NY Realty",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 3,
+    "law": 23,
+    "fidi": 43,
+    "sunnyside": 27,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/21-08-31-avenue/3f",
@@ -459,7 +707,15 @@
    "img": "https://photos.zillowstatic.com/fp/d6d033695c6075b52c640016a3c2a66b-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 9,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/21-08-31-avenue/4r",
@@ -473,7 +729,15 @@
    "img": "https://photos.zillowstatic.com/fp/2d0e1c389f58027649b4444d0156e1f3-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 9,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/507",
@@ -487,7 +751,15 @@
    "img": "https://photos.zillowstatic.com/fp/1edacda6b8487cc09b100fd026401621-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/30-halletts-point-astoria/31807",
@@ -501,7 +773,15 @@
    "img": "https://photos.zillowstatic.com/fp/fc4d3f9bfd0905d64179e347f747d73a-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 21,
+    "law": 41,
+    "fidi": 61,
+    "sunnyside": 45,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/hearthstone-34_35-44th-street-long_island_city/302",
@@ -515,7 +795,15 @@
    "img": "https://photos.zillowstatic.com/fp/bc20890e9cd96347bf84ab0251ee0af9-p_e.webp",
    "by": "Greystar",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 13,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/32_18-34-street-astoria/2r",
@@ -529,7 +817,15 @@
    "img": "https://photos.zillowstatic.com/fp/70881ab34094617a64e41c6536bc7a6a-p_e.webp",
    "by": "Tolmas Corporation",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 2,
+    "law": 20,
+    "fidi": 40,
+    "sunnyside": 24,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-wesley/3e",
@@ -543,7 +839,15 @@
    "img": "https://photos.zillowstatic.com/fp/0cc15cbcbb29ebf797d2f175f132b01c-p_e.webp",
    "by": "SUMMIT SLS LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "21 St (G)",
+    "walk": 6,
+    "law": 14,
+    "fidi": 38,
+    "sunnyside": 24,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/fabric-astoria/2k",
@@ -557,7 +861,15 @@
    "img": "https://photos.zillowstatic.com/fp/2f20c4b838ed3693ceb78982e71569fd-p_e.webp",
    "by": "MNS",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria-Ditmars Blvd (N/W)",
+    "walk": 12,
+    "law": 36,
+    "fidi": 56,
+    "sunnyside": 40,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/21-08-31-avenue/6r",
@@ -571,7 +883,15 @@
    "img": "https://photos.zillowstatic.com/fp/98da5e28e34bde5b2f1945c9db72a755-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 9,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/21-08-31-avenue/6f",
@@ -585,7 +905,15 @@
    "img": "https://photos.zillowstatic.com/fp/dc29238bc7713522f921f87837c96464-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 9,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/20-halletts-point-astoria/22201",
@@ -599,7 +927,15 @@
    "img": "https://photos.zillowstatic.com/fp/c051c4266f172eade5ab9bf10a88c59d-p_e.webp",
    "by": "The Durst Organization",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 21,
+    "law": 41,
+    "fidi": 61,
+    "sunnyside": 45,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/ivy28-condominium/3c",
@@ -613,7 +949,15 @@
    "img": "https://photos.zillowstatic.com/fp/32d3e1d5a15ac55a80705affbecae8b8-p_e.webp",
    "by": "Nest Seekers International",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Queensboro Plaza (N/W/7)",
+    "walk": 2,
+    "law": 10,
+    "fidi": 34,
+    "sunnyside": 12,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-fifty-lic/5f",
@@ -627,7 +971,15 @@
    "img": "https://photos.zillowstatic.com/fp/5713501f009f463ef0a157859563ff27-p_e.webp",
    "by": "Polaris Property Group",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "39 Av-Dutch Kills (N/W)",
+    "walk": 2,
+    "law": 16,
+    "fidi": 36,
+    "sunnyside": 20,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/roma-condominium/rental/5092766",
@@ -641,7 +993,15 @@
    "img": "https://photos.zillowstatic.com/fp/5baeeae4bfe33caf44d27ba08941cf9f-p_e.webp",
    "by": "Corcoran",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 5,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-vitoria/3a",
@@ -655,7 +1015,15 @@
    "img": "https://photos.zillowstatic.com/fp/19d95e796aea3a2a5c0e244803d292bf-p_e.webp",
    "by": "Modern Spaces",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 4,
+    "law": 26,
+    "fidi": 46,
+    "sunnyside": 30,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-doria/7703",
@@ -669,7 +1037,15 @@
    "img": "https://photos.zillowstatic.com/fp/c2af3eeca013d03457350899230caa6e-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 8,
+    "law": 26,
+    "fidi": 46,
+    "sunnyside": 30,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/midori/3h",
@@ -683,7 +1059,15 @@
    "img": "https://photos.zillowstatic.com/fp/7f3f5a5925a4309122257a457c87f5a9-p_e.webp",
    "by": "REAL New York",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 2,
+    "law": 18,
+    "fidi": 38,
+    "sunnyside": 22,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/dutch-house/505",
@@ -697,7 +1081,15 @@
    "img": "https://photos.zillowstatic.com/fp/de85345b81cd24978d924eed856e79b3-p_e.webp",
    "by": "Abode Residential LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 3,
+    "law": 19,
+    "fidi": 39,
+    "sunnyside": 23,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/greenpoint-central-65-dupont-street-brooklyn/220",
@@ -711,7 +1103,15 @@
    "img": "https://photos.zillowstatic.com/fp/99568c4990ba38dd13d2e413f5b3b6b6-p_e.webp",
    "by": "MNS",
    "area": "Greenpoint",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Greenpoint Av (G)",
+    "walk": 8,
+    "law": 21,
+    "fidi": 50,
+    "sunnyside": 29,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/midori/5d",
@@ -725,7 +1125,15 @@
    "img": "https://photos.zillowstatic.com/fp/9e649b129bc637c5e3169f4865f3210b-p_e.webp",
    "by": "REAL New York",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 2,
+    "law": 18,
+    "fidi": 38,
+    "sunnyside": 22,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/midori/5b",
@@ -739,7 +1147,15 @@
    "img": "https://photos.zillowstatic.com/fp/ada32b5a3fb9e589ce69da2cab949515-p_e.webp",
    "by": "REAL New York",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 2,
+    "law": 18,
+    "fidi": 38,
+    "sunnyside": 22,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/514",
@@ -753,7 +1169,15 @@
    "img": "https://photos.zillowstatic.com/fp/1edacda6b8487cc09b100fd026401621-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/hearthstone-34_35-44th-street-long_island_city/336",
@@ -767,7 +1191,15 @@
    "img": "https://photos.zillowstatic.com/fp/39f67086925aa40825a6e4d3f0a80450-p_e.webp",
    "by": "Greystar",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 13,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/vernon-tower/706",
@@ -781,7 +1213,15 @@
    "img": "https://photos.zillowstatic.com/fp/224a184fd0d5986c5353d8093b83d402-p_e.webp",
    "by": "Voro New York",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 14,
+    "law": 32,
+    "fidi": 52,
+    "sunnyside": 36,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/vernon-tower/615",
@@ -795,7 +1235,15 @@
    "img": "https://photos.zillowstatic.com/fp/664dd668d1caee19ee54249c442e99e0-p_e.webp",
    "by": "Voro New York",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 14,
+    "law": 32,
+    "fidi": 52,
+    "sunnyside": 36,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/12_15-broadway-astoria/508",
@@ -809,7 +1257,15 @@
    "img": "https://photos.zillowstatic.com/fp/40178f63918247d93412f8205a1e2b4b-p_e.webp",
    "by": "TorsX Inc",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 12,
+    "law": 30,
+    "fidi": 50,
+    "sunnyside": 34,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/midori/6a",
@@ -823,7 +1279,15 @@
    "img": "https://photos.zillowstatic.com/fp/9e649b129bc637c5e3169f4865f3210b-p_e.webp",
    "by": "REAL New York",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 2,
+    "law": 18,
+    "fidi": 38,
+    "sunnyside": 22,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-northern/501",
@@ -837,7 +1301,15 @@
    "img": "https://photos.zillowstatic.com/fp/d30abbf0645f040ef79e599cd4e3027b-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "39 Av-Dutch Kills (N/W)",
+    "walk": 1,
+    "law": 15,
+    "fidi": 35,
+    "sunnyside": 19,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-northern/412",
@@ -851,7 +1323,15 @@
    "img": "https://photos.zillowstatic.com/fp/d30abbf0645f040ef79e599cd4e3027b-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "39 Av-Dutch Kills (N/W)",
+    "walk": 1,
+    "law": 15,
+    "fidi": 35,
+    "sunnyside": 19,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-northern/808",
@@ -865,7 +1345,15 @@
    "img": "https://photos.zillowstatic.com/fp/73f349bcb8229b9a11066f5b12d56bb8-p_e.webp",
    "by": "Nooklyn NYC LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "39 Av-Dutch Kills (N/W)",
+    "walk": 1,
+    "law": 15,
+    "fidi": 35,
+    "sunnyside": 19,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/one-astoria-cove/319",
@@ -879,7 +1367,15 @@
    "img": "https://photos.zillowstatic.com/fp/5f2841215013e6c91b9c425353acacbe-p_e.webp",
    "by": "SERHANT.",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 16,
+    "law": 38,
+    "fidi": 58,
+    "sunnyside": 42,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/astoria-west/506s",
@@ -893,7 +1389,15 @@
    "img": "https://photos.zillowstatic.com/fp/aa7b630ec65902094b10daf483e41939-p_e.webp",
    "by": "Compass",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 14,
+    "law": 34,
+    "fidi": 54,
+    "sunnyside": 38,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/fabric-astoria/3h",
@@ -907,7 +1411,15 @@
    "img": "https://photos.zillowstatic.com/fp/2f20c4b838ed3693ceb78982e71569fd-p_e.webp",
    "by": "MNS",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria-Ditmars Blvd (N/W)",
+    "walk": 12,
+    "law": 36,
+    "fidi": 56,
+    "sunnyside": 40,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/nova-astoria/416",
@@ -921,7 +1433,15 @@
    "img": "https://photos.zillowstatic.com/fp/6d640d5221c56b46596e17907574aa70-p_e.webp",
    "by": "EXR",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "21 St-Queensbridge (F)",
+    "walk": 11,
+    "law": 27,
+    "fidi": 50,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/nova-astoria/516",
@@ -935,7 +1455,15 @@
    "img": "https://photos.zillowstatic.com/fp/1fc183eae5d10957fa07c9a94f0fbb48-p_e.webp",
    "by": "EXR",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "21 St-Queensbridge (F)",
+    "walk": 11,
+    "law": 27,
+    "fidi": 50,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/hearthstone-34_35-44th-street-long_island_city/807",
@@ -949,7 +1477,15 @@
    "img": "https://photos.zillowstatic.com/fp/34fc7192067c2ba42d99d441f86ecc1b-p_e.webp",
    "by": "Greystar",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 13,
+    "law": 31,
+    "fidi": 51,
+    "sunnyside": 35,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/bevel-lic/1214",
@@ -963,7 +1499,15 @@
    "img": "https://photos.zillowstatic.com/fp/7190348af4d7b430d5bbe28b1826321f-p_e.webp",
    "by": "Brooklyn Living USA Corp.",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Queensboro Plaza (N/W/7)",
+    "walk": 2,
+    "law": 10,
+    "fidi": 34,
+    "sunnyside": 12,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/182-eagle-street-brooklyn/5e",
@@ -977,7 +1521,15 @@
    "img": "https://photos.zillowstatic.com/fp/5d79bc9770fbc1174221cf365c35aef0-p_e.webp",
    "by": "Safdie Realty Group",
    "area": "Greenpoint",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Greenpoint Av (G)",
+    "walk": 5,
+    "law": 18,
+    "fidi": 47,
+    "sunnyside": 26,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/dutch-house/209",
@@ -991,7 +1543,15 @@
    "img": "https://photos.zillowstatic.com/fp/de85345b81cd24978d924eed856e79b3-p_e.webp",
    "by": "Abode Residential LLC",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 3,
+    "law": 19,
+    "fidi": 39,
+    "sunnyside": 23,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-ariel-44_46-purves-street-long_island_city/10i",
@@ -1005,7 +1565,15 @@
    "img": "https://photos.zillowstatic.com/fp/fbe838f401fddd2a610343e8ceab619f-p_e.webp",
    "by": "FIND Real Estate",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Court Sq (E/M/G/7)",
+    "walk": 5,
+    "law": 11,
+    "fidi": 31,
+    "sunnyside": 17,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/30_77-38-street-astoria/rental/5110287",
@@ -1019,7 +1587,15 @@
    "img": "https://photos.zillowstatic.com/fp/e3ddb6f9baac63da9557fa3e170e4b78-p_e.webp",
    "by": "A Class Realty Corp",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 7,
+    "law": 27,
+    "fidi": 47,
+    "sunnyside": 31,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/the-catherine/4b",
@@ -1033,7 +1609,15 @@
    "img": "https://photos.zillowstatic.com/fp/6d424721bc0da96ea70ca4d55d909471-p_e.webp",
    "by": "SUMMIT SLS LLC",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Broadway (N/W)",
+    "walk": 8,
+    "law": 26,
+    "fidi": 46,
+    "sunnyside": 30,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/greenpoint-central-65-dupont-street-brooklyn/426",
@@ -1047,7 +1631,15 @@
    "img": "https://photos.zillowstatic.com/fp/2338b21c8fa051415fef6354ab6d92b0-p_e.webp",
    "by": "MNS",
    "area": "Greenpoint",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Greenpoint Av (G)",
+    "walk": 8,
+    "law": 21,
+    "fidi": 50,
+    "sunnyside": 29,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/midori/3b",
@@ -1061,7 +1653,15 @@
    "img": "https://photos.zillowstatic.com/fp/3125cae64e6cf18c72d70f170e3f2218-p_e.webp",
    "by": "REAL New York",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "36 Av (N/W)",
+    "walk": 2,
+    "law": 18,
+    "fidi": 38,
+    "sunnyside": 22,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/heritage-27-on-27th/8d",
@@ -1075,7 +1675,15 @@
    "img": "https://photos.zillowstatic.com/fp/78082d3d4b4a0562e6ae3f821fa2c332-p_e.webp",
    "by": "Heatherwood Communities",
    "area": "Long Island City",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Queensboro Plaza (N/W/7)",
+    "walk": 2,
+    "law": 10,
+    "fidi": 34,
+    "sunnyside": 12,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/28_15-35-street-astoria/5a",
@@ -1089,7 +1697,15 @@
    "img": "https://photos.zillowstatic.com/fp/25023a6ccf6e53aaf865659c833467e1-p_e.webp",
    "by": "Perch Society",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "30 Av (N/W)",
+    "walk": 5,
+    "law": 25,
+    "fidi": 45,
+    "sunnyside": 29,
+    "approx": false
+   }
   },
   {
    "url": "https://streeteasy.com/building/25_35-18-street-astoria/4c",
@@ -1103,7 +1719,15 @@
    "img": "https://photos.zillowstatic.com/fp/78c3fe1c77e8fa9783df594f3ccf56c0-p_e.webp",
    "by": "Voro New York",
    "area": "Astoria",
-   "firstSeen": "2026-07-30"
+   "firstSeen": "2026-07-30",
+   "commute": {
+    "station": "Astoria Blvd (N/W)",
+    "walk": 11,
+    "law": 33,
+    "fidi": 53,
+    "sunnyside": 37,
+    "approx": false
+   }
   }
  ]
 }
