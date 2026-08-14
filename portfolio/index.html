@@ -80,78 +80,8 @@
     <button class="lb-btn" id="lbClose" aria-label="Close">&times;</button>
   </div>
 
+  <script src="projects.js"></script>
   <script>
-    const PROJECTS = [
-      {
-        title: "Haffen Park Pool Complex Reconstruction",
-        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2023",
-        desc: "Pool deck and landscape reconstruction for the Haffen Park bathhouse complex: a new ADA-accessible park entrance at Burke and Ely Avenues, an accessible ramp to the wading pool, Euroblue pigmented-concrete deck, seatwalls with companion seating, and an entrance plaza organized for pool-season queuing and Parks operations.",
-        hero: 12,
-        pages: [
-          [1, "Title sheet"], [2, "Existing conditions plan"], [3, "Layout & materials plan"],
-          [4, "Grading, drainage & site electrical plan"], [5, "Site details — underground detention & outlet control"],
-          [6, "Existing pool deck & landscape layout"], [7, "Proposed pool deck & landscape plan"],
-          [8, "Burke Ave & Ely Ave entrance — existing"], [9, "Burke Ave & Ely Ave entrance — proposed ADA ramp"],
-          [10, "Entrance circulation during pool season"], [11, "Pool deck — existing"],
-          [12, "Pool deck — proposed"], [13, "Wading pool — existing"], [14, "Wading pool — proposed, ADA accessible"]
-        ]
-      },
-      {
-        title: "Clove Lakes Park Pavement Reconstruction",
-        meta: "Project Manager, Designer & Drafter · NYC Parks Capital Projects · Staten Island · 2023",
-        desc: "Reconstruction of pavement surfaces between Victory Boulevard and Martling Avenue: roughly 81,000 SF of asphalt pathways and 30,000 SF of parking, granite block swales and landscape edging, and new drainage inlets with headwall outfalls, riprap aprons, and landscape boulders.",
-        hero: 16,
-        pages: [
-          [15, "Title sheet"], [16, "Reconstruction plan — sheet 1"], [17, "Reconstruction plan — sheet 2"],
-          [18, "Reconstruction plan — sheet 3"], [19, "Site details — swales & edging"],
-          [20, "Site details — inlet, headwall outfall & riprap"]
-        ]
-      },
-      {
-        title: "Brower Park Pathway Reconstruction",
-        meta: "Designer & Drafter · NYC Parks Capital Projects · Brooklyn · 2021",
-        desc: "Pathway reconstruction around the park oval and Shirley Chisholm Circle: full-depth asphalt, new concrete curbs, 1939 World's Fair benches, bluestone repair at the circle, a custom post-and-chain garden fence, and tree protection specifications covering 58 mature trees.",
-        hero: 23,
-        pages: [
-          [21, "Title sheet"], [22, "Tree protection & removals plan"],
-          [23, "Layout, materials & grading plan — Shirley Chisholm Circle detail"], [24, "Post & chain fence details"]
-        ]
-      },
-      {
-        title: "Claremont Park Play Area & Sports Courts",
-        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2022",
-        desc: "Multipurpose play area and sports court pavement reconstruction along Teller, Morris, and Mt. Eden Avenues: color-sealed basketball courts, a permeable paver plaza, World's Fair benches with companion seating, and new drinking fountains.",
-        hero: 26,
-        pages: [ [25, "Title sheet"], [26, "Layout, materials & grading plan"] ]
-      },
-      {
-        title: "William F. Passannante Ballfield Reconstruction",
-        meta: "Designer & Drafter · NYC Parks Capital Projects · Manhattan · 2022",
-        desc: "Reconstruction of the ballfield at West Houston Street and Avenue of the Americas: color-sealed softball, hockey, and basketball surfaces, new benches, sidewalk and street tree work — all coordinated over the active subway tunnel directly below the site.",
-        hero: 28,
-        pages: [ [27, "Title sheet"], [28, "Layout & materials plan"] ]
-      },
-      {
-        title: "Crotona Parkway Malls Pavement Reconstruction",
-        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2022",
-        desc: "Pavement reconstruction across the three Crotona Parkway mall blocks between East 175th Street and Elsmere Place: asphalt paths, flush concrete curbs, World's Fair benches with ADA companion seating, lawn restoration, and tree protection throughout the corridor.",
-        hero: 31,
-        pages: [
-          [29, "Title sheet"], [30, "Removals & protection plans"], [31, "Layout, materials & grading plan"]
-        ]
-      },
-      {
-        title: "Brooklyn Basketball Courts Reconstruction",
-        meta: "Designer & Drafter · NYC Parks Capital Projects with NYC DEP · Brooklyn · 2021–23",
-        desc: "Basketball court reconstruction at Taaffe, Star Spangled, and Potomac Playgrounds, paired with DEP green infrastructure: full-depth asphalt courts with color seal, new backstops, benches, and subsurface stormwater detention beneath the courts.",
-        hero: 33,
-        pages: [
-          [32, "Title sheet"], [33, "Taaffe Playground — layout plan"],
-          [34, "Star Spangled Playground — layout plan"], [35, "Potomac Playground — layout plan"]
-        ]
-      }
-    ];
-
     const src = n => `img/p${String(n).padStart(2, "0")}.webp`;
 
     const container = document.getElementById("projects");
