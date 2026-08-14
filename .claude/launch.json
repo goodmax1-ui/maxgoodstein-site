@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "partnerments",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/maxgoodstein/Documents/Codex/2026-07-30/bui", "run", "dev"],
+      "port": 3000
+    },
+    {
       "name": "dashboard",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["server.py"],
@@ -18,6 +24,36 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8092"],
       "port": 8092
+    },
+    {
+      "name": "nycdash",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8094", "--directory", "/Users/maxgoodstein/Claude code/Dashboards/events and news/goodmax1-ui.github.io"],
+      "port": 8094
+    },
+    {
+      "name": "nycdash2",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8095", "--directory", "/Users/maxgoodstein/Claude code/Dashboards/events and news/goodmax1-ui.github.io"],
+      "port": 8095
+    },
+    {
+      "name": "nycdash3",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8098", "--directory", "/Users/maxgoodstein/Claude code/Dashboards/events and news/goodmax1-ui.github.io"],
+      "port": 8098
+    },
+    {
+      "name": "cityrecord",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8097", "--directory", "/Users/maxgoodstein/Claude code/Dashboards/City Record"],
+      "port": 8097
+    },
+    {
+      "name": "nycdash-social-worktree-claude",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8096", "--directory", "/private/tmp/claude-501/-Users-maxgoodstein-Claude-code-Dashboards-HOMEPAGE/ecd30f81-90a1-42b8-b32d-30908bda0e92/scratchpad/nycdash-cardui"],
+      "port": 8096
     }
   ]
 }
