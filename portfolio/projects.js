@@ -1,30 +1,30 @@
-// Portfolio content — edit this file directly, or use maxgoodstein.com/portfolio/?edit
+// Portfolio content: edit this file directly, or use maxgoodstein.com/portfolio/?edit
 // and download the result. To publish: replace portfolio/projects.js with this file,
 // then commit and push.
 
 const PROJECTS = [
   {
     "title": "Brigadier General Charles Young Field Reconstruction",
-    "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024–26",
-    "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field — roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a Parks architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints — an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
+    "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024-26",
+    "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field, roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a Parks architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints: an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
     "hero": "cy08",
     "compare": ["cy06a", "cy08"],
     "pages": [
       [
         "cy06",
-        "Before — natural turf field (aerial)"
+        "Before: natural turf field (aerial)"
       ],
       [
         "cy07",
-        "Construction — field stripped and regraded (aerial)"
+        "Construction: field stripped and regraded (aerial)"
       ],
       [
         "cy01",
-        "Construction — excavation of the natural turf field"
+        "Construction: excavation of the natural turf field"
       ],
       [
         "cy02",
-        "Construction — subbase placement"
+        "Construction: subbase placement"
       ],
       [
         "cy03",
@@ -32,7 +32,7 @@ const PROJECTS = [
       ],
       [
         "cy04",
-        "Completed field — baseball, softball & football overlays"
+        "Completed field: baseball, softball & football overlays"
       ],
       [
         "cy05",
@@ -40,7 +40,7 @@ const PROJECTS = [
       ],
       [
         "cy08",
-        "Completed — synthetic turf field (aerial)"
+        "Completed: synthetic turf field (aerial)"
       ]
     ]
   },
@@ -53,23 +53,40 @@ const PROJECTS = [
     "pages": [
       [
         "sv01",
-        "Existing conditions — before"
+        "Existing conditions: before"
       ],
       [
         "sv02",
-        "Construction — excavation, formwork & granite block staging"
+        "Construction: excavation, formwork & granite block staging"
       ],
       [
         "sv03",
-        "Completed — level entrance meeting the sidewalk"
+        "Completed: level entrance meeting the sidewalk"
       ],
       [
         "sv04",
-        "Completed — diamond-grid stabilized surface with granite block edging"
+        "Completed: diamond-grid stabilized surface with granite block edging"
       ],
       [
         "sv05",
-        "Completed — path across the lawn"
+        "Completed: path across the lawn"
+      ]
+    ]
+  },
+  {
+    "title": "Billings Lawn Restoration, Fort Tryon Park",
+    "meta": "Designer & Project Manager · Privately funded ($50K Con Edison grant) · Manhattan · 2026",
+    "desc": "Restoration of the heavily used Billings Lawn, funded by a $50,000 grant from Con Edison. Led the design and project management: a new trench drain system that drains the compacted lawn after rain events and lets stormwater infiltrate back into the soil, plus soil aeration, regrading to a consistent slope, new sod, and tree protection for the two large canopy trees that anchor the site. The lawn now drains correctly and the restoration has held.",
+    "hero": "bl02",
+    "compare": ["blb", "bla"],
+    "pages": [
+      [
+        "bl01",
+        "Before: compacted lawn with failing turf"
+      ],
+      [
+        "bl02",
+        "After: restored lawn with new sod and trench drainage"
       ]
     ]
   },
@@ -97,7 +114,7 @@ const PROJECTS = [
       ],
       [
         5,
-        "Site details — underground detention & outlet control"
+        "Site details: underground detention & outlet control"
       ],
       [
         6,
@@ -109,11 +126,11 @@ const PROJECTS = [
       ],
       [
         8,
-        "Burke Ave & Ely Ave entrance — existing"
+        "Burke Ave & Ely Ave entrance: existing"
       ],
       [
         9,
-        "Burke Ave & Ely Ave entrance — proposed ADA ramp"
+        "Burke Ave & Ely Ave entrance: proposed ADA ramp"
       ],
       [
         10,
@@ -121,19 +138,19 @@ const PROJECTS = [
       ],
       [
         11,
-        "Pool deck — existing"
+        "Pool deck: existing"
       ],
       [
         12,
-        "Pool deck — proposed"
+        "Pool deck: proposed"
       ],
       [
         13,
-        "Wading pool — existing"
+        "Wading pool: existing"
       ],
       [
         14,
-        "Wading pool — proposed, ADA accessible"
+        "Wading pool: proposed, ADA accessible"
       ]
     ]
   },
@@ -149,23 +166,23 @@ const PROJECTS = [
       ],
       [
         16,
-        "Reconstruction plan — sheet 1"
+        "Reconstruction plan: sheet 1"
       ],
       [
         17,
-        "Reconstruction plan — sheet 2"
+        "Reconstruction plan: sheet 2"
       ],
       [
         18,
-        "Reconstruction plan — sheet 3"
+        "Reconstruction plan: sheet 3"
       ],
       [
         19,
-        "Site details — swales & edging"
+        "Site details: swales & edging"
       ],
       [
         20,
-        "Site details — inlet, headwall outfall & riprap"
+        "Site details: inlet, headwall outfall & riprap"
       ]
     ]
   },
@@ -185,7 +202,7 @@ const PROJECTS = [
       ],
       [
         23,
-        "Layout, materials & grading plan — Shirley Chisholm Circle detail"
+        "Layout, materials & grading plan: Shirley Chisholm Circle detail"
       ],
       [
         24,
@@ -212,7 +229,7 @@ const PROJECTS = [
   {
     "title": "William F. Passannante Ballfield Reconstruction",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Manhattan · 2022",
-    "desc": "Reconstruction of the Multipurpose Play Area at West Houston Street and Avenue of the Americas: color-sealed softball, hockey, pickleball and basketball surfaces, new benches, sidewalk and street tree work — all coordinated over the active subway tunnel directly below the site.",
+    "desc": "Reconstruction of the Multipurpose Play Area at West Houston Street and Avenue of the Americas: color-sealed softball, hockey, pickleball and basketball surfaces, new benches, sidewalk and street tree work, all coordinated over the active subway tunnel directly below the site.",
     "hero": 28,
     "pages": [
       [
@@ -247,7 +264,7 @@ const PROJECTS = [
   },
   {
     "title": "Brooklyn Basketball Courts Reconstruction",
-    "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects with NYC DEP · Brooklyn · 2021–23",
+    "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects with NYC DEP · Brooklyn · 2021-23",
     "desc": "Basketball court reconstruction at Taaffe, Star Spangled, and Potomac Playgrounds, paired with DEP green infrastructure: full-depth asphalt courts with color seal, new backstops, benches, and subsurface stormwater detention beneath the courts.",
     "hero": 33,
     "pages": [
@@ -257,15 +274,15 @@ const PROJECTS = [
       ],
       [
         33,
-        "Taaffe Playground — layout plan"
+        "Taaffe Playground: layout plan"
       ],
       [
         34,
-        "Star Spangled Playground — layout plan"
+        "Star Spangled Playground: layout plan"
       ],
       [
         35,
-        "Potomac Playground — layout plan"
+        "Potomac Playground: layout plan"
       ]
     ]
   }
