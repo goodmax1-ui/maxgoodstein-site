@@ -49,6 +49,7 @@ const PROJECTS = [
     "meta": "Designer & Project Manager · Privately funded · Manhattan · 2025",
     "desc": "A new ADA-accessible path into St. Vartan Park, built with private dollars: a diamond-grid stabilized surface with granite block edging and a level entrance meeting the sidewalk.",
     "hero": "sv03",
+    "compare": ["svb", "sva"],
     "pages": [
       [
         "sv01",
