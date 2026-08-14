@@ -4,6 +4,18 @@
 
 const PROJECTS = [
   {
+    "title": "St. Vartan Park ADA Path",
+    "meta": "Designer & Project Manager · Privately funded · Manhattan · 2025",
+    "desc": "A new ADA-accessible path into St. Vartan Park, built with private dollars: a diamond-grid stabilized surface with granite block edging and a level entrance meeting the sidewalk.",
+    "hero": "sv01",
+    "pages": [
+      [
+        "sv01",
+        "Existing conditions — before"
+      ]
+    ]
+  },
+  {
     "title": "Haffen Park Pool Complex Reconstruction",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Bronx · 2023",
     "desc": "Pool deck and landscape reconstruction for the Haffen Park bathhouse complex: a new ADA-accessible park entrance at Burke and Ely Avenues, an accessible ramp to the wading pool, Euroblue pigmented-concrete deck, seatwalls with companion seating, and an entrance plaza organized for pool-season queuing and Parks operations.",

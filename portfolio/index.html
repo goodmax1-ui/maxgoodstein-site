@@ -102,7 +102,8 @@
 
   <script src="projects.js"></script>
   <script>
-    const src = n => `img/p${String(n).padStart(2, "0")}.webp`;
+    // Numbers map to img/pNN.webp (portfolio PDF pages); strings map to img/<name>.webp
+    const src = n => typeof n === "number" ? `img/p${String(n).padStart(2, "0")}.webp` : `img/${n}.webp`;
 
     // Edit mode: open the page with ?edit added to the URL.
     const EDIT = new URLSearchParams(location.search).has("edit");
@@ -113,6 +114,7 @@
       if (draft) {
         try {
           const saved = JSON.parse(draft);
+          if (saved.length !== PROJECTS.length) throw new Error("draft is from an older project list");
           saved.forEach((s, i) => {
             if (!PROJECTS[i]) return;
             PROJECTS[i].title = s.title; PROJECTS[i].meta = s.meta; PROJECTS[i].desc = s.desc;
