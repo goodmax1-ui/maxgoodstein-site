@@ -4,6 +4,34 @@
 
 const PROJECTS = [
   {
+    "title": "Brigadier General Charles Young Field Reconstruction",
+    "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024–25",
+    "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field — roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a fellow Parks landscape architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints — an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
+    "hero": "cy04",
+    "pages": [
+      [
+        "cy01",
+        "Construction — excavation of the natural turf field"
+      ],
+      [
+        "cy02",
+        "Construction — subbase placement"
+      ],
+      [
+        "cy03",
+        "Perimeter paving completed with DOT"
+      ],
+      [
+        "cy04",
+        "Completed field — baseball, softball & football overlays"
+      ],
+      [
+        "cy05",
+        "Completed synthetic turf"
+      ]
+    ]
+  },
+  {
     "title": "St. Vartan Park ADA Path",
     "meta": "Designer & Project Manager · Privately funded · Manhattan · 2025",
     "desc": "A new ADA-accessible path into St. Vartan Park, built with private dollars: a diamond-grid stabilized surface with granite block edging and a level entrance meeting the sidewalk.",
