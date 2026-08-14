@@ -8,6 +8,7 @@ const PROJECTS = [
     "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024–26",
     "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field — roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a Parks architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints — an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
     "hero": "cy08",
+    "compare": ["cy06a", "cy08"],
     "pages": [
       [
         "cy06",
