@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio — Max Goodstein</title>
-  <meta name="description" content="Landscape architecture portfolio of Max Goodstein, RLA">
+  <meta name="description" content="Landscape architecture portfolio of Max Goodstein, RLA — NYC Parks Capital Projects">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -20,34 +20,42 @@
       --card-bg: #ffffff;
     }
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
 
     header { margin-bottom: 2.5rem; }
     .back { display: inline-block; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 1.5rem; }
     .back:hover { color: var(--accent); }
     h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
-    .subtitle { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; max-width: 560px; }
+    .subtitle { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
 
-    .grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-    @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .projects { display: flex; flex-direction: column; gap: 2rem; }
+    .project { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .project .hero { display: block; width: 100%; cursor: zoom-in; background: #eee; border: 0; padding: 0; }
+    .project .hero img { display: block; width: 100%; height: auto; }
+    .project .body { padding: 1.2rem 1.4rem 1.4rem; }
+    .project h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .project .meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.7rem; }
+    .project p { font-size: 0.92rem; line-height: 1.65; color: var(--text-secondary); }
 
-    .project { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.2s ease; }
-    .project:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .project figure { aspect-ratio: 4 / 3; background: linear-gradient(135deg, #e9f2ee, #d4e6dd); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
-    .project figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .project figure .placeholder { font-size: 0.85rem; color: var(--accent); opacity: 0.7; }
-    .project .body { padding: 1.1rem 1.25rem 1.35rem; }
-    .project h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
-    .project .meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
-    .project p { font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); }
+    .thumbs { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0 1.4rem 1.3rem; -webkit-overflow-scrolling: touch; }
+    .thumbs button { flex: 0 0 auto; width: 88px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; padding: 0; background: #fff; cursor: pointer; }
+    .thumbs button:hover { border-color: var(--accent); }
+    .thumbs img { display: block; width: 100%; height: 62px; object-fit: cover; }
 
     /* Lightbox */
-    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 1.5rem; z-index: 10; cursor: zoom-out; }
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; z-index: 10; }
     .lightbox.open { display: flex; }
-    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 6px; }
+    .lightbox img { max-width: 100%; max-height: 82vh; border-radius: 4px; background: #fff; }
+    .lb-caption { color: #ccc; font-size: 0.85rem; margin-top: 0.75rem; text-align: center; }
+    .lb-btn { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.12); color: #fff; border: 0; font-size: 1.6rem; line-height: 1; padding: 0.7rem 0.9rem; border-radius: 8px; cursor: pointer; }
+    .lb-btn:hover { background: rgba(255,255,255,0.25); }
+    #lbPrev { left: 0.75rem; }
+    #lbNext { right: 0.75rem; }
+    #lbClose { position: fixed; top: 0.75rem; right: 0.75rem; transform: none; font-size: 1.1rem; }
 
     .divider { width: 40px; height: 1px; background: var(--border); margin: 3rem auto 1.5rem; }
     .footer { font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6; text-align: center; }
+    @media (max-width: 480px) { .project .body { padding: 1rem 1.1rem 1.1rem; } .thumbs { padding: 0 1.1rem 1.1rem; } }
   </style>
 </head>
 <body>
@@ -55,67 +63,150 @@
     <header>
       <a class="back" href="/">&larr; maxgoodstein.com</a>
       <h1>Portfolio</h1>
-      <p class="subtitle">Selected landscape architecture work. Max Goodstein, RLA.</p>
+      <p class="subtitle">Selected capital projects for NYC Parks &amp; Recreation &mdash; design, construction documents, and drafting. Max Goodstein, RLA.</p>
     </header>
 
-    <!--
-      To add a project: copy one <article class="project"> block.
-      Put images in /portfolio/img/ and set the <img> src.
-      If no image yet, leave the .placeholder span in place.
-    -->
-    <div class="grid">
-      <article class="project">
-        <figure><span class="placeholder">Image forthcoming</span></figure>
-        <div class="body">
-          <h2>Project Title</h2>
-          <div class="meta">Role &middot; Location &middot; Year</div>
-          <p>One or two sentences about the project: scope, your role, what was built.</p>
-        </div>
-      </article>
-
-      <article class="project">
-        <figure><span class="placeholder">Image forthcoming</span></figure>
-        <div class="body">
-          <h2>Project Title</h2>
-          <div class="meta">Role &middot; Location &middot; Year</div>
-          <p>One or two sentences about the project: scope, your role, what was built.</p>
-        </div>
-      </article>
-
-      <article class="project">
-        <figure><span class="placeholder">Image forthcoming</span></figure>
-        <div class="body">
-          <h2>Project Title</h2>
-          <div class="meta">Role &middot; Location &middot; Year</div>
-          <p>One or two sentences about the project: scope, your role, what was built.</p>
-        </div>
-      </article>
-
-      <article class="project">
-        <figure><span class="placeholder">Image forthcoming</span></figure>
-        <div class="body">
-          <h2>Project Title</h2>
-          <div class="meta">Role &middot; Location &middot; Year</div>
-          <p>One or two sentences about the project: scope, your role, what was built.</p>
-        </div>
-      </article>
-    </div>
+    <div class="projects" id="projects"></div>
 
     <div class="divider"></div>
     <p class="footer">&copy; 2026 Max Goodstein</p>
   </div>
 
-  <div class="lightbox" id="lightbox"><img alt=""></div>
+  <div class="lightbox" id="lightbox">
+    <img id="lbImg" alt="">
+    <div class="lb-caption" id="lbCap"></div>
+    <button class="lb-btn" id="lbPrev" aria-label="Previous">&larr;</button>
+    <button class="lb-btn" id="lbNext" aria-label="Next">&rarr;</button>
+    <button class="lb-btn" id="lbClose" aria-label="Close">&times;</button>
+  </div>
+
   <script>
-    // Click any project image to view full-size; click anywhere to close.
-    const lb = document.getElementById('lightbox');
-    const lbImg = lb.querySelector('img');
-    document.querySelectorAll('.project figure img').forEach(img => {
-      img.closest('figure').addEventListener('click', () => {
-        lbImg.src = img.src; lbImg.alt = img.alt; lb.classList.add('open');
+    const PROJECTS = [
+      {
+        title: "Haffen Park Pool Complex Reconstruction",
+        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2023",
+        desc: "Pool deck and landscape reconstruction for the Haffen Park bathhouse complex: a new ADA-accessible park entrance at Burke and Ely Avenues, an accessible ramp to the wading pool, Euroblue pigmented-concrete deck, seatwalls with companion seating, and an entrance plaza organized for pool-season queuing and Parks operations.",
+        hero: 12,
+        pages: [
+          [1, "Title sheet"], [2, "Existing conditions plan"], [3, "Layout & materials plan"],
+          [4, "Grading, drainage & site electrical plan"], [5, "Site details — underground detention & outlet control"],
+          [6, "Existing pool deck & landscape layout"], [7, "Proposed pool deck & landscape plan"],
+          [8, "Burke Ave & Ely Ave entrance — existing"], [9, "Burke Ave & Ely Ave entrance — proposed ADA ramp"],
+          [10, "Entrance circulation during pool season"], [11, "Pool deck — existing"],
+          [12, "Pool deck — proposed"], [13, "Wading pool — existing"], [14, "Wading pool — proposed, ADA accessible"]
+        ]
+      },
+      {
+        title: "Clove Lakes Park Pavement Reconstruction",
+        meta: "Project Manager, Designer & Drafter · NYC Parks Capital Projects · Staten Island · 2023",
+        desc: "Reconstruction of pavement surfaces between Victory Boulevard and Martling Avenue: roughly 81,000 SF of asphalt pathways and 30,000 SF of parking, granite block swales and landscape edging, and new drainage inlets with headwall outfalls, riprap aprons, and landscape boulders.",
+        hero: 16,
+        pages: [
+          [15, "Title sheet"], [16, "Reconstruction plan — sheet 1"], [17, "Reconstruction plan — sheet 2"],
+          [18, "Reconstruction plan — sheet 3"], [19, "Site details — swales & edging"],
+          [20, "Site details — inlet, headwall outfall & riprap"]
+        ]
+      },
+      {
+        title: "Brower Park Pathway Reconstruction",
+        meta: "Designer & Drafter · NYC Parks Capital Projects · Brooklyn · 2021",
+        desc: "Pathway reconstruction around the park oval and Shirley Chisholm Circle: full-depth asphalt, new concrete curbs, 1939 World's Fair benches, bluestone repair at the circle, a custom post-and-chain garden fence, and tree protection specifications covering 58 mature trees.",
+        hero: 23,
+        pages: [
+          [21, "Title sheet"], [22, "Tree protection & removals plan"],
+          [23, "Layout, materials & grading plan — Shirley Chisholm Circle detail"], [24, "Post & chain fence details"]
+        ]
+      },
+      {
+        title: "Claremont Park Play Area & Sports Courts",
+        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2022",
+        desc: "Multipurpose play area and sports court pavement reconstruction along Teller, Morris, and Mt. Eden Avenues: color-sealed basketball courts, a permeable paver plaza, World's Fair benches with companion seating, and new drinking fountains.",
+        hero: 26,
+        pages: [ [25, "Title sheet"], [26, "Layout, materials & grading plan"] ]
+      },
+      {
+        title: "William F. Passannante Ballfield Reconstruction",
+        meta: "Designer & Drafter · NYC Parks Capital Projects · Manhattan · 2022",
+        desc: "Reconstruction of the ballfield at West Houston Street and Avenue of the Americas: color-sealed softball, hockey, and basketball surfaces, new benches, sidewalk and street tree work — all coordinated over the active subway tunnel directly below the site.",
+        hero: 28,
+        pages: [ [27, "Title sheet"], [28, "Layout & materials plan"] ]
+      },
+      {
+        title: "Crotona Parkway Malls Pavement Reconstruction",
+        meta: "Designer & Drafter · NYC Parks Capital Projects · Bronx · 2022",
+        desc: "Pavement reconstruction across the three Crotona Parkway mall blocks between East 175th Street and Elsmere Place: asphalt paths, flush concrete curbs, World's Fair benches with ADA companion seating, lawn restoration, and tree protection throughout the corridor.",
+        hero: 31,
+        pages: [
+          [29, "Title sheet"], [30, "Removals & protection plans"], [31, "Layout, materials & grading plan"]
+        ]
+      },
+      {
+        title: "Brooklyn Basketball Courts Reconstruction",
+        meta: "Designer & Drafter · NYC Parks Capital Projects with NYC DEP · Brooklyn · 2021–23",
+        desc: "Basketball court reconstruction at Taaffe, Star Spangled, and Potomac Playgrounds, paired with DEP green infrastructure: full-depth asphalt courts with color seal, new backstops, benches, and subsurface stormwater detention beneath the courts.",
+        hero: 33,
+        pages: [
+          [32, "Title sheet"], [33, "Taaffe Playground — layout plan"],
+          [34, "Star Spangled Playground — layout plan"], [35, "Potomac Playground — layout plan"]
+        ]
+      }
+    ];
+
+    const src = n => `img/p${String(n).padStart(2, "0")}.webp`;
+
+    const container = document.getElementById("projects");
+    PROJECTS.forEach((proj, pi) => {
+      const art = document.createElement("article");
+      art.className = "project";
+      const heroIdx = proj.pages.findIndex(p => p[0] === proj.hero);
+      art.innerHTML = `
+        <button class="hero" aria-label="Open gallery"><img loading="lazy" src="${src(proj.hero)}" alt="${proj.title}"></button>
+        <div class="body">
+          <h2>${proj.title}</h2>
+          <div class="meta">${proj.meta}</div>
+          <p>${proj.desc}</p>
+        </div>
+        <div class="thumbs"></div>`;
+      art.querySelector(".hero").addEventListener("click", () => openLB(pi, heroIdx));
+      const thumbs = art.querySelector(".thumbs");
+      proj.pages.forEach((pg, idx) => {
+        const b = document.createElement("button");
+        b.innerHTML = `<img loading="lazy" src="${src(pg[0])}" alt="${pg[1]}">`;
+        b.title = pg[1];
+        b.addEventListener("click", () => openLB(pi, idx));
+        thumbs.appendChild(b);
       });
+      container.appendChild(art);
     });
-    lb.addEventListener('click', () => lb.classList.remove('open'));
+
+    // Lightbox
+    const lb = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lbImg");
+    const lbCap = document.getElementById("lbCap");
+    let cur = { p: 0, i: 0 };
+    function openLB(p, i) { cur = { p, i }; render(); lb.classList.add("open"); document.body.style.overflow = "hidden"; }
+    function closeLB() { lb.classList.remove("open"); document.body.style.overflow = ""; }
+    function render() {
+      const proj = PROJECTS[cur.p];
+      const [n, cap] = proj.pages[cur.i];
+      lbImg.src = src(n);
+      lbCap.textContent = `${proj.title} — ${cap} (${cur.i + 1}/${proj.pages.length})`;
+    }
+    function step(d) {
+      const len = PROJECTS[cur.p].pages.length;
+      cur.i = (cur.i + d + len) % len;
+      render();
+    }
+    document.getElementById("lbPrev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
+    document.getElementById("lbNext").addEventListener("click", e => { e.stopPropagation(); step(1); });
+    document.getElementById("lbClose").addEventListener("click", closeLB);
+    lb.addEventListener("click", e => { if (e.target === lb) closeLB(); });
+    document.addEventListener("keydown", e => {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") closeLB();
+      if (e.key === "ArrowLeft") step(-1);
+      if (e.key === "ArrowRight") step(1);
+    });
   </script>
 </body>
 </html>
