@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio — Max Goodstein</title>
+  <meta name="description" content="Landscape architecture portfolio of Max Goodstein, RLA">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #2d6a4f;
+      --accent-hover: #40916c;
+      --bg: #fafafa;
+      --text: #1a1a1a;
+      --text-secondary: #555555;
+      --border: #e0e0e0;
+      --card-bg: #ffffff;
+    }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+    header { margin-bottom: 2.5rem; }
+    .back { display: inline-block; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 1.5rem; }
+    .back:hover { color: var(--accent); }
+    h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    .subtitle { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; max-width: 560px; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+    .project { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.2s ease; }
+    .project:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .project figure { aspect-ratio: 4 / 3; background: linear-gradient(135deg, #e9f2ee, #d4e6dd); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+    .project figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .project figure .placeholder { font-size: 0.85rem; color: var(--accent); opacity: 0.7; }
+    .project .body { padding: 1.1rem 1.25rem 1.35rem; }
+    .project h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .project .meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
+    .project p { font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); }
+
+    /* Lightbox */
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 1.5rem; z-index: 10; cursor: zoom-out; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 6px; }
+
+    .divider { width: 40px; height: 1px; background: var(--border); margin: 3rem auto 1.5rem; }
+    .footer { font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="back" href="/">&larr; maxgoodstein.com</a>
+      <h1>Portfolio</h1>
+      <p class="subtitle">Selected landscape architecture work. Max Goodstein, RLA.</p>
+    </header>
+
+    <!--
+      To add a project: copy one <article class="project"> block.
+      Put images in /portfolio/img/ and set the <img> src.
+      If no image yet, leave the .placeholder span in place.
+    -->
+    <div class="grid">
+      <article class="project">
+        <figure><span class="placeholder">Image forthcoming</span></figure>
+        <div class="body">
+          <h2>Project Title</h2>
+          <div class="meta">Role &middot; Location &middot; Year</div>
+          <p>One or two sentences about the project: scope, your role, what was built.</p>
+        </div>
+      </article>
+
+      <article class="project">
+        <figure><span class="placeholder">Image forthcoming</span></figure>
+        <div class="body">
+          <h2>Project Title</h2>
+          <div class="meta">Role &middot; Location &middot; Year</div>
+          <p>One or two sentences about the project: scope, your role, what was built.</p>
+        </div>
+      </article>
+
+      <article class="project">
+        <figure><span class="placeholder">Image forthcoming</span></figure>
+        <div class="body">
+          <h2>Project Title</h2>
+          <div class="meta">Role &middot; Location &middot; Year</div>
+          <p>One or two sentences about the project: scope, your role, what was built.</p>
+        </div>
+      </article>
+
+      <article class="project">
+        <figure><span class="placeholder">Image forthcoming</span></figure>
+        <div class="body">
+          <h2>Project Title</h2>
+          <div class="meta">Role &middot; Location &middot; Year</div>
+          <p>One or two sentences about the project: scope, your role, what was built.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="divider"></div>
+    <p class="footer">&copy; 2026 Max Goodstein</p>
+  </div>
+
+  <div class="lightbox" id="lightbox"><img alt=""></div>
+  <script>
+    // Click any project image to view full-size; click anywhere to close.
+    const lb = document.getElementById('lightbox');
+    const lbImg = lb.querySelector('img');
+    document.querySelectorAll('.project figure img').forEach(img => {
+      img.closest('figure').addEventListener('click', () => {
+        lbImg.src = img.src; lbImg.alt = img.alt; lb.classList.add('open');
+      });
+    });
+    lb.addEventListener('click', () => lb.classList.remove('open'));
+  </script>
+</body>
+</html>
