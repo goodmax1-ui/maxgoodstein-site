@@ -56,6 +56,18 @@
     .divider { width: 40px; height: 1px; background: var(--border); margin: 3rem auto 1.5rem; }
     .footer { font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6; text-align: center; }
     @media (max-width: 480px) { .project .body { padding: 1rem 1.1rem 1.1rem; } .thumbs { padding: 0 1.1rem 1.1rem; } }
+
+    /* Edit mode */
+    body.editing { padding-bottom: 5.5rem; }
+    body.editing [contenteditable] { outline: 1px dashed var(--accent-hover); outline-offset: 3px; border-radius: 2px; }
+    body.editing [contenteditable]:focus { outline: 2px solid var(--accent); background: #f2f8f5; }
+    .editbar { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: #1f2d27; color: #e8efeb; padding: 0.7rem 1rem; }
+    body.editing .editbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+    .editbar .msg { font-size: 0.78rem; color: #b9cbc2; flex: 1 1 220px; line-height: 1.4; }
+    .editbar button { border: 0; border-radius: 8px; padding: 0.55rem 0.9rem; font-size: 0.82rem; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: #fff; }
+    .editbar button:hover { background: rgba(255,255,255,0.22); }
+    .editbar button.primary { background: var(--accent); }
+    .editbar button.primary:hover { background: var(--accent-hover); }
   </style>
 </head>
 <body>
@@ -72,6 +84,14 @@
     <p class="footer">&copy; 2026 Max Goodstein</p>
   </div>
 
+  <div class="editbar" id="editbar">
+    <span class="msg" id="editMsg">Edit mode — click any text above to change it. Changes are saved as a draft on this device; download the file to publish.</span>
+    <button class="primary" id="edDownload">Download projects.js</button>
+    <button id="edCopy">Copy</button>
+    <button id="edReset">Discard draft</button>
+    <button id="edDone">Done</button>
+  </div>
+
   <div class="lightbox" id="lightbox">
     <img id="lbImg" alt="">
     <div class="lb-caption" id="lbCap"></div>
@@ -83,6 +103,25 @@
   <script src="projects.js"></script>
   <script>
     const src = n => `img/p${String(n).padStart(2, "0")}.webp`;
+
+    // Edit mode: open the page with ?edit added to the URL.
+    const EDIT = new URLSearchParams(location.search).has("edit");
+    const DRAFT_KEY = "portfolioDraft";
+    if (EDIT) {
+      document.body.classList.add("editing");
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) {
+        try {
+          const saved = JSON.parse(draft);
+          saved.forEach((s, i) => {
+            if (!PROJECTS[i]) return;
+            PROJECTS[i].title = s.title; PROJECTS[i].meta = s.meta; PROJECTS[i].desc = s.desc;
+            if (s.pages) s.pages.forEach((pg, j) => { if (PROJECTS[i].pages[j]) PROJECTS[i].pages[j][1] = pg[1]; });
+          });
+        } catch (e) { console.warn("Bad draft, ignoring", e); }
+      }
+    }
+    const saveDraft = () => localStorage.setItem(DRAFT_KEY, JSON.stringify(PROJECTS));
 
     const container = document.getElementById("projects");
     PROJECTS.forEach((proj, pi) => {
@@ -98,6 +137,13 @@
         </div>
         <div class="thumbs"></div>`;
       art.querySelector(".hero").addEventListener("click", () => openLB(pi, heroIdx));
+      if (EDIT) {
+        [["h2", "title"], [".meta", "meta"], ["p", "desc"]].forEach(([sel, field]) => {
+          const el = art.querySelector(sel);
+          try { el.contentEditable = "plaintext-only"; } catch { el.contentEditable = "true"; }
+          el.addEventListener("input", () => { PROJECTS[pi][field] = el.textContent; saveDraft(); });
+        });
+      }
       const thumbs = art.querySelector(".thumbs");
       proj.pages.forEach((pg, idx) => {
         const b = document.createElement("button");
@@ -120,7 +166,7 @@
       const proj = PROJECTS[cur.p];
       const [n, cap] = proj.pages[cur.i];
       lbImg.src = src(n);
-      lbCap.textContent = `${proj.title} — ${cap} (${cur.i + 1}/${proj.pages.length})`;
+      lbCap.textContent = EDIT ? cap : `${proj.title} — ${cap} (${cur.i + 1}/${proj.pages.length})`;
     }
     function step(d) {
       const len = PROJECTS[cur.p].pages.length;
@@ -134,9 +180,47 @@
     document.addEventListener("keydown", e => {
       if (!lb.classList.contains("open")) return;
       if (e.key === "Escape") closeLB();
+      if (e.target.isContentEditable) return;
       if (e.key === "ArrowLeft") step(-1);
       if (e.key === "ArrowRight") step(1);
     });
+
+    // Edit mode toolbar
+    if (EDIT) {
+      try { lbCap.contentEditable = "plaintext-only"; } catch { lbCap.contentEditable = "true"; }
+      lbCap.addEventListener("input", () => {
+        PROJECTS[cur.p].pages[cur.i][1] = lbCap.textContent;
+        saveDraft();
+      });
+
+      const msg = document.getElementById("editMsg");
+      const header = "// Portfolio content — edit this file directly, or use maxgoodstein.com/portfolio/?edit\n" +
+        "// and download the result. To publish: replace portfolio/projects.js with this file,\n" +
+        "// then commit and push.\n\n";
+      const exportText = () => header + "const PROJECTS = " + JSON.stringify(PROJECTS, null, 2) + ";\n";
+
+      document.getElementById("edDownload").addEventListener("click", () => {
+        const blob = new Blob([exportText()], { type: "text/javascript" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "projects.js";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        msg.textContent = "Downloaded. Replace portfolio/projects.js in the repo with it, then commit & push.";
+      });
+      document.getElementById("edCopy").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(exportText());
+          msg.textContent = "Copied projects.js to clipboard.";
+        } catch { msg.textContent = "Copy failed — use Download instead."; }
+      });
+      document.getElementById("edReset").addEventListener("click", () => {
+        if (!confirm("Discard your draft edits and reload the published text?")) return;
+        localStorage.removeItem(DRAFT_KEY);
+        location.reload();
+      });
+      document.getElementById("edDone").addEventListener("click", () => { location.href = location.pathname; });
+    }
   </script>
 </body>
 </html>
