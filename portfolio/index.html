@@ -31,7 +31,7 @@
     .projects { display: flex; flex-direction: column; gap: 2rem; }
     .project { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .project .hero { display: block; width: 100%; cursor: zoom-in; background: #eee; border: 0; padding: 0; }
-    .project .hero img { display: block; width: 100%; height: auto; }
+    .project .hero img { display: block; width: 100%; height: auto; max-height: 600px; object-fit: cover; }
     .project .body { padding: 1.2rem 1.4rem 1.4rem; }
     .project h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.3rem; }
     .project .meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.7rem; }
@@ -75,7 +75,7 @@
     <header>
       <a class="back" href="/">&larr; maxgoodstein.com</a>
       <h1>Portfolio</h1>
-      <p class="subtitle">Selected capital projects for NYC Parks &amp; Recreation &mdash; design, construction documents, and drafting. Max Goodstein, RLA.</p>
+      <p class="subtitle">Selected park projects &mdash; design, construction documents, and project management. Max Goodstein, RLA.</p>
     </header>
 
     <div class="projects" id="projects"></div>
