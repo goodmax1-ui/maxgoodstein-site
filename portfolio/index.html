@@ -28,7 +28,17 @@
     h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
     .subtitle { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
 
+    html { scroll-behavior: smooth; }
+
+    /* Sticky jump nav */
+    .nav { position: sticky; top: 0; z-index: 5; background: var(--bg); margin: 0 -1.25rem 1.5rem; padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.4rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a { flex: 0 0 auto; font-size: 0.78rem; font-weight: 500; color: var(--text-secondary); text-decoration: none; padding: 0.35rem 0.75rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card-bg); white-space: nowrap; }
+    .nav a:hover { border-color: var(--accent); color: var(--accent); }
+    .nav a.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
     .projects { display: flex; flex-direction: column; gap: 2rem; }
+    .project { scroll-margin-top: 4rem; }
     .project { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .project .hero { display: block; width: 100%; cursor: zoom-in; background: #eee; border: 0; padding: 0; }
     .project .hero img { display: block; width: 100%; height: auto; max-height: 600px; object-fit: cover; }
@@ -89,6 +99,8 @@
       <p class="subtitle">Selected park projects: design, construction documents, and project management. Max Goodstein, RLA.</p>
     </header>
 
+    <nav class="nav" id="nav" aria-label="Jump to project"></nav>
+
     <div class="projects" id="projects"></div>
 
     <div class="divider"></div>
@@ -136,10 +148,21 @@
     }
     const saveDraft = () => localStorage.setItem(DRAFT_KEY, JSON.stringify(PROJECTS));
 
+    // Jump nav
+    const nav = document.getElementById("nav");
+    const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    PROJECTS.forEach(proj => {
+      const a = document.createElement("a");
+      a.href = "#" + slug(proj.title);
+      a.textContent = proj.short || proj.title;
+      nav.appendChild(a);
+    });
+
     const container = document.getElementById("projects");
     PROJECTS.forEach((proj, pi) => {
       const art = document.createElement("article");
       art.className = "project";
+      art.id = slug(proj.title);
       const heroIdx = proj.pages.findIndex(p => p[0] === proj.hero);
       const heroHTML = proj.compare
         ? `<div class="compare" style="--pos:50%">
@@ -212,6 +235,23 @@
       if (e.key === "ArrowLeft") step(-1);
       if (e.key === "ArrowRight") step(1);
     });
+
+    // Highlight the nav chip for the project currently in view
+    const chips = [...nav.querySelectorAll("a")];
+    const cards = [...container.querySelectorAll(".project")];
+    const setActive = id => {
+      chips.forEach(c => {
+        const on = c.getAttribute("href") === "#" + id;
+        c.classList.toggle("active", on);
+        if (on) c.scrollIntoView({ block: "nearest", inline: "nearest" });
+      });
+    };
+    const io = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting)
+        .sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top);
+      if (vis.length) setActive(vis[0].target.id);
+    }, { rootMargin: "-10% 0px -60% 0px" });
+    cards.forEach(c => io.observe(c));
 
     // Edit mode toolbar
     if (EDIT) {

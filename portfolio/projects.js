@@ -5,6 +5,7 @@
 const PROJECTS = [
   {
     "title": "Brigadier General Charles Young Field Reconstruction",
+    "short": "Charles Young Field",
     "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024-26",
     "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field, roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a Parks architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints: an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
     "hero": "cy08",
@@ -46,6 +47,7 @@ const PROJECTS = [
   },
   {
     "title": "St. Vartan Park ADA Path",
+    "short": "St. Vartan ADA Path",
     "meta": "Designer & Project Manager · Privately funded · Manhattan · 2025",
     "desc": "A new ADA-accessible path into St. Vartan Park, built with private dollars: a diamond-grid stabilized surface with granite block edging and a level entrance meeting the sidewalk.",
     "hero": "sv03",
@@ -75,6 +77,7 @@ const PROJECTS = [
   },
   {
     "title": "Billings Lawn Restoration, Fort Tryon Park",
+    "short": "Billings Lawn",
     "meta": "Designer & Project Manager · Privately funded ($50K Con Edison grant) · Manhattan · 2026",
     "desc": "Restoration of the heavily used Billings Lawn, funded by a $50,000 grant from Con Edison. Led the design and project management: a new french drain system that drains the compacted lawn after rain events and lets stormwater infiltrate back into the soil, built as perforated pipe surrounded by #67 crushed stone wrapped in geotextile fabric, with clean fill above and sod on top. The project also included soil aeration, regrading to a consistent slope, new sod throughout, and tree protection for the two large canopy trees that anchor the site. The lawn now drains correctly and the restoration has held. Nearby, a failing section of asphalt path with a recurring sinkhole was torn up and replaced with a planting bed: designed as a small rain garden, then adjusted during construction to a regular planting bed.",
     "hero": "bl02",
@@ -104,6 +107,7 @@ const PROJECTS = [
   },
   {
     "title": "East River Esplanade Detour Signage",
+    "short": "Esplanade Signage",
     "meta": "Designer · NYC Parks · Manhattan · 2025-26",
     "desc": "Public detour signage for East River Esplanade closures. For the sinkhole at E. 94 St that closed the esplanade between E. 93 and E. 96 Streets, the sign lays out the bicycle detour, pedestrian access via Carl Schurz Park and E. 96 St, accessible entrances, and ferry access at E. 90 St over an aerial map, in English, Spanish, and Chinese. A second sign, for a separate project closing the greenway between E. 71 and E. 75 Streets, routes riders off at E. 63 St.",
     "hero": "er01",
@@ -120,6 +124,7 @@ const PROJECTS = [
   },
   {
     "title": "Haffen Park Pool Complex Reconstruction",
+    "short": "Haffen Park Pool",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Bronx · 2023",
     "desc": "Pool deck and landscape reconstruction for the Haffen Park bathhouse complex: a new ADA-accessible park entrance at Burke and Ely Avenues, an accessible ramp to the wading pool, Euroblue pigmented-concrete deck, seatwalls with companion seating, and an entrance plaza organized for pool-season queuing and Parks operations.",
     "hero": 12,
@@ -184,6 +189,7 @@ const PROJECTS = [
   },
   {
     "title": "Clove Lakes Park Pavement Reconstruction",
+    "short": "Clove Lakes",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Staten Island · 2023",
     "desc": "Reconstruction of pavement surfaces between Victory Boulevard and Martling Avenue: roughly 81,000 SF of asphalt pathways and 30,000 SF of parking, granite block swales and landscape edging, and new drainage inlets with headwall outfalls, riprap aprons, and landscape boulders.",
     "hero": 16,
@@ -216,6 +222,7 @@ const PROJECTS = [
   },
   {
     "title": "Brower Park Pathway Reconstruction",
+    "short": "Brower Park",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Brooklyn · 2021",
     "desc": "Pathway reconstruction around the park oval and Shirley Chisholm Circle: full-depth asphalt, new concrete curbs, 1939 World's Fair benches, bluestone repair at the circle, a custom post-and-chain garden fence, and tree protection specifications covering 58 mature trees.",
     "hero": 23,
@@ -240,6 +247,7 @@ const PROJECTS = [
   },
   {
     "title": "Claremont Park Play Area & Sports Courts",
+    "short": "Claremont Park",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Bronx · 2022",
     "desc": "Multipurpose Play Area and sports court pavement reconstruction along Teller, Morris, and Mt. Eden Avenues: color-sealed basketball courts, a permeable paver plaza, World's Fair benches with companion seating, and new drinking fountains.",
     "hero": 26,
@@ -256,6 +264,7 @@ const PROJECTS = [
   },
   {
     "title": "William F. Passannante Ballfield Reconstruction",
+    "short": "Passannante Ballfield",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Manhattan · 2022",
     "desc": "Reconstruction of the Multipurpose Play Area at West Houston Street and Avenue of the Americas: color-sealed softball, hockey, pickleball and basketball surfaces, new benches, sidewalk and street tree work, all coordinated over the active subway tunnel directly below the site.",
     "hero": 28,
@@ -272,6 +281,7 @@ const PROJECTS = [
   },
   {
     "title": "Crotona Parkway Malls Pavement Reconstruction",
+    "short": "Crotona Parkway",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Bronx · 2022",
     "desc": "Pavement reconstruction across the three Crotona Parkway mall blocks between East 175th Street and Elsmere Place: asphalt paths, flush concrete curbs, World's Fair benches with ADA companion seating, lawn restoration, and tree protection throughout the corridor.",
     "hero": 31,
@@ -292,6 +302,7 @@ const PROJECTS = [
   },
   {
     "title": "Brooklyn Basketball Courts Reconstruction",
+    "short": "Brooklyn Courts",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects with NYC DEP · Brooklyn · 2021-23",
     "desc": "Basketball court reconstruction at Taaffe, Star Spangled, and Potomac Playgrounds, paired with DEP green infrastructure: full-depth asphalt courts with color seal, new backstops, benches, and subsurface stormwater detention beneath the courts.",
     "hero": 33,
