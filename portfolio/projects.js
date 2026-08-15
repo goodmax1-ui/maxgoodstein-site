@@ -66,10 +66,6 @@ const PROJECTS = [
         "Completed: level entrance meeting the sidewalk"
       ],
       [
-        "sv04",
-        "Completed: diamond-grid stabilized surface with granite block edging"
-      ],
-      [
         "sv05",
         "Completed: path across the lawn"
       ]
@@ -79,7 +75,7 @@ const PROJECTS = [
     "title": "Billings Lawn Restoration, Fort Tryon Park",
     "short": "Billings Lawn",
     "meta": "Designer & Project Manager · Privately funded ($50K Con Edison grant) · Manhattan · 2026",
-    "desc": "Restoration of the heavily used Billings Lawn, funded by a $50,000 grant from Con Edison. Led the design and project management: a new french drain system that drains the compacted lawn after rain events and lets stormwater infiltrate back into the soil, built as perforated pipe surrounded by #67 crushed stone wrapped in geotextile fabric, with clean fill above and sod on top. The project also included soil aeration, regrading to a consistent slope, new sod throughout, and tree protection for the two large canopy trees that anchor the site. The lawn now drains correctly and the restoration has held. Nearby, a failing section of asphalt path with a recurring sinkhole was torn up and replaced with a planting bed: designed as a small rain garden, then adjusted during construction to a regular planting bed.",
+    "desc": "Restoration of the heavily used Billings Lawn, funded by a $50,000 grant from Con Edison. Led the design and project management: a new french drain system that drains the compacted lawn after rain events and lets stormwater infiltrate back into the soil, built as perforated pipe surrounded by #67 crushed stone wrapped in geotextile fabric, with clean fill above and grass seed on top. The project also included soil aeration, regrading to a consistent slope, new grass seed throughout, and tree protection for the two large canopy trees that anchor the site. The lawn now drains correctly and the restoration has held. Nearby, a failing section of asphalt path with a recurring sinkhole was torn up and replaced with a planting bed: designed as a small rain garden, then adjusted during construction to a regular planting bed.",
     "hero": "bl02",
     "compare": ["blb", "bla"],
     "pages": [
@@ -89,7 +85,7 @@ const PROJECTS = [
       ],
       [
         "bl02",
-        "After: restored lawn with new sod and french drain system"
+        "After: restored lawn with new grass seed and french drain system"
       ],
       [
         "bl03",
