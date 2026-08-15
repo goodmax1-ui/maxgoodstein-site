@@ -105,7 +105,7 @@ const PROJECTS = [
   {
     "title": "East River Esplanade Detour Signage",
     "meta": "Designer · NYC Parks · Manhattan · 2025-26",
-    "desc": "Public detour signage for East River Esplanade closures. A sinkhole at E. 94 St closed the esplanade between E. 93 and E. 96 Streets: the sign lays out the bicycle detour, pedestrian access via Carl Schurz Park and E. 96 St, accessible entrances, and ferry access at E. 90 St over an aerial map, in English, Spanish, and Chinese. A companion sign covers the greenway detour at E. 63 St for the 71 St Bridge closure.",
+    "desc": "Public detour signage for East River Esplanade closures. For the sinkhole at E. 94 St that closed the esplanade between E. 93 and E. 96 Streets, the sign lays out the bicycle detour, pedestrian access via Carl Schurz Park and E. 96 St, accessible entrances, and ferry access at E. 90 St over an aerial map, in English, Spanish, and Chinese. A second sign, for a separate project closing the greenway between E. 71 and E. 75 Streets, routes riders off at E. 63 St.",
     "hero": "er01",
     "pages": [
       [
@@ -114,7 +114,7 @@ const PROJECTS = [
       ],
       [
         "er02",
-        "Companion sign: greenway detour at E. 63 St for the 71 St Bridge closure"
+        "E. 71 to E. 75 St greenway closure (separate project): detour sign at E. 63 St"
       ]
     ]
   },
