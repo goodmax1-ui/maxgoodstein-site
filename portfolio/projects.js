@@ -103,6 +103,22 @@ const PROJECTS = [
     ]
   },
   {
+    "title": "East River Esplanade Detour Signage",
+    "meta": "Designer · NYC Parks · Manhattan · 2025-26",
+    "desc": "Public detour signage for East River Esplanade closures. A sinkhole at E. 94 St closed the esplanade between E. 93 and E. 96 Streets: the sign lays out the bicycle detour, pedestrian access via Carl Schurz Park and E. 96 St, accessible entrances, and ferry access at E. 90 St over an aerial map, in English, Spanish, and Chinese. A companion sign covers the greenway detour at E. 63 St for the 71 St Bridge closure.",
+    "hero": "er01",
+    "pages": [
+      [
+        "er01",
+        "E. 94 St sinkhole closure: esplanade detour sign, E. 93 to E. 96 St"
+      ],
+      [
+        "er02",
+        "Companion sign: greenway detour at E. 63 St for the 71 St Bridge closure"
+      ]
+    ]
+  },
+  {
     "title": "Haffen Park Pool Complex Reconstruction",
     "meta": "PM, Designer & Drafter · NYC Parks CWS Capital Projects · Bronx · 2023",
     "desc": "Pool deck and landscape reconstruction for the Haffen Park bathhouse complex: a new ADA-accessible park entrance at Burke and Ely Avenues, an accessible ramp to the wading pool, Euroblue pigmented-concrete deck, seatwalls with companion seating, and an entrance plaza organized for pool-season queuing and Parks operations.",
