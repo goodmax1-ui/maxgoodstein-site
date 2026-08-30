@@ -8,6 +8,11 @@
   "avatarShape": "circle",
   "links": [
     {
+      "label": "Portfolio",
+      "url": "/portfolio/",
+      "icon": "portfolio"
+    },
+    {
       "label": "LinkedIn",
       "url": "https://www.linkedin.com/in/goodmax1/",
       "icon": "linkedin"

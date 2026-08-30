@@ -99,6 +99,59 @@
     }
     .device-toggle button:hover:not(.active) { color: #ccc; }
 
+    .tab-toggle {
+      display: flex;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: 0.5rem;
+    }
+    .tab-toggle button {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tab-toggle button.active {
+      background: #555;
+      color: #fff;
+    }
+    .tab-toggle button:hover:not(.active) { color: #ccc; }
+
+    /* ── Portfolio editor ── */
+    .pf-head-btns { display: flex; align-items: center; gap: 0.1rem; }
+    .pf-head-btns .btn-remove:disabled { opacity: 0.25; cursor: default; }
+    .pf-head-btns .btn-remove:disabled:hover { color: #ccc; background: none; }
+    .pf-pages { display: flex; flex-direction: column; gap: 0.4rem; }
+    .pf-page { display: flex; align-items: center; gap: 0.4rem; }
+    .pf-page img {
+      width: 44px; height: 32px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--dash-border);
+      flex-shrink: 0;
+      background: #eee;
+    }
+    .pf-page input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.4rem 0.55rem;
+      border: 1px solid var(--dash-border);
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      background: var(--dash-surface);
+    }
+    .pf-page input:focus { outline: none; border-color: var(--dash-accent); }
+    .pf-page .btn-remove:disabled { opacity: 0.25; cursor: default; }
+    .pf-page .btn-remove:disabled:hover { color: #ccc; background: none; }
+    .pf-add-wrap { padding: 1rem 1.25rem 1.25rem; }
+
     .btn {
       padding: 0.45rem 1.1rem;
       border-radius: 7px;
@@ -622,6 +675,10 @@
   <div class="topbar">
     <div class="topbar-left">
       <h1>maxgoodstein.com</h1>
+      <div class="tab-toggle">
+        <button class="active" id="tabHome" onclick="setTab('home')">Home</button>
+        <button id="tabPortfolio" onclick="setTab('portfolio')">Portfolio</button>
+      </div>
       <div class="dot saved" id="statusDot"></div>
       <span class="status-text" id="statusText">Saved</span>
     </div>
@@ -638,6 +695,8 @@
   <div class="layout">
     <!-- Editor -->
     <div class="editor">
+
+      <div id="editorHome">
 
       <!-- Theme section -->
       <div class="section" id="sectionTheme">
@@ -750,6 +809,17 @@
         </div>
       </div>
 
+      </div><!-- /editorHome -->
+
+      <!-- Portfolio editor -->
+      <div id="editorPortfolio" style="display:none">
+        <div id="pfContainer"></div>
+        <div class="pf-add-wrap">
+          <button class="add-link-btn" onclick="pfAddProject()">+ Add Project</button>
+        </div>
+        <input type="file" id="pfFile" class="file-input" accept="image/*" onchange="pfUpload(this)">
+      </div>
+
     </div>
 
     <!-- Preview -->
@@ -801,6 +871,7 @@ const AVATAR_SHAPES = [
 ];
 
 const ICON_OPTIONS = [
+  { value: "portfolio", label: "Portfolio" },
   { value: "linkedin",  label: "LinkedIn" },
   { value: "github",    label: "GitHub" },
   { value: "email",     label: "Email" },
@@ -1141,7 +1212,8 @@ async function saveContent() {
 }
 
 function refreshPreview() {
-  document.getElementById("previewFrame").src = "/preview?" + Date.now();
+  const url = activeTab === "portfolio" ? "/portfolio/" : "/preview";
+  document.getElementById("previewFrame").src = url + "?" + Date.now();
 }
 
 function setUnsaved(val) {
@@ -1153,7 +1225,12 @@ function setUnsaved(val) {
 }
 
 async function pushLive() {
-  if (hasUnsaved) await saveContent();
+  clearTimeout(saveTimeout);
+  clearTimeout(pfSaveTimeout);
+  if (hasUnsaved) {
+    await saveContent();
+    if (pfLoaded) await savePortfolio();
+  }
   const overlay = document.getElementById("pushingOverlay");
   const btn = document.getElementById("pushBtn");
   overlay.classList.add("show");
@@ -1176,6 +1253,226 @@ function showToast(message, type) {
   toast.textContent = message;
   toast.className = `toast ${type} show`;
   setTimeout(() => toast.classList.remove("show"), 3500);
+}
+
+// ── Portfolio editor ──
+let portfolio = [];
+let pfLoaded = false;
+let activeTab = "home";
+let pfSaveTimeout = null;
+let pfUploadTarget = null;
+const pfOpen = new Set(); // expanded project objects (survives reordering)
+
+function setTab(tab) {
+  activeTab = tab;
+  document.getElementById("tabHome").classList.toggle("active", tab === "home");
+  document.getElementById("tabPortfolio").classList.toggle("active", tab === "portfolio");
+  document.getElementById("editorHome").style.display = tab === "home" ? "" : "none";
+  document.getElementById("editorPortfolio").style.display = tab === "portfolio" ? "" : "none";
+  if (tab === "portfolio" && !pfLoaded) loadPortfolio();
+  refreshPreview();
+}
+
+async function loadPortfolio() {
+  try {
+    const res = await fetch("/api/portfolio");
+    portfolio = await res.json();
+    pfLoaded = true;
+    renderPortfolio();
+  } catch (e) {
+    showToast("Could not load portfolio", "error");
+  }
+}
+
+// Same id-to-file mapping as portfolio/index.html, rooted at /portfolio/
+const pfSrc = n => typeof n === "number" ? `/portfolio/img/p${String(n).padStart(2, "0")}.webp`
+  : String(n).includes(".") ? `/portfolio/img/${n}` : `/portfolio/img/${n}.webp`;
+
+function pfImageIds(proj) {
+  const ids = proj.pages.map(p => p[0]);
+  (proj.compare || []).forEach(id => { if (!ids.includes(id)) ids.push(id); });
+  if (proj.hero !== "" && proj.hero != null && !ids.includes(proj.hero)) ids.push(proj.hero);
+  return ids;
+}
+
+function pfIdLabel(proj, id) {
+  const pg = proj.pages.find(p => p[0] === id);
+  const label = typeof id === "number" ? "p" + String(id).padStart(2, "0") : id;
+  const cap = pg && pg[1] ? pg[1] : "";
+  return cap ? `${label} — ${cap.length > 42 ? cap.slice(0, 42) + "…" : cap}` : label;
+}
+
+function pfImgSelect(pi, field, current, allowNone) {
+  const proj = portfolio[pi];
+  const none = allowNone
+    ? `<option value="" ${current == null || current === "" ? "selected" : ""}>None</option>`
+    : "";
+  const opts = pfImageIds(proj).map(id =>
+    `<option value="${escHtml(JSON.stringify(id))}" ${id === current ? "selected" : ""}>${escHtml(pfIdLabel(proj, id))}</option>`
+  ).join("");
+  return `<select style="flex:1;min-width:0" onchange="pfPickImage(${pi},'${field}',this.value)">${none}${opts}</select>`;
+}
+
+function renderPortfolio() {
+  const container = document.getElementById("pfContainer");
+  container.innerHTML = "";
+  portfolio.forEach((proj, pi) => {
+    const open = pfOpen.has(proj);
+    const compare = proj.compare || [null, null];
+    const rows = proj.pages.map((pg, gi) => `
+      <div class="pf-page">
+        <img src="${escHtml(pfSrc(pg[0]))}" alt="">
+        <input type="text" placeholder="Caption" value="${escHtml(pg[1])}" oninput="pfUpdateCaption(${pi},${gi},this.value)">
+        <button class="btn-remove" title="Move up" ${gi === 0 ? "disabled" : ""} onclick="pfMovePage(${pi},${gi},-1)">&#9650;</button>
+        <button class="btn-remove" title="Move down" ${gi === proj.pages.length - 1 ? "disabled" : ""} onclick="pfMovePage(${pi},${gi},1)">&#9660;</button>
+        <button class="btn-remove" title="Remove image" onclick="pfRemovePage(${pi},${gi})">&times;</button>
+      </div>`).join("");
+    const sec = document.createElement("div");
+    sec.className = "section" + (open ? "" : " collapsed");
+    sec.innerHTML = `
+      <div class="section-header">
+        <h2 style="text-transform:none;letter-spacing:0;font-size:0.8rem;">${escHtml(proj.short || proj.title || "Project " + (pi + 1))}</h2>
+        <div class="pf-head-btns">
+          <button class="btn-remove" title="Move up" ${pi === 0 ? "disabled" : ""} onclick="event.stopPropagation();pfMoveProject(${pi},-1)">&#9650;</button>
+          <button class="btn-remove" title="Move down" ${pi === portfolio.length - 1 ? "disabled" : ""} onclick="event.stopPropagation();pfMoveProject(${pi},1)">&#9660;</button>
+          <button class="btn-remove" title="Delete project" onclick="event.stopPropagation();pfRemoveProject(${pi})">&times;</button>
+          <span class="chevron">&#9660;</span>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field"><label>Title</label><input type="text" value="${escHtml(proj.title)}" oninput="pfUpdate(${pi},'title',this.value)"></div>
+        <div class="field"><label>Nav Label</label><input type="text" value="${escHtml(proj.short)}" oninput="pfUpdate(${pi},'short',this.value)"></div>
+        <div class="field"><label>Meta</label><input type="text" value="${escHtml(proj.meta)}" oninput="pfUpdate(${pi},'meta',this.value)"></div>
+        <div class="field"><label>Description</label><textarea oninput="pfUpdate(${pi},'desc',this.value)">${escHtml(proj.desc)}</textarea></div>
+        <div class="field"><label>Hero Image</label>${pfImgSelect(pi, "hero", proj.hero, false)}</div>
+        <div class="field"><label>Before / After Slider</label>
+          <div style="display:flex;gap:0.4rem;">${pfImgSelect(pi, "before", compare[0], true)}${pfImgSelect(pi, "after", compare[1], true)}</div>
+        </div>
+        <div class="field"><label>Images (${proj.pages.length})</label><div class="pf-pages">${rows}</div></div>
+        <button class="add-link-btn" onclick="pfAddImage(${pi})">+ Add Image</button>
+      </div>`;
+    sec.querySelector(".section-header").addEventListener("click", () => {
+      pfOpen.has(proj) ? pfOpen.delete(proj) : pfOpen.add(proj);
+      sec.classList.toggle("collapsed");
+    });
+    container.appendChild(sec);
+  });
+}
+
+function pfUpdate(pi, field, val) {
+  portfolio[pi][field] = val;
+  if (field === "short" || field === "title") {
+    const heads = document.querySelectorAll("#pfContainer .section-header h2");
+    if (heads[pi]) heads[pi].textContent = portfolio[pi].short || portfolio[pi].title || "Project " + (pi + 1);
+  }
+  schedulePfSave();
+}
+
+function pfPickImage(pi, field, val) {
+  const proj = portfolio[pi];
+  const id = val === "" ? null : JSON.parse(val);
+  if (field === "hero") {
+    if (id !== null) proj.hero = id;
+  } else {
+    const cmp = [...(proj.compare || [null, null])];
+    cmp[field === "before" ? 0 : 1] = id;
+    if (cmp[0] == null || cmp[1] == null) delete proj.compare;
+    else proj.compare = cmp;
+  }
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfUpdateCaption(pi, gi, val) {
+  portfolio[pi].pages[gi][1] = val;
+  schedulePfSave();
+}
+
+function pfMovePage(pi, gi, d) {
+  const pages = portfolio[pi].pages;
+  const [moved] = pages.splice(gi, 1);
+  pages.splice(gi + d, 0, moved);
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfRemovePage(pi, gi) {
+  const proj = portfolio[pi];
+  const [removed] = proj.pages.splice(gi, 1);
+  if (proj.hero === removed[0] && !proj.pages.some(p => p[0] === removed[0])) {
+    proj.hero = proj.pages.length ? proj.pages[0][0] : "";
+  }
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfMoveProject(pi, d) {
+  const [moved] = portfolio.splice(pi, 1);
+  portfolio.splice(pi + d, 0, moved);
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfRemoveProject(pi) {
+  const proj = portfolio[pi];
+  if (!confirm(`Delete "${proj.title || "this project"}" from the portfolio?`)) return;
+  portfolio.splice(pi, 1);
+  pfOpen.delete(proj);
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfAddProject() {
+  const proj = { title: "New Project", short: "", meta: "", desc: "", hero: "", pages: [] };
+  portfolio.push(proj);
+  pfOpen.add(proj);
+  renderPortfolio();
+  schedulePfSave();
+}
+
+function pfAddImage(pi) {
+  pfUploadTarget = pi;
+  document.getElementById("pfFile").click();
+}
+
+async function pfUpload(input) {
+  const file = input.files[0];
+  input.value = "";
+  if (!file || pfUploadTarget == null) return;
+  const form = new FormData();
+  form.append("file", file);
+  try {
+    const res = await fetch("/api/portfolio/upload", { method: "POST", body: form });
+    const data = await res.json();
+    if (!data.ok) { showToast("Upload failed: " + data.message, "error"); return; }
+    const proj = portfolio[pfUploadTarget];
+    proj.pages.push([data.id, ""]);
+    if (proj.hero === "" || proj.hero == null) proj.hero = data.id;
+    renderPortfolio();
+    schedulePfSave();
+  } catch (e) {
+    showToast("Upload failed", "error");
+  }
+}
+
+function schedulePfSave() {
+  setUnsaved(true);
+  clearTimeout(pfSaveTimeout);
+  pfSaveTimeout = setTimeout(savePortfolio, 600);
+}
+
+async function savePortfolio() {
+  try {
+    await fetch("/api/portfolio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(portfolio),
+    });
+    refreshPreview();
+    setUnsaved(false);
+  } catch (e) {
+    showToast("Save failed", "error");
+  }
 }
 
 // ── Go ──

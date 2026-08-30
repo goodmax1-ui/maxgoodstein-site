@@ -1,6 +1,6 @@
-// Portfolio content: edit this file directly, or use maxgoodstein.com/portfolio/?edit
-// and download the result. To publish: replace portfolio/projects.js with this file,
-// then commit and push.
+// Portfolio content: edit via the local dashboard (python3 server.py -> Portfolio tab),
+// directly in this file, or at maxgoodstein.com/portfolio/?edit (download the result).
+// To publish from the dashboard just hit Push Live; otherwise commit and push.
 
 const PROJECTS = [
   {
@@ -9,7 +9,10 @@ const PROJECTS = [
     "meta": "Landscape Architecture Co-Lead & Project Manager · NYC Parks Adopt-a-Park · Privately funded · Manhattan · 2024-26",
     "desc": "Conversion of the natural turf field at Brigadier General Charles Young Playground to a multi-sport synthetic turf field, roughly $10M of work funded through private dollars and drug-forfeiture funds via NYC Parks' Adopt-a-Park program. Helped lead the landscape architecture work alongside a Parks architect: directing the contractor through construction, resolving scopes as field conditions emerged, and coordinating companion work with other city agencies, including paving with DOT. Delivered in two phases (field, then sports lighting) under unusual constraints: an active subway tunnel below the site, permit stipulations from the adjacent 145th Street Bridge, and DOB requirements.",
     "hero": "cy08",
-    "compare": ["cy06a", "cy08"],
+    "compare": [
+      "cy06a",
+      "cy08"
+    ],
     "pages": [
       [
         "cy06",
@@ -51,7 +54,10 @@ const PROJECTS = [
     "meta": "Designer & Project Manager · Privately funded · Manhattan · 2025",
     "desc": "A new ADA-accessible path into St. Vartan Park, built with private dollars: a diamond-grid stabilized surface with granite block edging and a level entrance meeting the sidewalk.",
     "hero": "sv03",
-    "compare": ["svb", "sva"],
+    "compare": [
+      "svb",
+      "sva"
+    ],
     "pages": [
       [
         "sv01",
@@ -77,7 +83,10 @@ const PROJECTS = [
     "meta": "Designer & Project Manager · Privately funded ($50K Con Edison grant) · Manhattan · 2026",
     "desc": "Restoration of the heavily used Billings Lawn, funded by a $50,000 grant from Con Edison. Led the design and project management: a new french drain system that drains the compacted lawn after rain events and lets stormwater infiltrate back into the soil, built as perforated pipe surrounded by #67 crushed stone wrapped in geotextile fabric, with clean fill above and grass seed on top. The project also included soil aeration, regrading to a consistent slope, new grass seed throughout, and tree protection for the two large canopy trees that anchor the site. The lawn now drains correctly and the restoration has held. Nearby, a failing section of asphalt path with a recurring sinkhole was torn up and replaced with a planting bed: designed as a small rain garden, then adjusted during construction to a regular planting bed.",
     "hero": "bl02",
-    "compare": ["blb", "bla"],
+    "compare": [
+      "blb",
+      "bla"
+    ],
     "pages": [
       [
         "bl01",
