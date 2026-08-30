@@ -54,6 +54,9 @@
     .shelf-sub { font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 2rem; }
     #lockbtn { font: inherit; font-size: 0.85rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; }
     #lockbtn:hover { color: var(--accent); }
+    .shelf-tools { display: flex; gap: 1rem; align-items: baseline; }
+    .shelf-tools a { font-size: 0.85rem; color: var(--text-secondary); }
+    .shelf-tools a:hover { color: var(--accent); }
     .doc {
       display: block; width: 100%; text-align: left; cursor: pointer; font: inherit;
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
@@ -103,7 +106,10 @@
     <div class="shelf-head">
       <!-- ═══════ EDIT PAGE TEXT: shelf heading + subtitle ═══════ -->
       <h1>Library</h1>
-      <button id="lockbtn">Lock</button>
+      <div class="shelf-tools">
+        <a href="rekey.html">Change passphrase</a>
+        <button id="lockbtn">Lock</button>
+      </div>
     </div>
     <p class="shelf-sub">Manuals and how-tos.</p>
     <!-- ═══════ end page text ═══════ -->
