@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Library — Max Goodstein</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #2d6a4f;
+      --accent-hover: #40916c;
+      --bg: #fafafa;
+      --text: #1a1a1a;
+      --text-secondary: #555555;
+      --border: #e0e0e0;
+      --card-bg: #ffffff;
+      --danger: #b3402e;
+    }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* ---- Gate ---- */
+    #gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .gate-card { max-width: 380px; width: 100%; text-align: center; }
+    .lock {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #fff;
+    }
+    .lock svg { width: 36px; height: 36px; }
+    #gate h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    #gate p { font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 1.75rem; }
+    .pwrow { display: flex; gap: 0.5rem; }
+    #pw {
+      flex: 1; padding: 0.8rem 1rem; font: inherit; font-size: 0.95rem;
+      border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); color: var(--text);
+    }
+    #pw:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    #unlock {
+      padding: 0.8rem 1.3rem; font: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+      border: none; border-radius: 10px; background: var(--accent); color: #fff; transition: background 0.2s ease;
+    }
+    #unlock:hover { background: var(--accent-hover); }
+    #unlock:disabled { opacity: 0.6; cursor: wait; }
+    #gate-err { color: var(--danger); font-size: 0.85rem; margin-top: 0.9rem; min-height: 1.2em; }
+
+    /* ---- Shelf ---- */
+    #shelf { display: none; max-width: 640px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+    .shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; }
+    #shelf h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
+    .shelf-sub { font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 2rem; }
+    #lockbtn { font: inherit; font-size: 0.85rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; }
+    #lockbtn:hover { color: var(--accent); }
+    .doc {
+      display: block; width: 100%; text-align: left; cursor: pointer; font: inherit;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.1rem 1.3rem; margin-bottom: 0.75rem; transition: all 0.2s ease; color: var(--text);
+    }
+    .doc:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .doc .t { font-weight: 600; font-size: 1rem; margin-bottom: 0.2rem; }
+    .doc .d { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+    .doc .u { font-size: 0.78rem; color: var(--text-secondary); opacity: 0.7; margin-top: 0.45rem; }
+    .empty { color: var(--text-secondary); font-size: 0.92rem; }
+
+    /* ---- Reader ---- */
+    #reader { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 10; flex-direction: column; }
+    .reader-bar {
+      display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 1rem;
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+    }
+    #back {
+      display: flex; align-items: center; gap: 0.4rem; font: inherit; font-size: 0.9rem; font-weight: 500;
+      color: var(--accent); background: none; border: none; cursor: pointer; padding: 0.35rem 0.5rem;
+    }
+    #back:hover { color: var(--accent-hover); }
+    #reader-title { font-size: 0.95rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #frame { flex: 1; width: 100%; border: none; background: #fff; }
+  </style>
+</head>
+<body>
+
+  <div id="gate">
+    <div class="gate-card">
+      <div class="lock">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h1>Library</h1>
+      <p>Manuals and how-tos. Enter the passphrase to open the shelf.</p>
+      <div class="pwrow">
+        <input id="pw" type="password" autocomplete="current-password" placeholder="Passphrase" aria-label="Passphrase">
+        <button id="unlock">Open</button>
+      </div>
+      <p id="gate-err" role="alert"></p>
+    </div>
+  </div>
+
+  <main id="shelf">
+    <div class="shelf-head">
+      <h1>Library</h1>
+      <button id="lockbtn">Lock</button>
+    </div>
+    <p class="shelf-sub">Manuals and how-tos for the things Max builds and uses.</p>
+    <div id="docs"></div>
+  </main>
+
+  <div id="reader">
+    <div class="reader-bar">
+      <button id="back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Library
+      </button>
+      <span id="reader-title"></span>
+    </div>
+    <iframe id="frame" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" title="Document"></iframe>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+  var KEYSTORE = 'library-keybits';
+  var blob = null, docs = null;
+
+  function b64(s) { var bin = atob(s), a = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
+  function hex(a) { return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
+  function unhex(s) { var a = new Uint8Array(s.length / 2); for (var i = 0; i < a.length; i++) a[i] = parseInt(s.substr(i * 2, 2), 16); return a; }
+  function concat(a, b) { var c = new Uint8Array(a.length + b.length); c.set(a, 0); c.set(b, a.length); return c; }
+
+  async function loadBlob() {
+    if (blob) return blob;
+    var r = await fetch('blob.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error('The library data file is missing.');
+    blob = await r.json();
+    return blob;
+  }
+
+  async function deriveBits(pw, b) {
+    var pwKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+    var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64(b.salt), iterations: b.iter, hash: 'SHA-256' }, pwKey, 512);
+    return new Uint8Array(bits);
+  }
+
+  async function tryDecrypt(bits, b) {
+    var aesKey = await crypto.subtle.importKey('raw', bits.slice(0, 32), { name: 'AES-CBC' }, false, ['decrypt']);
+    var macKey = await crypto.subtle.importKey('raw', bits.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+    var iv = b64(b.iv), ct = b64(b.ct);
+    var ok = await crypto.subtle.verify('HMAC', macKey, b64(b.mac), concat(iv, ct));
+    if (!ok) return null;
+    var pt = await crypto.subtle.decrypt({ name: 'AES-CBC', iv: iv }, aesKey, ct);
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+
+  function showShelf() {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('shelf').style.display = 'block';
+    var list = document.getElementById('docs');
+    list.innerHTML = '';
+    if (!docs.length) { list.innerHTML = '<p class="empty">Nothing on the shelf yet.</p>'; return; }
+    docs.forEach(function (doc) {
+      var btn = document.createElement('button');
+      btn.className = 'doc';
+      var t = document.createElement('div'); t.className = 't'; t.textContent = doc.title;
+      var d = document.createElement('div'); d.className = 'd'; d.textContent = doc.desc || '';
+      var u = document.createElement('div'); u.className = 'u'; u.textContent = doc.updated ? 'Updated ' + doc.updated : '';
+      btn.appendChild(t); btn.appendChild(d); if (doc.updated) btn.appendChild(u);
+      btn.addEventListener('click', function () { openDoc(doc); });
+      list.appendChild(btn);
+    });
+  }
+
+  function openDoc(doc) {
+    document.getElementById('reader-title').textContent = doc.title;
+    document.getElementById('frame').srcdoc = '<base target="_blank">' + doc.html;
+    document.getElementById('reader').style.display = 'flex';
+  }
+
+  document.getElementById('back').addEventListener('click', function () {
+    document.getElementById('reader').style.display = 'none';
+    document.getElementById('frame').srcdoc = '';
+  });
+
+  document.getElementById('lockbtn').addEventListener('click', function () {
+    try { sessionStorage.removeItem(KEYSTORE); } catch (e) {}
+    location.reload();
+  });
+
+  async function unlock() {
+    var pw = document.getElementById('pw').value;
+    if (!pw) return;
+    var btn = document.getElementById('unlock'), err = document.getElementById('gate-err');
+    btn.disabled = true; err.textContent = '';
+    try {
+      var b = await loadBlob();
+      var bits = await deriveBits(pw, b);
+      var payload = await tryDecrypt(bits, b);
+      if (!payload) { err.textContent = 'That passphrase didn’t work.'; btn.disabled = false; return; }
+      try { sessionStorage.setItem(KEYSTORE, hex(bits)); } catch (e) {}
+      docs = payload.docs || [];
+      showShelf();
+    } catch (e) {
+      err.textContent = e.message || 'Something went wrong — try again.';
+    }
+    btn.disabled = false;
+  }
+
+  document.getElementById('unlock').addEventListener('click', unlock);
+  document.getElementById('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+
+  // Refresh-friendly: if this tab already unlocked, reopen silently
+  (async function () {
+    var stored = null;
+    try { stored = sessionStorage.getItem(KEYSTORE); } catch (e) {}
+    if (!stored) return;
+    try {
+      var b = await loadBlob();
+      var payload = await tryDecrypt(unhex(stored), b);
+      if (payload) { docs = payload.docs || []; showShelf(); }
+      else { try { sessionStorage.removeItem(KEYSTORE); } catch (e) {} }
+    } catch (e) {}
+  })();
+})();
+</script>
+</body>
+</html>
