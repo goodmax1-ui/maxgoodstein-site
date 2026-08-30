@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Change Library Passphrase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #2d6a4f; --accent-hover: #40916c; --bg: #fafafa; --text: #1a1a1a;
+      --text-secondary: #555555; --border: #e0e0e0; --card-bg: #ffffff; --danger: #b3402e;
+    }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; -webkit-font-smoothing: antialiased; }
+    main { max-width: 420px; width: 100%; }
+    h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 500; margin: 0.9rem 0 0.3rem; }
+    input { width: 100%; padding: 0.75rem 1rem; font: inherit; font-size: 0.95rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); color: var(--text); }
+    input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    button { width: 100%; margin-top: 1.4rem; padding: 0.85rem 1.3rem; font: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; border: none; border-radius: 10px; background: var(--accent); color: #fff; transition: background 0.2s ease; }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    #msg { font-size: 0.85rem; margin-top: 1rem; min-height: 1.3em; }
+    #msg.err { color: var(--danger); }
+    #msg.ok { color: var(--accent); }
+    ol { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; padding-left: 1.2rem; margin-top: 1rem; display: none; }
+    ol.show { display: block; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Change the library passphrase</h1>
+  <p>Runs entirely in your browser — the passphrases are never sent anywhere. It produces a new <b>blob.json</b> you then upload to the site (step-by-step appears after it downloads).</p>
+  <label for="old">Current passphrase</label>
+  <input id="old" type="password" autocomplete="off">
+  <label for="new1">New passphrase (12+ characters recommended)</label>
+  <input id="new1" type="password" autocomplete="new-password">
+  <label for="new2">New passphrase again</label>
+  <input id="new2" type="password" autocomplete="new-password">
+  <button id="go">Re-encrypt and download</button>
+  <p id="msg"></p>
+  <ol id="steps">
+    <li>Go to <a href="https://github.com/goodmax1-ui/maxgoodstein-site/tree/main/library" target="_blank" rel="noopener">the library folder on GitHub</a>.</li>
+    <li>Click <b>Add file → Upload files</b>, drag in the downloaded <b>blob.json</b>, and commit. It replaces the old one.</li>
+    <li>Wait a minute, then unlock the library with the new passphrase.</li>
+  </ol>
+</main>
+<script>
+(function () {
+  'use strict';
+  function b64d(s) { var bin = atob(s), a = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
+  function b64e(a) { var s = ''; for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
+  function concat(a, b) { var c = new Uint8Array(a.length + b.length); c.set(a, 0); c.set(b, a.length); return c; }
+  async function derive(pw, salt, iter) {
+    var pwKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: salt, iterations: iter, hash: 'SHA-256' }, pwKey, 512));
+  }
+  document.getElementById('go').addEventListener('click', async function () {
+    var msg = document.getElementById('msg'), btn = this;
+    msg.className = ''; msg.textContent = '';
+    var oldPw = document.getElementById('old').value;
+    var n1 = document.getElementById('new1').value, n2 = document.getElementById('new2').value;
+    if (!oldPw || !n1) { msg.className = 'err'; msg.textContent = 'Fill in all three fields.'; return; }
+    if (n1 !== n2) { msg.className = 'err'; msg.textContent = 'The new passphrases don’t match.'; return; }
+    if (n1.length < 8) { msg.className = 'err'; msg.textContent = 'Use at least 8 characters (12+ recommended).'; return; }
+    btn.disabled = true;
+    try {
+      var r = await fetch('blob.json', { cache: 'no-store' });
+      var blob = await r.json();
+      var oldBits = await derive(oldPw, b64d(blob.salt), blob.iter);
+      var iv = b64d(blob.iv), ct = b64d(blob.ct);
+      var macKey = await crypto.subtle.importKey('raw', oldBits.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+      var ok = await crypto.subtle.verify('HMAC', macKey, b64d(blob.mac), concat(iv, ct));
+      if (!ok) { msg.className = 'err'; msg.textContent = 'Current passphrase is wrong.'; btn.disabled = false; return; }
+      var aesOld = await crypto.subtle.importKey('raw', oldBits.slice(0, 32), { name: 'AES-CBC' }, false, ['decrypt']);
+      var plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-CBC', iv: iv }, aesOld, ct));
+      var salt2 = crypto.getRandomValues(new Uint8Array(32));
+      var iv2 = crypto.getRandomValues(new Uint8Array(16));
+      var newBits = await derive(n1, salt2, blob.iter);
+      var aesNew = await crypto.subtle.importKey('raw', newBits.slice(0, 32), { name: 'AES-CBC' }, false, ['encrypt']);
+      var ct2 = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CBC', iv: iv2 }, aesNew, plain));
+      var macKey2 = await crypto.subtle.importKey('raw', newBits.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      var mac2 = new Uint8Array(await crypto.subtle.sign('HMAC', macKey2, concat(iv2, ct2)));
+      var out = JSON.stringify({ v: 1, iter: blob.iter, salt: b64e(salt2), iv: b64e(iv2), ct: b64e(ct2), mac: b64e(mac2) }, null, 2);
+      var url = URL.createObjectURL(new Blob([out], { type: 'application/json' }));
+      var a = document.createElement('a');
+      a.href = url; a.download = 'blob.json'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      msg.className = 'ok'; msg.textContent = 'Downloaded. Now upload it to GitHub:';
+      document.getElementById('steps').className = 'show';
+    } catch (e) {
+      msg.className = 'err'; msg.textContent = 'Something went wrong: ' + (e.message || e);
+    }
+    btn.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
