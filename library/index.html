@@ -67,6 +67,18 @@
     .doc .d { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
     .doc .u { font-size: 0.78rem; color: var(--text-secondary); opacity: 0.7; margin-top: 0.45rem; }
     .empty { color: var(--text-secondary); font-size: 0.92rem; }
+    .section-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin: 2.25rem 0 0.75rem; }
+    .linkcard { cursor: default; }
+    .linkcard:hover { transform: none; box-shadow: none; }
+    .addr { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.6rem; }
+    .addr .alabel { font-size: 0.78rem; color: var(--text-secondary); min-width: 4.6rem; flex-shrink: 0; }
+    .addr a { flex: 1; font-size: 0.88rem; color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+    .addr a:hover { text-decoration: underline; }
+    .copybtn {
+      font: inherit; font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.7rem; flex-shrink: 0;
+      border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-secondary); cursor: pointer;
+    }
+    .copybtn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ---- Reader ---- */
     #reader { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 10; flex-direction: column; }
@@ -114,6 +126,7 @@
     <p class="shelf-sub">Manuals and how-tos.</p>
     <!-- ═══════ end page text ═══════ -->
     <div id="docs"></div>
+    <div id="links"></div>
   </main>
 
   <div id="reader">
@@ -131,7 +144,7 @@
 (function () {
   'use strict';
   var KEYSTORE = 'library-keybits';
-  var blob = null, docs = null;
+  var blob = null, docs = null, links = null;
 
   function b64(s) { var bin = atob(s), a = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
   function hex(a) { return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
@@ -178,6 +191,42 @@
       btn.addEventListener('click', function () { openDoc(doc); });
       list.appendChild(btn);
     });
+    showLinks();
+  }
+
+  function showLinks() {
+    var box = document.getElementById('links');
+    box.innerHTML = '';
+    if (!links || !links.length) return;
+    var lab = document.createElement('p');
+    lab.className = 'section-label';
+    lab.textContent = 'Apartment server';
+    box.appendChild(lab);
+    links.forEach(function (l) {
+      var card = document.createElement('div');
+      card.className = 'doc linkcard';
+      var t = document.createElement('div'); t.className = 't'; t.textContent = l.title;
+      card.appendChild(t);
+      if (l.desc) { var d = document.createElement('div'); d.className = 'd'; d.textContent = l.desc; card.appendChild(d); }
+      (l.addrs || []).forEach(function (ad) {
+        var row = document.createElement('div'); row.className = 'addr';
+        var lab = document.createElement('span'); lab.className = 'alabel'; lab.textContent = ad.label || '';
+        var a = document.createElement('a');
+        a.href = ad.url; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = ad.url.replace(/^https?:\/\//, '');
+        var copy = document.createElement('button');
+        copy.className = 'copybtn'; copy.textContent = 'Copy';
+        copy.addEventListener('click', function () {
+          navigator.clipboard.writeText(ad.url).then(function () {
+            copy.textContent = 'Copied';
+            setTimeout(function () { copy.textContent = 'Copy'; }, 1500);
+          });
+        });
+        row.appendChild(lab); row.appendChild(a); row.appendChild(copy);
+        card.appendChild(row);
+      });
+      box.appendChild(card);
+    });
   }
 
   function openDoc(doc) {
@@ -208,6 +257,7 @@
       if (!payload) { err.textContent = 'That passphrase didn’t work.'; btn.disabled = false; return; }
       try { sessionStorage.setItem(KEYSTORE, hex(bits)); } catch (e) {}
       docs = payload.docs || [];
+      links = payload.links || [];
       showShelf();
     } catch (e) {
       err.textContent = e.message || 'Something went wrong — try again.';
@@ -226,7 +276,7 @@
     try {
       var b = await loadBlob();
       var payload = await tryDecrypt(unhex(stored), b);
-      if (payload) { docs = payload.docs || []; showShelf(); }
+      if (payload) { docs = payload.docs || []; links = payload.links || []; showShelf(); }
       else { try { sessionStorage.removeItem(KEYSTORE); } catch (e) {} }
     } catch (e) {}
   })();
