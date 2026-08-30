@@ -17,7 +17,8 @@ if (-not $Passphrase) {
     $sec = Read-Host -AsSecureString "Library passphrase"
     $Passphrase = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
 }
-$plain = [System.Text.Encoding]::UTF8.GetBytes((Get-Content $PayloadPath -Raw))
+# Read raw bytes - the payload file is UTF-8 JSON; Get-Content would misread it as ANSI
+$plain = [System.IO.File]::ReadAllBytes($PayloadPath)
 $iter = 310000
 $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
 $salt = New-Object byte[] 32; $rng.GetBytes($salt)
