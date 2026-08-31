@@ -111,6 +111,42 @@
     }
     .grid a:hover .port { opacity: 1; color: color-mix(in srgb, var(--c) 80%, #fff); }
 
+    /* live status */
+    .status-pill.off { color: #fbbf24; background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.3); }
+    .status-pill.off .dot { background: #fbbf24; animation: none; }
+    .sdot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4b5563; margin-right: 0.35rem; vertical-align: 1px; transition: background 0.4s, box-shadow 0.4s; }
+    .sdot.up { background: var(--accent); box-shadow: 0 0 6px rgba(74,222,128,0.7); }
+    .sdot.down { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.7); }
+    .chips { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; min-height: 1.7rem; }
+    .chip {
+      font-family: var(--mono); font-size: 0.66rem; color: var(--text-dim);
+      border: 1px solid var(--card-border); background: var(--card); border-radius: 999px;
+      padding: 0.3rem 0.7rem; opacity: 0; transform: translateY(4px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .chip.show { opacity: 1; transform: none; }
+    .chip b { color: var(--text); font-weight: 500; }
+
+    /* info accordion */
+    .info { margin-top: 2.5rem; display: grid; gap: 0.6rem; }
+    .info details {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden;
+    }
+    .info summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.9rem 1.05rem; font-size: 0.88rem; font-weight: 600; user-select: none;
+    }
+    .info summary::-webkit-details-marker { display: none; }
+    .info summary::after { content: '+'; margin-left: auto; font-family: var(--mono); color: var(--text-dim); transition: transform 0.25s; }
+    .info details[open] summary::after { transform: rotate(45deg); }
+    .info summary:hover { color: var(--accent); }
+    .info .body { padding: 0 1.05rem 1rem; font-size: 0.82rem; color: var(--text-dim); line-height: 1.75; }
+    .info .body b { color: var(--text); font-weight: 500; }
+    .info .body code { font-family: var(--mono); font-size: 0.74rem; color: var(--accent); background: rgba(74,222,128,0.08); border-radius: 5px; padding: 0.1rem 0.35rem; }
+    .info .body ul { padding-left: 1.1rem; }
+    .info .body li { margin: 0.15rem 0; }
+
     .footer { text-align: center; margin-top: 2.75rem; font-size: 0.82rem; color: var(--text-dim); line-height: 1.7; }
     .footer a { color: var(--accent); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
@@ -129,9 +165,10 @@
   <div class="aurora" aria-hidden="true"></div>
   <main class="container">
     <header>
-      <div class="status-pill"><span class="dot"></span>APT SERVER ONLINE</div>
+      <div class="status-pill" id="pill"><span class="dot"></span><span id="pill-text">CHECKING SERVER</span></div>
       <h1>Apartment Server</h1>
       <p class="greeting"><span id="greet">Hello</span>, Max. <time id="clock"></time></p>
+      <div class="chips" id="chips"></div>
     </header>
 
     <h2>Media</h2>
@@ -205,6 +242,44 @@
       </a>
     </div>
 
+    <h2>About this setup</h2>
+    <div class="info">
+      <details>
+        <summary>What is all this?</summary>
+        <div class="body">
+          A MacBook Pro at the apartment runs everything on this page, always on, in Docker containers. Media, photos, and audio live on a 4.5TB external drive. The Mac also answers DNS for the whole apartment and the tailnet, which is what makes the ad blocking work everywhere.
+        </div>
+      </details>
+      <details>
+        <summary>Addresses to remember</summary>
+        <div class="body">
+          <ul>
+            <li>Tailnet (works from anywhere): <code>100.117.16.114</code>, hostname <code>apt</code></li>
+            <li>Home wifi only: <code>192.168.0.137</code></li>
+            <li>Every service is that address plus the port shown on its card</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Something's broken</summary>
+        <div class="body">
+          <ul>
+            <li><b>Cards won't load?</b> Open the Tailscale app and make sure it's connected.</li>
+            <li><b>Jellyfin, Immich, or Audiobookshelf empty?</b> Check the easystore drive is plugged into the Mac.</li>
+            <li><b>Internet looks broken on everything at home?</b> The Mac is down or asleep. Wake or restart it; DNS comes back with it.</li>
+            <li><b>One service acting up?</b> SSH to the Mac and <code>docker restart</code> it.</li>
+            <li>The full recovery guide lives in the encrypted Library above.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Setting up a new phone</summary>
+        <div class="body">
+          Install <b>Tailscale</b> first and sign in, then the apps: <b>Jellyfin</b> (or JellyTV), <b>Immich</b>, <b>Audiobookshelf</b>, <b>ntfy</b> (subscribe to topic <code>homelab</code>), and <b>Home Assistant</b>. Point each at <code>100.117.16.114</code> with the port from its card.
+        </div>
+      </details>
+    </div>
+
     <p class="footer">Links only load on the tailnet. Not connected? Open the Tailscale app first.<br><a href="/">maxgoodstein.com</a></p>
   </main>
 
@@ -219,6 +294,56 @@
       }
       tick();
       setInterval(tick, 15000);
+
+      // live status via the library server's /status.json (tailnet only)
+      var PORT_SVC = { '8096': 'jellyfin', '13378': 'audiobookshelf', '2283': 'immich',
+        '8000': 'paperless', '8123': 'homeassistant', '8090': 'ntfy',
+        '3002': 'grafana', '3001': 'uptimekuma', '8083': 'adguard' };
+      var dots = {};
+      document.querySelectorAll('.grid a').forEach(function (a) {
+        var svc = a.host === 'apt.tail258803.ts.net' ? 'library' : PORT_SVC[a.port];
+        if (!svc) return;
+        var dot = document.createElement('span');
+        dot.className = 'sdot';
+        a.querySelector('.port').prepend(dot);
+        dots[svc] = dot;
+      });
+      var pill = document.getElementById('pill');
+      var pillText = document.getElementById('pill-text');
+      var chips = document.getElementById('chips');
+
+      function addChip(html) {
+        var c = document.createElement('span');
+        c.className = 'chip';
+        c.innerHTML = html;
+        chips.appendChild(c);
+        requestAnimationFrame(function () { c.classList.add('show'); });
+      }
+
+      function refresh() {
+        fetch('https://apt.tail258803.ts.net/status.json', { signal: AbortSignal.timeout(4000) })
+          .then(function (r) { return r.json(); })
+          .then(function (s) {
+            var up = 0, total = 0;
+            for (var k in dots) {
+              var ok = !!s.services[k];
+              dots[k].className = 'sdot ' + (ok ? 'up' : 'down');
+              total++; if (ok) up++;
+            }
+            pill.className = 'status-pill';
+            pillText.textContent = up === total ? 'ALL ' + total + ' SERVICES UP' : up + '/' + total + ' SERVICES UP';
+            chips.innerHTML = '';
+            addChip(s.easystore ? 'easystore <b>mounted</b>' : 'easystore <b>DISCONNECTED</b>');
+            if (s.disk_free_gb != null) addChip('mac disk <b>' + s.disk_free_gb + ' GB free</b>');
+          })
+          .catch(function () {
+            pill.className = 'status-pill off';
+            pillText.textContent = 'OFF TAILNET';
+            for (var k in dots) dots[k].className = 'sdot';
+          });
+      }
+      refresh();
+      setInterval(refresh, 30000);
     })();
   </script>
 </body>
