@@ -277,9 +277,9 @@
           <svg class="spark" id="s-disk" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
         <div class="vtile">
-          <div class="vnum" id="v-rent">&#8212;</div>
-          <div class="vlabel">TD House median rent</div>
-          <svg class="spark" id="s-rent" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="vnum" id="v-easystore">&#8212;</div>
+          <div class="vlabel">easystore used</div>
+          <svg class="spark" id="s-easystore" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
         <div class="vtile">
           <div class="vnum" id="v-containers">&#8212;</div>
@@ -412,12 +412,12 @@
             var h = s.history || {};
             if ((h.disk_free || []).length > 1) {
               document.getElementById('vitals-section').hidden = false;
-              var df = h.disk_free, td = h.tdhouse_median, dc = h.containers;
+              var df = h.disk_free, es = h.easystore_used, dc = h.containers;
               document.getElementById('v-disk').innerHTML = Math.round(df[df.length - 1][1]) + ' <small>GB</small>';
               spark('s-disk', df, '#4ade80');
-              if ((td || []).length > 1) {
-                document.getElementById('v-rent').innerHTML = '$' + Math.round(td[td.length - 1][1]).toLocaleString();
-                spark('s-rent', td, '#38bdf8');
+              if ((es || []).length > 1) {
+                document.getElementById('v-easystore').innerHTML = Math.round(es[es.length - 1][1]) + ' <small>GB</small>';
+                spark('s-easystore', es, '#38bdf8');
               }
               if ((dc || []).length > 1) {
                 document.getElementById('v-containers').textContent = Math.round(dc[dc.length - 1][1]);
@@ -458,23 +458,32 @@
       refresh();
       setInterval(refresh, 30000);
 
-      // on phones, try the native app first; fall back to the web UI if it
-      // doesn't open. only schemes the apps are known to register.
+      // on phones, cards for apps with a registered scheme link straight to the
+      // app (a direct tap opens it with no dialog race); the port label becomes
+      // the web-UI fallback. JS-navigate-then-timeout is unreliable on iOS: the
+      // fallback timer races Safari's open-in-app flow and yanks the page away.
       var SCHEMES = { '8123': 'homeassistant://', '2283': 'app.immich:///' };
       var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
       if (isMobile) {
         document.querySelectorAll('.grid a').forEach(function (a) {
           var scheme = SCHEMES[a.port];
           if (!scheme) return;
-          a.addEventListener('click', function (e) {
-            e.preventDefault();
-            var web = a.href;
-            var timer = setTimeout(function () { window.location.href = web; }, 1200);
-            var cancel = function () { clearTimeout(timer); };
-            document.addEventListener('visibilitychange', cancel, { once: true });
-            window.addEventListener('pagehide', cancel, { once: true });
-            window.location.href = scheme;
-          });
+          var web = a.href;
+          a.href = scheme;
+          var port = a.querySelector('.port');
+          if (port) {
+            // a nested <a> is invalid inside the card link, so a span navigates
+            var webLink = document.createElement('span');
+            webLink.textContent = 'web';
+            webLink.style.cssText = 'text-decoration:underline;padding:0.3rem;margin:-0.3rem';
+            port.appendChild(document.createTextNode(' '));
+            port.appendChild(webLink);
+            webLink.addEventListener('click', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.location.href = web;
+            });
+          }
         });
       }
     })();
