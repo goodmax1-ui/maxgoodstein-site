@@ -228,6 +228,11 @@
         <span class="meta"><span class="name">Library</span><br><span class="desc">Encrypted docs vault</span></span>
         <span class="port">ts.net</span>
       </a>
+      <a href="https://apt.tail258803.ts.net/weave/" style="--c:#8b7cf6">
+        <span class="tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+        <span class="meta"><span class="name">Weave</span><br><span class="desc">Notes and reminders</span></span>
+        <span class="port">ts.net</span>
+      </a>
     </div>
 
     <h2>Home</h2>
@@ -353,7 +358,9 @@
         '3002': 'grafana', '3001': 'uptimekuma', '8083': 'adguard' };
       var dots = {};
       document.querySelectorAll('.grid a').forEach(function (a) {
-        var svc = a.host === 'apt.tail258803.ts.net' ? 'library' : PORT_SVC[a.port];
+        var svc = a.host === 'apt.tail258803.ts.net'
+          ? (a.pathname.indexOf('/weave') === 0 ? 'weave' : 'library')
+          : PORT_SVC[a.port];
         if (!svc) return;
         var dot = document.createElement('span');
         dot.className = 'sdot';
