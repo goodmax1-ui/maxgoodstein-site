@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""Add or update one document in library/blob.json (macOS/Linux counterpart of build-library.ps1).
+"""Add or update one quick link in library/blob.json (shown under "Apartment server" on the shelf).
 
-Decrypts the existing blob with your passphrase, inserts the doc, re-encrypts.
+Decrypts the existing blob with your passphrase, inserts the link, re-encrypts.
 Plaintext never touches disk and the passphrase is prompted, never passed as an argument.
 
 Usage:
-  python3 _scripts/library-add-doc.py path/to/doc.html --id home-server --title "Home Server Guide" \
-      --desc "What the Mac runs and how to fix the internet if it breaks." [--blob library/blob.json]
+  python3 _scripts/library-add-link.py --id jellyfin --title Jellyfin \
+      --addr "Tailscale=http://100.117.16.114:8096" --addr "Home wifi=http://192.168.0.137:8096" \
+      [--desc "note shown under the title"] [--blob library/blob.json] [--remove]
 
-If the HTML file contains <!-- DOC START --> / <!-- DOC END --> markers, only the content
-between them is stored (lets one file double as a standalone page and a library doc).
-An existing doc with the same id is replaced; otherwise the doc is appended.
+Each --addr is Label=URL and renders as its own row with a Copy button.
+An existing link with the same id is replaced; otherwise the link is appended.
+--remove deletes the link with that id instead.
 """
-import argparse, base64, datetime, getpass, hashlib, hmac, json, os, re, sys
+import argparse, base64, getpass, hashlib, hmac, json, os, sys
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
@@ -53,39 +54,47 @@ def encrypt(payload: dict, passphrase: str, old: dict) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("html_file")
     ap.add_argument("--id", required=True)
-    ap.add_argument("--title", required=True)
+    ap.add_argument("--title")
+    ap.add_argument("--addr", action="append", default=[], metavar="LABEL=URL")
     ap.add_argument("--desc", default="")
-    ap.add_argument("--updated", default=datetime.date.today().isoformat())
     ap.add_argument("--blob", default=os.path.expanduser("~/Server/library/blob.json"))
+    ap.add_argument("--remove", action="store_true")
     args = ap.parse_args()
-
-    with open(args.html_file, encoding="utf-8") as f:
-        html = f.read()
-    m = re.search(r"<!-- DOC START -->(.*)<!-- DOC END -->", html, re.S)
-    if m:
-        html = m.group(1).strip()
+    if not args.remove and not (args.title and args.addr):
+        ap.error("--title and at least one --addr are required unless --remove is given")
+    addrs = []
+    for spec in args.addr:
+        label, sep, url = spec.partition("=")
+        if not sep or not url:
+            ap.error(f"--addr must be LABEL=URL, got: {spec!r}")
+        addrs.append({"label": label, "url": url})
 
     with open(args.blob, encoding="utf-8") as f:
         blob = json.load(f)
     passphrase = getpass.getpass("Library passphrase: ")
     payload = decrypt(blob, derive(passphrase, base64.b64decode(blob["salt"]), blob["iter"]))
 
-    doc = {"id": args.id, "title": args.title, "desc": args.desc, "updated": args.updated, "html": html}
-    docs = payload.setdefault("docs", [])
-    idx = next((i for i, d in enumerate(docs) if d.get("id") == args.id), None)
-    if idx is not None:
-        docs[idx] = doc
-        action = "replaced"
+    links = payload.setdefault("links", [])
+    idx = next((i for i, l in enumerate(links) if l.get("id") == args.id), None)
+    if args.remove:
+        if idx is None:
+            sys.exit(f"No link with id '{args.id}'. Nothing changed.")
+        links.pop(idx)
+        action = "removed"
     else:
-        docs.append(doc)
-        action = "added"
+        link = {"id": args.id, "title": args.title, "addrs": addrs, "desc": args.desc}
+        if idx is not None:
+            links[idx] = link
+            action = "replaced"
+        else:
+            links.append(link)
+            action = "added"
 
     with open(args.blob, "w", encoding="utf-8") as f:
         json.dump(encrypt(payload, passphrase, blob), f, indent=2)
         f.write("\n")
-    print(f"{action} doc '{args.id}' ({len(html)} bytes html); {args.blob} now holds {len(docs)} doc(s)")
+    print(f"{action} link '{args.id}'; {args.blob} now holds {len(links)} link(s)")
 
 
 if __name__ == "__main__":

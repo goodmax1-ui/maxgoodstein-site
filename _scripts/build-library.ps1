@@ -1,4 +1,9 @@
-# Builds library/blob.json - the encrypted payload behind maxgoodstein.com/library.
+# Builds a library blob.json from scratch (the library now lives on the home
+# server at ~/Server/library/, not on maxgoodstein.com).
+# WARNING: this generates a fresh salt, which invalidates any enrolled security
+# keys ("keys" entries in blob.json) - they must be re-enrolled at /addkey.html.
+# For incremental edits use library-add-doc.py / library-add-link.py instead;
+# those preserve the salt and the enrolled keys.
 # The payload is a JSON object: { docs: [ { id, title, desc, updated, html } ] }
 # Encryption: PBKDF2-SHA256 (310k iters) -> 64 bytes; first 32 = AES-256-CBC key,
 # last 32 = HMAC-SHA256 key over (iv || ciphertext). Decrypted in the browser
