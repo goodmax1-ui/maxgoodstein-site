@@ -127,6 +127,19 @@
     .chip.show { opacity: 1; transform: none; }
     .chip b { color: var(--text); font-weight: 500; }
 
+    /* vitals tiles */
+    .vitals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .vtile {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: 16px;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      padding: 0.9rem 1rem 0.6rem; overflow: hidden;
+    }
+    .vnum { font-family: var(--mono); font-size: 1.25rem; font-weight: 500; color: var(--text); line-height: 1.2; }
+    .vnum small { font-size: 0.7rem; color: var(--text-dim); font-weight: 400; }
+    .vlabel { font-size: 0.7rem; color: var(--text-dim); margin: 0.15rem 0 0.5rem; }
+    .spark { display: block; width: 100%; height: 34px; }
+    @media (max-width: 460px) { .vitals { grid-template-columns: 1fr; } }
+
     /* info accordion */
     .info { margin-top: 2.5rem; display: grid; gap: 0.6rem; }
     .info details {
@@ -242,6 +255,27 @@
       </a>
     </div>
 
+    <div id="vitals-section" hidden>
+      <h2>Vitals</h2>
+      <div class="vitals">
+        <div class="vtile">
+          <div class="vnum" id="v-disk">&#8212;</div>
+          <div class="vlabel">Mac disk free, 7 days</div>
+          <svg class="spark" id="s-disk" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="vtile">
+          <div class="vnum" id="v-rent">&#8212;</div>
+          <div class="vlabel">TD House median rent</div>
+          <svg class="spark" id="s-rent" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="vtile">
+          <div class="vnum" id="v-containers">&#8212;</div>
+          <div class="vlabel">Containers running</div>
+          <svg class="spark" id="s-containers" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+      </div>
+    </div>
+
     <h2>About this setup</h2>
     <div class="info">
       <details>
@@ -320,6 +354,27 @@
         requestAnimationFrame(function () { c.classList.add('show'); });
       }
 
+      // sparkline: thin line + soft area fill + end dot, normalized into the viewBox
+      function spark(id, pts, color) {
+        var svg = document.getElementById(id);
+        if (!svg || !pts || pts.length < 2) return;
+        var vals = pts.map(function (p) { return p[1]; });
+        var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+        var span = (max - min) || 1;
+        var coords = pts.map(function (p, i) {
+          var x = (i / (pts.length - 1)) * 100;
+          var y = 27 - ((p[1] - min) / span) * 24;
+          return [x, y];
+        });
+        var line = coords.map(function (c) { return c[0].toFixed(1) + ',' + c[1].toFixed(1); }).join(' ');
+        var last = coords[coords.length - 1];
+        svg.innerHTML =
+          '<polygon points="0,30 ' + line + ' 100,30" fill="' + color + '" opacity="0.12"/>' +
+          '<polyline points="' + line + '" fill="none" stroke="' + color + '" stroke-width="2" ' +
+          'vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>' +
+          '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="2.5" fill="' + color + '" vector-effect="non-scaling-stroke"/>';
+      }
+
       function refresh() {
         fetch('https://apt.tail258803.ts.net/status.json', { signal: AbortSignal.timeout(4000) })
           .then(function (r) { return r.json(); })
@@ -335,6 +390,22 @@
             chips.innerHTML = '';
             addChip(s.easystore ? 'easystore <b>mounted</b>' : 'easystore <b>DISCONNECTED</b>');
             if (s.disk_free_gb != null) addChip('mac disk <b>' + s.disk_free_gb + ' GB free</b>');
+            if (s.load != null) addChip('load <b>' + s.load + '</b>');
+            var h = s.history || {};
+            if ((h.disk_free || []).length > 1) {
+              document.getElementById('vitals-section').hidden = false;
+              var df = h.disk_free, td = h.tdhouse_median, dc = h.containers;
+              document.getElementById('v-disk').innerHTML = Math.round(df[df.length - 1][1]) + ' <small>GB</small>';
+              spark('s-disk', df, '#4ade80');
+              if ((td || []).length > 1) {
+                document.getElementById('v-rent').innerHTML = '$' + Math.round(td[td.length - 1][1]).toLocaleString();
+                spark('s-rent', td, '#38bdf8');
+              }
+              if ((dc || []).length > 1) {
+                document.getElementById('v-containers').textContent = Math.round(dc[dc.length - 1][1]);
+                spark('s-containers', dc, '#a78bfa');
+              }
+            }
           })
           .catch(function () {
             pill.className = 'status-pill off';
@@ -344,6 +415,26 @@
       }
       refresh();
       setInterval(refresh, 30000);
+
+      // on phones, try the native app first; fall back to the web UI if it
+      // doesn't open. only schemes the apps are known to register.
+      var SCHEMES = { '8123': 'homeassistant://', '2283': 'app.immich:///' };
+      var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        document.querySelectorAll('.grid a').forEach(function (a) {
+          var scheme = SCHEMES[a.port];
+          if (!scheme) return;
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            var web = a.href;
+            var timer = setTimeout(function () { window.location.href = web; }, 1200);
+            var cancel = function () { clearTimeout(timer); };
+            document.addEventListener('visibilitychange', cancel, { once: true });
+            window.addEventListener('pagehide', cancel, { once: true });
+            window.location.href = scheme;
+          });
+        });
+      }
     })();
   </script>
 </body>
