@@ -140,8 +140,10 @@
 
   <script src="projects.js"></script>
   <script>
-    // Numbers map to img/pNN.webp (portfolio PDF pages); strings map to img/<name>.webp
-    const src = n => typeof n === "number" ? `img/p${String(n).padStart(2, "0")}.webp` : `img/${n}.webp`;
+    // Numbers map to img/pNN.webp (portfolio PDF pages); strings map to img/<name>.webp,
+    // unless they already carry an extension (uploaded jpg/png), then img/<name.ext>
+    const src = n => typeof n === "number" ? `img/p${String(n).padStart(2, "0")}.webp`
+      : String(n).includes(".") ? `img/${n}` : `img/${n}.webp`;
 
     // Edit mode: open the page with ?edit added to the URL.
     const EDIT = new URLSearchParams(location.search).has("edit");
