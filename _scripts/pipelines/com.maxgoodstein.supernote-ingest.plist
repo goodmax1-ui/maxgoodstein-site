@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Converts new Supernote .note files every 10 minutes, then reports
+     freshness into status.json. Edit USERNAME before loading. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.maxgoodstein.supernote-ingest</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>
+      /Users/USERNAME/pipelines/supernote_ingest.py
+        --inbox /Users/USERNAME/pipelines/inbox/supernote
+        --work /Users/USERNAME/pipelines/work/supernote
+        --paperless-consume /Users/USERNAME/paperless/consume
+      &amp;&amp;
+      /Users/USERNAME/pipelines/heartbeat.py
+        --name supernote-ingest
+        --cadence "every 10m"
+        --expect-h 1
+        --status-file /Users/USERNAME/pipelines/status.json
+    </string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>600</integer>
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/USERNAME/pipelines/logs/supernote-ingest.out</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/USERNAME/pipelines/logs/supernote-ingest.err</string>
+</dict>
+</plist>
